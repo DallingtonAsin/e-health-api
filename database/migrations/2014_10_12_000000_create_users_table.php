@@ -27,7 +27,7 @@ class CreateUsersTable extends Migration
             $table->string('current_version')->nullable();
             $table->string('unique_device_id')->nullable();
             $table->string('fcm_token')->nullable();
-            $table->string('otp');
+            $table->string('otp')->nullable();
             $table->string('image')->nullable();
             $table->boolean('is_blocked')->default(false);
             $table->boolean('profile_status')->default(false);

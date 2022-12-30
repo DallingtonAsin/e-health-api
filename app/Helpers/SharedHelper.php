@@ -3,7 +3,7 @@
 namespace App\Helpers;
 use Illuminate\Support\Facades\Storage;
 use App\Models\User;
-
+use App\Helpers\Globals as Globals;
 class SharedHelper
 {
 
