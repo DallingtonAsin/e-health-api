@@ -17,13 +17,11 @@ use App\Http\Controllers\API\AuthenticationController;
 
 Route::post('/user/signup', [AuthenticationController::class, 'sendVerificationCode']);
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
+Route::group(['prefix' => 'user', 'middleware' => ['auth:api']], function(){
 
-    Route::post('login', [AuthenticationController::class, 'verifyOTP']);
+    Route::post('verify', [AuthenticationController::class, 'verifyOTP']);
     Route::post('register', [AuthenticationController::class, 'register']);
-   
-
-    return $request->user();
+    
 });
 
 

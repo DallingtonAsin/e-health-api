@@ -23,12 +23,10 @@ class AuthenticationController extends Controller
     public function register(Request $request)
     {
 
-        $validatedData = $request->validate([
+        $validator = Validator::make($request->all(), [
             'first_name' => 'required|max:55',
             'last_name' => 'required|max:55',
-            'country_code' => 'required|max:5',
-            'phone_number' => 'required|max:15',
-            'email' => 'email|required|unique:users',
+            'email' => 'email|sometimes|nullable|unique:users',
             'gender' => 'required',
             'address' => 'required',
             'dob' => 'required'
@@ -36,42 +34,34 @@ class AuthenticationController extends Controller
 
         try {
 
-            $user = User::create($validatedData);
+            if ($validator->fails()) {
+                $message = $validator->errors()->all();
+                return Helper::sendFailedHttpResponse($message);
+            } else {
 
-            $accessToken = $user->createToken('authToken')->accessToken;
+                $validatedData = [
+                    'first_name' => $request->first_name,
+                    'last_name' => $request->last_name,
+                    'email' => $request->email,
+                    'gender' => ucfirst($request->gender),
+                    'address' => $request->address,
+                    'dob' => date('Y-m-d', strtotime($request->dob)),
+                ];
 
-            return response(['user' => $user, 'access_token' => $accessToken], 201);
+                $user = auth('api')->user();
+                $user_id = $user->id;
+                $user_phone_number = $user->country_code . '' . $user->phone_number;
+                User::where('id', $user_id)->update($validatedData);
+                $user->access_token = $user->createToken('User' . $user_phone_number, ['user'])->accessToken;
 
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
-    }
-
-    public function login(Request $request)
-    {
-
-
-        $loginData = $request->validate([
-            'country_code' => 'required',
-            'phone_number' => 'required',
-            'otp' => 'required'
-        ]);
-
-        try {
-
-            if (!auth()->attempt($loginData)) {
-                return response(['message' => 'Invalid OTP code'], 400);
+                return response($user, 201);
             }
 
-            $accessToken = auth()->user()->createToken('authToken')->accessToken;
-
-            return response(['user' => auth()->user(), 'access_token' => $accessToken]);
-
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
-
     }
+
 
     public function sendVerificationCode(Request $request)
     {
@@ -177,15 +167,14 @@ class AuthenticationController extends Controller
                 $userData['country_code'] = $user->country_code;
                 $userData['phone_number'] = $user->phone_number;
                 $userData['is_registered'] = $user->profile_status;
-                $userData['access_token'] = $user->createToken('Customer' . $user->country_code . '' . $user->phone_number, ['user'])->accessToken;
+                $userData['access_token'] = $user->createToken('User' . $user->country_code . '' . $user->phone_number, ['user'])->accessToken;
 
                 User::where("country_code", "=", $country_code)->where("phone_number", "=", $phone_number)->update(["otp" => null]);
 
-                $message = 'OTP successfully verified!';
-                return Helper::sendOkHttpResponse(['message' => $message, 'data' => $userData]);
+                return Helper::sendOkHttpResponse($userData);
 
             } else {
-                $message = 'Invalid OTP Code';
+                $message = 'Invalid verification code';
                 return Helper::sendFailedHttpResponse($message);
             }
 
@@ -200,7 +189,7 @@ class AuthenticationController extends Controller
             $otp = $this->smsService->generateNumericOTP(4);
             $user_phone_number = $user->country_code . '' . $user->phone_number;
             $this->smsService->sendOTP($user_phone_number, $otp);
-            
+
             User::where("id", $user_id)->update(["otp" => $otp]);
             $user = User::find($user_id);
             $user->access_token = $user->createToken('User' . $user_phone_number, ['user'])->accessToken;
