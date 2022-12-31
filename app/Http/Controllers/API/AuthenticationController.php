@@ -46,14 +46,13 @@ class AuthenticationController extends Controller
                     'gender' => ucfirst($request->gender),
                     'address' => $request->address,
                     'dob' => date('Y-m-d', strtotime($request->dob)),
+                    'profile_status' => 1,
                 ];
 
                 $user = auth('api')->user();
                 $user_id = $user->id;
-                $user_phone_number = $user->country_code . '' . $user->phone_number;
                 User::where('id', $user_id)->update($validatedData);
-                $user->access_token = $user->createToken('User' . $user_phone_number, ['user'])->accessToken;
-
+                $user = User::find($user_id);
                 return response($user, 201);
             }
 
@@ -135,8 +134,6 @@ class AuthenticationController extends Controller
     public function verifyOTP(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'country_code' => 'required',
-            'phone_number' => 'required',
             'otp' => 'required|min:4',
         ]);
 
@@ -145,33 +142,16 @@ class AuthenticationController extends Controller
             return Helper::sendFailedHttpResponse($message);
         } else {
 
-            $country_code = request('country_code');
-            $phone_number = request('phone_number');
+            $user = auth('api')->user();
+            $user_id = $user->id;
             $otp = request('otp');
 
-            $exists = User::where("country_code", "=", $country_code)
-                ->where("phone_number", "=", $phone_number)
-                ->where("otp", "=", $otp)->exists();
+            $exists = User::where("id", $user_id)->where("otp", "=", $otp)->exists();
 
             if ($exists) {
-                $user = User::where("country_code", "=", $country_code)
-                    ->where("phone_number", "=", $phone_number)
-                    ->where("otp", "=", $otp)->first();
-
-                config(['auth.guards.api.provider' => 'user']);
-                $user_id = $user->id;
-                $user = User::select('users.*')->find($user_id);
-                $userData = Helper::getUserInfo($user_id);
-
-                $userData['id'] = $user->id;
-                $userData['country_code'] = $user->country_code;
-                $userData['phone_number'] = $user->phone_number;
-                $userData['is_registered'] = $user->profile_status;
-                $userData['access_token'] = $user->createToken('User' . $user->country_code . '' . $user->phone_number, ['user'])->accessToken;
-
-                User::where("country_code", "=", $country_code)->where("phone_number", "=", $phone_number)->update(["otp" => null]);
-
-                return Helper::sendOkHttpResponse($userData);
+                $user = User::find($user_id);
+                $user->update(["otp" => null]);
+                return Helper::sendOkHttpResponse($user);
 
             } else {
                 $message = 'Invalid verification code';
