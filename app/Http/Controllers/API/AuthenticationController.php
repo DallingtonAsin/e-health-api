@@ -53,6 +53,7 @@ class AuthenticationController extends Controller
                 $user_id = $user->id;
                 User::where('id', $user_id)->update($validatedData);
                 $user = User::find($user_id);
+                $user->access_token = $this->generateToken($user);
                 return response($user, 201);
             }
 
@@ -117,7 +118,7 @@ class AuthenticationController extends Controller
                         'current_version' => $current_version,
                         'ip_address' => $ip_address,
                     ];
-                   
+
                     $user = User::create($validatedData);
                 }
 
@@ -151,6 +152,7 @@ class AuthenticationController extends Controller
             if ($exists) {
                 $user = User::find($user_id);
                 $user->update(["otp" => null]);
+                $user->access_token = $this->generateToken($user);
                 return Helper::sendOkHttpResponse($user);
 
             } else {
@@ -172,10 +174,21 @@ class AuthenticationController extends Controller
 
             User::where("id", $user_id)->update(["otp" => $otp]);
             $user = User::find($user_id);
-            $user->access_token = $user->createToken('User' . $user_phone_number, ['user'])->accessToken;
+            $user->authorization = $this->generateToken($user);
 
             return $user;
 
+        } catch (\Exception $ex) {
+            throw $ex;
+        }
+    }
+
+    private function generateToken($user)
+    {
+        try {
+            $phone_number = $user->country_code . '' . $user->phone_number;
+            $access_token = $user->createToken('User' . $phone_number, ['user'])->accessToken;
+            return $access_token;
         } catch (\Exception $ex) {
             throw $ex;
         }

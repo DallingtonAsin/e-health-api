@@ -15,7 +15,7 @@ use App\Http\Controllers\API\AuthenticationController;
 |
 */
 
-Route::post('/user/signup', [AuthenticationController::class, 'sendVerificationCode']);
+Route::post('/user/login', [AuthenticationController::class, 'sendVerificationCode']);
 
 Route::group(['prefix' => 'user', 'middleware' => ['auth:api']], function(){
 
