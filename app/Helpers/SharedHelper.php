@@ -6,7 +6,6 @@ use App\Models\User;
 use App\Helpers\Globals as Globals;
 class SharedHelper
 {
-
     public static function sendOkHttpResponse($data)
     {
         try {
