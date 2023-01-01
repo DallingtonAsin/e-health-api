@@ -53,7 +53,7 @@ class UserController extends Controller
                 User::where('id', $user_id)->update($validatedData);
                 $user = User::find($user_id);
                 $user->access_token = Helper::generateToken($user);
-                return response($user, 200);
+                return response(['message' => 'Profile updated successfully', 'user' => $user], 200);
             }
 
         } catch (\Exception $e) {
