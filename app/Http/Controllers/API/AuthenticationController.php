@@ -174,7 +174,7 @@ class AuthenticationController extends Controller
 
             User::where("id", $user_id)->update(["otp" => $otp]);
             $user = User::find($user_id);
-            $user->authorization = $this->generateToken($user);
+            $user->access_token = $this->generateToken($user);
 
             return $user;
 
