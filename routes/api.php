@@ -1,8 +1,9 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthenticationController;
+use App\Http\Controllers\UserController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -21,7 +22,8 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth:api']], function(){
 
     Route::post('verify', [AuthenticationController::class, 'verifyOTP']);
     Route::post('register', [AuthenticationController::class, 'register']);
-    
+    Route::post('profile/update', [UserController::class, 'update']);
+
 });
 
 

@@ -44,4 +44,15 @@ class SharedHelper
         }
     }
 
+    public static function generateToken($user)
+    {
+        try {
+            $phone_number = $user->country_code . '' . $user->phone_number;
+            $access_token = $user->createToken('User' . $phone_number, ['user'])->accessToken;
+            return $access_token;
+        } catch (\Exception $ex) {
+            throw $ex;
+        }
+    }
+
 }

@@ -1,0 +1,64 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use App\Helpers\SharedHelper as Helper;
+use App\Models\User;
+
+class UserController extends Controller
+{
+
+    public function update(Request $request)
+    {
+
+        $validator = Validator::make($request->all(), [
+            'first_name' => 'required|max:55',
+            'last_name' => 'required|max:55',
+            'email' => 'email|sometimes|nullable',
+            'gender' => 'required',
+            'address' => 'required',
+            'dob' => 'required'
+        ]);
+
+        try {
+
+            if ($validator->fails()) {
+                $message = $validator->errors()->all();
+                return Helper::sendFailedHttpResponse($message);
+            } else {
+
+                $email = $request->email;
+                $user = auth('api')->user();
+                $user_id = $user->id;
+                $userDetail = User::find($user_id);
+                
+                if($email != $userDetail->email){
+                    $emailTaken = User::where('email', $email)->exists();
+                    if($emailTaken){
+                        return response()->json(['error' => 'The email has already been taken.'], 500);
+                    }
+                }
+
+                $validatedData = [
+                    'first_name' => $request->first_name,
+                    'last_name' => $request->last_name,
+                    'email' => $email,
+                    'gender' => ucfirst($request->gender),
+                    'address' => $request->address,
+                    'dob' => date('Y-m-d', strtotime($request->dob))
+                ];
+
+                User::where('id', $user_id)->update($validatedData);
+                $user = User::find($user_id);
+                $user->access_token = Helper::generateToken($user);
+                return response($user, 200);
+            }
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+}
