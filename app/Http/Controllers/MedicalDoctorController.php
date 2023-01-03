@@ -71,7 +71,17 @@ class MedicalDoctorController extends Controller
      */
     public function show($id)
     {
-        //
+        try{
+            $doctor_info = MedicalDoctor::where('id', $id)->get();
+            $doctor_info->makeHidden(['created_at', 'updated_at']);
+            foreach($doctor_info as $info){
+                $info->languages = implode(", ", unserialize(($info->languages)));
+                $info->service_fee = config('app.currency') . '. ' . number_format($info->service_fee);
+            }
+            return response($doctor_info, 200);
+        }catch(Exception $ex){
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
     }
 
     /**
