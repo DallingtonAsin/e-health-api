@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthenticationController;
 use App\Http\Controllers\UserController;
-
+use App\Http\Controllers\MedicalSpecialtyController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,6 +25,15 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth:api']], function(){
     Route::post('profile/update', [UserController::class, 'update']);
 
 });
+
+Route::group(['prefix' => 'medical', 'middleware' => ['auth:api']], function(){
+    
+    Route::resource('specialties', MedicalSpecialtyController::class);
+
+});
+
+
+
 
 
 
