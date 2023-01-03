@@ -78,7 +78,7 @@ class MedicalDoctorController extends Controller
                 $info->languages = implode(", ", unserialize(($info->languages)));
                 $info->service_fee = config('app.currency') . '. ' . number_format($info->service_fee);
             }
-            return response($doctor_info, 200);
+            return response($doctor_info[0], 200);
         }catch(Exception $ex){
             return response()->json(['error' => $ex->getMessage()], 500);
         }
