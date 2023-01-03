@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthenticationController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\MedicalSpecialtyController;
+use App\Http\Controllers\MedicalDoctorController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,6 +30,8 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth:api']], function(){
 Route::group(['prefix' => 'medical', 'middleware' => ['auth:api']], function(){
     
     Route::resource('specialties', MedicalSpecialtyController::class);
+    Route::resource('doctors', MedicalDoctorController::class);
+
 
 });
 

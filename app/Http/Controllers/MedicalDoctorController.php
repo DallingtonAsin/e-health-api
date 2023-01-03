@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\MedicalSpecialty;
+use App\Models\MedicalDoctor;
 use Mockery\Exception;
 
-class MedicalSpecialtyController extends Controller
+class MedicalDoctorController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,8 +16,12 @@ class MedicalSpecialtyController extends Controller
     public function index()
     {
         try{
-            $medical_specialties = MedicalSpecialty::get(['id', 'name'])->toArray();
-            return response($medical_specialties, 200);
+            $medical_doctors = MedicalDoctor::all();
+            $medical_doctors->makeHidden(['created_at', 'updated_at']);
+            foreach($medical_doctors as $doctor){
+                $doctor->languages = unserialize(($doctor->languages));
+            }
+            return response($medical_doctors, 200);
         }catch(Exception $ex){
             return response()->json(['error' => $ex->getMessage()], 500);
         }
