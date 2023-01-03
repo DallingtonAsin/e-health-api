@@ -27,6 +27,21 @@ class MedicalDoctorController extends Controller
         }
     }
 
+    public function getDoctorsBySpecialty($speciality_id)
+    {
+        try{
+            $medical_doctors = MedicalDoctor::where('specialty_id', $speciality_id)->get();
+            $medical_doctors->makeHidden(['created_at', 'updated_at']);
+            foreach($medical_doctors as $doctor){
+                $doctor->languages = implode(", ", unserialize(($doctor->languages)));
+                $doctor->service_fee = config('app.currency') . '. ' . number_format($doctor->service_fee);
+            }
+            return response($medical_doctors, 200);
+        }catch(Exception $ex){
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
     /**
      * Show the form for creating a new resource.
      *

@@ -13,7 +13,9 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', 'E-HEALTH'),
+    'currency' => env('APP_CURRENCY', 'UGX'),
+
 
     'AfricasTalking_Sandbox_Username' => env('AFRICASTALKING_SANDBOX_USERNAME'),
     'AfricasTalking_Sandbox_ApiKey' => env('AFRICASTALKING_SANDBOX_APIKEY'),
