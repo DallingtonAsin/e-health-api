@@ -59,8 +59,8 @@ class MedicalDoctorSeeder extends Seeder
         ]);
 
         MedicalDoctor::create([
-            "first_name" => "Grace",
-            "last_name" => "Kaisa",
+            "first_name" => "Moses",
+            "last_name" => "MUkasa",
             "title" => "Dr.",
             "phone_number" => "0704709074",
             "email" => $this->faker->email,

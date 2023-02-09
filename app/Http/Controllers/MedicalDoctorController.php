@@ -4,10 +4,20 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\MedicalDoctor;
-use Mockery\Exception;
+use App\Repositories\MedicalDoctorRepository;
+
 
 class MedicalDoctorController extends Controller
 {
+
+
+    protected $medicalDoctorRepository;
+
+
+    public function __construct(MedicalDoctorRepository $medicalDoctorRepository)
+    {
+        $this->medicalDoctorRepository = $medicalDoctorRepository;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -16,13 +26,9 @@ class MedicalDoctorController extends Controller
     public function index()
     {
         try{
-            $medical_doctors = MedicalDoctor::all();
-            $medical_doctors->makeHidden(['created_at', 'updated_at']);
-            foreach($medical_doctors as $doctor){
-                $doctor->languages = unserialize(($doctor->languages));
-            }
+            $medical_doctors = $this->medicalDoctorRepository->get();
             return response($medical_doctors, 200);
-        }catch(Exception $ex){
+        }catch(\Exception $ex){
             return response()->json(['error' => $ex->getMessage()], 500);
         }
     }
@@ -30,14 +36,9 @@ class MedicalDoctorController extends Controller
     public function getDoctorsBySpecialty($speciality_id)
     {
         try{
-            $medical_doctors = MedicalDoctor::where('specialty_id', $speciality_id)->get();
-            $medical_doctors->makeHidden(['created_at', 'updated_at']);
-            foreach($medical_doctors as $doctor){
-                $doctor->languages = implode(", ", unserialize(($doctor->languages)));
-                $doctor->service_fee = config('app.currency') . '. ' . number_format($doctor->service_fee);
-            }
+            $medical_doctors = $this->medicalDoctorRepository->get(null, $speciality_id);
             return response($medical_doctors, 200);
-        }catch(Exception $ex){
+        }catch(\Exception $ex){
             return response()->json(['error' => $ex->getMessage()], 500);
         }
     }
@@ -72,14 +73,9 @@ class MedicalDoctorController extends Controller
     public function show($id)
     {
         try{
-            $doctor_info = MedicalDoctor::where('id', $id)->get();
-            $doctor_info->makeHidden(['created_at', 'updated_at']);
-            foreach($doctor_info as $info){
-                $info->languages = implode(", ", unserialize(($info->languages)));
-                $info->service_fee = config('app.currency') . '. ' . number_format($info->service_fee);
-            }
-            return response($doctor_info[0], 200);
-        }catch(Exception $ex){
+            $doctor = $this->medicalDoctorRepository->get($id, null);
+            return response($doctor[0], 200);
+        }catch(\Exception $ex){
             return response()->json(['error' => $ex->getMessage()], 500);
         }
     }
