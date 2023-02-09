@@ -3,9 +3,24 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Helpers\SharedHelper as Helper;
+use Illuminate\Support\Facades\Validator;
+use App\Repositories\MedicalAppointmentRepository;
+use App\Repositories\AppointmentTypeRepository;
+use Carbon\Carbon;
 
 class MedicalAppointmentController extends Controller
 {
+
+
+    protected $appointmentTypeRepository, $medicalAppointmentRepository;
+
+
+    public function __construct(AppointmentTypeRepository $appointmentTypeRepository, MedicalAppointmentRepository $medicalAppointmentRepository)
+    {
+        $this->appointmentTypeRepository = $appointmentTypeRepository;
+        $this->medicalAppointmentRepository = $medicalAppointmentRepository;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -34,7 +49,50 @@ class MedicalAppointmentController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'patient_id' => 'required|exists:users,id',
+            'doctor_id' => 'required|exists:medical_doctors,id',
+            'appointment_type' => 'required|exists:appointment_types,name',
+            'appointment_date' => 'required',
+            'appointment_time' => 'required',
+            'symptoms' => 'sometimes|nullable',
+            'notes' => 'sometimes|nullable'
+        ]);
+
+        try {
+
+            if ($validator->fails()) {
+                $message = $validator->errors()->all();
+                return Helper::sendFailedHttpResponse($message);
+            } else {
+
+                $patient_id = $request->input('patient_id');
+                $doctor_id = $request->input('doctor_id');
+                $appointment_type_name = $request->input('appointment_type');
+                $date = $request->input('appointment_date');
+                $time = $request->input('appointment_time');
+                $symptoms = $request->input('symptoms');
+                $notes = $request->input('notes');
+
+                $appointment_type = $this->appointmentTypeRepository->getAppointmentTypeByName($appointment_type_name);
+                $appointment_date = Carbon::parse($date . ' ' . $time);
+
+                $data = [
+                    'patient_id' => $patient_id,
+                    'doctor_id' => $doctor_id,
+                    'appointment_type_id' => $appointment_type->id,
+                    'appointment_date' => $appointment_date,
+                    'symptoms' => $symptoms,
+                    'notes' => $notes
+                ];
+
+                $this->medicalAppointmentRepository->create($data);
+                return response(['message' => 'Appointment has been created successfully'], 200);
+            }
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     /**

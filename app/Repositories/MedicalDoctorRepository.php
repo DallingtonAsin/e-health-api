@@ -62,8 +62,8 @@ class MedicalDoctorRepository
 
             unset($doctor->availability);
 
-            $doctor->schedule_dates = $dates;
-            $doctor->availability = $timeSlots;
+            $doctor['schedule_dates'] = $dates;
+            $doctor['schedule'] = $timeSlots;
         }
 
         return $doctors;

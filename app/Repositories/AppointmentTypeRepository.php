@@ -40,8 +40,11 @@ class AppointmentTypeRepository
     }
 
     public function exists($id){
-        $appointmentType = $this->appointmentType->where('id', $id)->exists();
-        return $appointmentType; 
+        return $this->appointmentType->where('id', $id)->exists();
+    }
+
+    public function getAppointmentTypeByName($name){
+        return $this->appointmentType->where('name', $name)->first();
     }
 
 }

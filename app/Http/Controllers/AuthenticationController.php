@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
-use Mockery\Exception;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\SharedHelper as Helper;
 use App\Services\Transaction\Sms\SmsService;
@@ -56,8 +55,8 @@ class AuthenticationController extends Controller
                 return response($user, 200);
             }
 
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+        } catch(\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
         }
     }
 

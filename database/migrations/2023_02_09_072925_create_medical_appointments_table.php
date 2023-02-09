@@ -21,6 +21,12 @@ class CreateMedicalAppointmentsTable extends Migration
             $table->dateTime('appointment_date');
             $table->text('symptoms')->nullable();
             $table->text('notes')->nullable();
+            $table->enum('status', ['pending', 'confirmed', 'completed', 'cancelled', 'missed', 'rescheduled', 'in progress', 'arrived', 'postponed'])->default('pending');
+            $table->timestamp('confirmed_at')->nullable();
+            $table->timestamp('reminded_at')->nullable();
+            $table->timestamp('completed_at')->nullable();
+            $table->timestamp('rescheduled_at')->nullable();
+            $table->timestamp('cancelled_at')->nullable();
             $table->timestamps();
 
             $table->foreign('patient_id')->references('id')->on('users')->onDelete('cascade');
