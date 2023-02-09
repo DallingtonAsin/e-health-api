@@ -92,9 +92,9 @@ class MedicalAppointmentController extends Controller
                 $data->makeHidden(['id', 'created_at', 'updated_at']);
                 $datetime = Carbon::parse($data->appointment_date);
                 $data->appointment_date = $datetime->toDateString();
-                $data->appointment_time = $datetime->toTimeString();
+                $data->appointment_time = date('H:i', strtotime($datetime->toTimeString()));
 
-                return response(['data' => $data], 200);
+                return response($data, 200);
             }
 
         } catch (\Exception $e) {
