@@ -5,6 +5,8 @@ use App\Http\Controllers\API\AuthenticationController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\MedicalSpecialtyController;
 use App\Http\Controllers\MedicalDoctorController;
+use App\Http\Controllers\AppointmentTypeController;
+use App\Http\Controllers\MedicalAppointmentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,11 +30,14 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth:api']], function(){
 });
 
 Route::group(['prefix' => 'medical', 'middleware' => ['auth:api']], function () {
-
     Route::get('doctors/specialty/{specialty}', [MedicalDoctorController::class, 'getDoctorsBySpecialty']);
     Route::resource('specialties', MedicalSpecialtyController::class);
     Route::resource('doctors', MedicalDoctorController::class);
+});
 
+Route::group(['prefix' => 'appointments', 'middleware' => ['auth:api']], function () {
+    Route::resource('types', AppointmentTypeController::class);
+    Route::resource('/', MedicalAppointmentController::class);
 });
 
 

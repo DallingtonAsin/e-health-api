@@ -3,18 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Repositories\MedicalSpecialtyRepository;
 
-class MedicalSpecialtyController extends Controller
+class MedicalAppointmentController extends Controller
 {
-
-    protected $medicalSpecialtyRepository;
-
-
-    public function __construct(MedicalSpecialtyRepository $medicalSpecialtyRepository)
-    {
-        $this->medicalSpecialtyRepository = $medicalSpecialtyRepository;
-    }
     /**
      * Display a listing of the resource.
      *
@@ -22,12 +13,7 @@ class MedicalSpecialtyController extends Controller
      */
     public function index()
     {
-        try{
-            $data = $this->medicalSpecialtyRepository->get();
-            return response($data, 200);
-        }catch(\Exception $ex){
-            return response()->json(['error' => $ex->getMessage()], 500);
-        }
+        //
     }
 
     /**
