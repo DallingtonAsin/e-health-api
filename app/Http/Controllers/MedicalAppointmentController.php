@@ -76,27 +76,34 @@ class MedicalAppointmentController extends Controller
 
                 $appointment_type = $this->appointmentTypeRepository->getAppointmentTypeByName($appointment_type_name);
                 $appointment_date = Carbon::parse($date . ' ' . $time);
-                $appointment_number = $this->medicalAppointmentRepository->generateAppointmentNumber();
+                $appointment_type_id = $appointment_type->id;
+                $exists = $this->medicalAppointmentRepository->checkIfAppointmentExists($patient_id, $doctor_id, $appointment_type_id, $appointment_date);
 
-                $data = [
-                    'patient_id' => $patient_id,
-                    'doctor_id' => $doctor_id,
-                    'appointment_number' => $appointment_number,
-                    'appointment_type_id' => $appointment_type->id,
-                    'appointment_date' => $appointment_date,
-                    'symptoms' => $symptoms,
-                    'notes' => $notes
-                ];
+                if ($exists) {
+                    return response(['error' => 'You have already booked an appointment with such details'], 400);
+                } else {
 
-                $data = $this->medicalAppointmentRepository->create($data);
-                $data->makeHidden(['id', 'created_at', 'updated_at']);
-                $datetime = Carbon::parse($data->appointment_date);
-                $data->appointment_date = $datetime->toDateString();
-                $data->appointment_time = date('H:i', strtotime($datetime->toTimeString()));
+                    $appointment_number = $this->medicalAppointmentRepository->generateAppointmentNumber();
 
-                return response($data, 200);
+                    $data = [
+                        'patient_id' => $patient_id,
+                        'doctor_id' => $doctor_id,
+                        'appointment_number' => $appointment_number,
+                        'appointment_type_id' => $appointment_type->id,
+                        'appointment_date' => $appointment_date,
+                        'symptoms' => $symptoms,
+                        'notes' => $notes
+                    ];
+
+                    $data = $this->medicalAppointmentRepository->create($data);
+                    $data->makeHidden(['id', 'created_at', 'updated_at']);
+                    $datetime = Carbon::parse($data->appointment_date);
+                    $data->appointment_date = $datetime->toDateString();
+                    $data->appointment_time = date('H:i', strtotime($datetime->toTimeString()));
+
+                    return response($data, 200);
+                }
             }
-
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }

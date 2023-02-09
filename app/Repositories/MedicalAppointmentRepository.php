@@ -45,6 +45,15 @@ class MedicalAppointmentRepository
         return $medicalAppointment; 
     }
 
+    public function checkIfAppointmentExists($patient_id, $doctor_id, $appointment_type_id, $appointment_date){
+      return $this->medicalAppointment
+              ->where('patient_id', $patient_id)
+              ->where('doctor_id', $doctor_id)
+              ->where('appointment_type_id', $appointment_type_id)
+              ->where('appointment_date', $appointment_date)
+              ->exists();
+    }
+
     public function generateAppointmentNumber(){
         return Helper::generateUniqueNumber('medical_appointments', 'appointment_number', 10, 'APT');
     }
