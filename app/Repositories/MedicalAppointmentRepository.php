@@ -2,6 +2,7 @@
 namespace App\Repositories;
 
 use App\Models\MedicalAppointment;
+use App\Helpers\SharedHelper as Helper;
 
 class MedicalAppointmentRepository
 {
@@ -42,6 +43,10 @@ class MedicalAppointmentRepository
     public function exists($id){
         $medicalAppointment = $this->medicalAppointment->where('id', $id)->exists();
         return $medicalAppointment; 
+    }
+
+    public function generateAppointmentNumber(){
+        return Helper::generateUniqueNumber('medical_appointments', 'appointment_number', 10, 'APT');
     }
 
 }

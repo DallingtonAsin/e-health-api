@@ -4,6 +4,9 @@ namespace App\Helpers;
 use Illuminate\Support\Facades\Storage;
 use App\Models\User;
 use App\Helpers\Globals as Globals;
+use Haruncpi\LaravelIdGenerator\IdGenerator;
+
+
 class SharedHelper
 {
     public static function sendOkHttpResponse($data)
@@ -52,6 +55,22 @@ class SharedHelper
         } catch (\Exception $ex) {
             throw $ex;
         }
+    }
+
+    public static function generateUniqueNumber($table, $column = null, $length, $prefix)
+    {
+      try {
+  
+        $config = ['table' => $table, 'length' => $length, 'prefix' => $prefix];
+
+        if ($column != null) {
+          $config['field'] = $column;
+        }
+        return IdGenerator::generate($config);
+        
+      } catch (\Exception $ex) {
+        throw $ex;
+      }
     }
 
 }

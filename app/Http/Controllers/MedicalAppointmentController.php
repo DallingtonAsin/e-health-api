@@ -76,18 +76,25 @@ class MedicalAppointmentController extends Controller
 
                 $appointment_type = $this->appointmentTypeRepository->getAppointmentTypeByName($appointment_type_name);
                 $appointment_date = Carbon::parse($date . ' ' . $time);
+                $appointment_number = $this->medicalAppointmentRepository->generateAppointmentNumber();
 
                 $data = [
                     'patient_id' => $patient_id,
                     'doctor_id' => $doctor_id,
+                    'appointment_number' => $appointment_number,
                     'appointment_type_id' => $appointment_type->id,
                     'appointment_date' => $appointment_date,
                     'symptoms' => $symptoms,
                     'notes' => $notes
                 ];
 
-                $this->medicalAppointmentRepository->create($data);
-                return response(['message' => 'Appointment has been created successfully'], 200);
+                $data = $this->medicalAppointmentRepository->create($data);
+                $data->makeHidden(['id', 'created_at', 'updated_at']);
+                $datetime = Carbon::parse($data->appointment_date);
+                $data->appointment_date = $datetime->toDateString();
+                $data->appointment_time = $datetime->toTimeString();
+
+                return response(['data' => $data], 200);
             }
 
         } catch (\Exception $e) {

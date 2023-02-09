@@ -17,6 +17,7 @@ class CreateMedicalAppointmentsTable extends Migration
             $table->id();
             $table->unsignedBigInteger('patient_id');
             $table->unsignedBigInteger('doctor_id');
+            $table->string('appointment_number')->unique();
             $table->unsignedBigInteger('appointment_type_id');
             $table->dateTime('appointment_date');
             $table->text('symptoms')->nullable();
