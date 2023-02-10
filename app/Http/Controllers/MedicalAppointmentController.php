@@ -31,9 +31,41 @@ class MedicalAppointmentController extends Controller
         //
     }
 
-    public function getPatientAppointments(Request $request, $patient_id, $status = null){
+    public function getPatientAppointments($patient_id, $status = null){
         try{
           return $this->medicalAppointmentRepository->getMedicalAppointments($patient_id, $status, null);
+        }catch(\Exception $ex){
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
+    public function getPatientPendingAppointments($patient_id){
+        try{
+          return $this->medicalAppointmentRepository->getMedicalAppointments($patient_id, 'pending', null);
+        }catch(\Exception $ex){
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
+    public function getPatientConfirmedAppointments($patient_id){
+        try{
+          return $this->medicalAppointmentRepository->getMedicalAppointments($patient_id, 'confirmed', null);
+        }catch(\Exception $ex){
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
+    public function getPatientCompletedAppointments($patient_id){
+        try{
+          return $this->medicalAppointmentRepository->getMedicalAppointments($patient_id, 'completed', null);
+        }catch(\Exception $ex){
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
+    public function getPatientCancelledAppointments($patient_id){
+        try{
+          return $this->medicalAppointmentRepository->getMedicalAppointments($patient_id, 'cancelled', null);
         }catch(\Exception $ex){
             return response()->json(['error' => $ex->getMessage()], 500);
         }

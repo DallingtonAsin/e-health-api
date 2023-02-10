@@ -84,6 +84,8 @@ class MedicalAppointmentRepository
             $appointments->where('status', $status);
         }
 
+        $appointments->orderBy('id', 'desc');
+
         $data = $appointments->get();
         foreach($data as $appointment){
             $datetime = Carbon::parse($appointment->appointment_date);
