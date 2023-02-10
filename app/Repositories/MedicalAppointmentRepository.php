@@ -1,16 +1,21 @@
-<?php 
+<?php
+
 namespace App\Repositories;
 
 use App\Models\MedicalAppointment;
+use App\Models\AppointmentType;
 use App\Helpers\SharedHelper as Helper;
+use Carbon\Carbon;
+
 
 class MedicalAppointmentRepository
 {
-    protected $medicalAppointment;
+    protected $medicalAppointment, $appointmentType;
 
-    public function __construct(MedicalAppointment $medicalAppointment)
+    public function __construct(MedicalAppointment $medicalAppointment, AppointmentType $appointmentType)
     {
         $this->medicalAppointment = $medicalAppointment;
+        $this->appointmentType = $appointmentType;
     }
 
     public function create($medicalAppointmentData)
@@ -18,10 +23,10 @@ class MedicalAppointmentRepository
         return $this->medicalAppointment->create($medicalAppointmentData);
     }
 
-    public function get($id = null)
+    public function get($id = null, $status = null)
     {
-        if($id){
-           return $this->medicalAppointment->find($id);
+        if ($id) {
+            return $this->medicalAppointment->find($id);
         }
         return $this->medicalAppointment->all();
     }
@@ -40,22 +45,58 @@ class MedicalAppointmentRepository
         return $medicalAppointment;
     }
 
-    public function exists($id){
+    public function exists($id)
+    {
         $medicalAppointment = $this->medicalAppointment->where('id', $id)->exists();
-        return $medicalAppointment; 
+        return $medicalAppointment;
     }
 
-    public function checkIfAppointmentExists($patient_id, $doctor_id, $appointment_type_id, $appointment_date){
-      return $this->medicalAppointment
-              ->where('patient_id', $patient_id)
-              ->where('doctor_id', $doctor_id)
-              ->where('appointment_type_id', $appointment_type_id)
-              ->where('appointment_date', $appointment_date)
-              ->exists();
+    public function checkIfAppointmentExists($patient_id, $doctor_id, $appointment_type_id, $appointment_date)
+    {
+        return $this->medicalAppointment
+            ->where('patient_id', $patient_id)
+            ->where('doctor_id', $doctor_id)
+            ->where('appointment_type_id', $appointment_type_id)
+            ->where('appointment_date', $appointment_date)
+            ->exists();
     }
 
-    public function generateAppointmentNumber(){
+    public function generateAppointmentNumber()
+    {
         return Helper::generateUniqueNumber('medical_appointments', 'appointment_number', 10, 'APT');
     }
 
+    public function getMedicalAppointments($patient_id = null, $status = null, $doctor_id = null)
+    {
+        $appointments = $this->medicalAppointment->with(['doctor' => function ($query){
+            $query->select(['id', 'first_name', 'last_name', 'specialty_id', 'title', 'phone_number', 'email', 'qualification', 'profession', 'experience', 'image', 'service_fee']);
+        }]);
+
+        if ($patient_id) {
+            $appointments->where('patient_id', $patient_id);
+        }
+
+        if ($doctor_id) {
+            $appointments->where('doctor_id', $doctor_id);
+        }
+
+        if ($status) {
+            $appointments->where('status', $status);
+        }
+
+        $data = $appointments->get();
+        foreach($data as $appointment){
+            $datetime = Carbon::parse($appointment->appointment_date);
+            $appointment['appointment_date'] = $datetime->toDateString();
+            $appointment['appointment_time'] = date('H:i A', strtotime($datetime->toTimeString()));
+            $appointment['status'] = ucfirst($appointment->status);
+            $appointment['appointment_type'] = $this->appointmentType->find($appointment->appointment_type_id)->name;
+            unset($appointment->appointment_type_id);
+
+
+        }
+        $data->makeHidden(['created_at', 'updated_at']);
+
+        return $data;
+    }
 }

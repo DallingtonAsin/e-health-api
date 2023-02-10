@@ -31,6 +31,14 @@ class MedicalAppointmentController extends Controller
         //
     }
 
+    public function getPatientAppointments(Request $request, $patient_id, $status = null){
+        try{
+          return $this->medicalAppointmentRepository->getMedicalAppointments($patient_id, $status, null);
+        }catch(\Exception $ex){
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
     /**
      * Show the form for creating a new resource.
      *
