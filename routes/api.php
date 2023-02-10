@@ -43,6 +43,7 @@ Route::group(['prefix' => 'appointments', 'middleware' => ['auth:api']], functio
     Route::get('/patient/{patient_id}/confirmed', [MedicalAppointmentController::class, 'getPatientConfirmedAppointments']);
     Route::get('/patient/{patient_id}/completed', [MedicalAppointmentController::class, 'getPatientCompletedAppointments']);
     Route::get('/patient/{patient_id}/cancelled', [MedicalAppointmentController::class, 'getPatientCancelledAppointments']);
+    Route::put('/cancel', [MedicalAppointmentController::class, 'cancelAppointment']);
 });
 
 

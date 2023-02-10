@@ -84,7 +84,7 @@ class MedicalAppointmentRepository
             $appointments->where('status', $status);
         }
 
-        $appointments->orderBy('id', 'desc');
+        $appointments->orderBy('appointment_date', 'desc');
 
         $data = $appointments->get();
 
@@ -103,4 +103,13 @@ class MedicalAppointmentRepository
 
         return $data;
     }
+
+
+    public function cancelAppointment($patient_id, $appointment_number){
+      return $this->medicalAppointment->where('patient_id', $patient_id)->where('appointment_number', $appointment_number)
+                  ->update(['status' => 'cancelled', 'cancelled_at' => Carbon::now()]);
+    }
+
+
+
 }

@@ -31,42 +31,73 @@ class MedicalAppointmentController extends Controller
         //
     }
 
-    public function getPatientAppointments($patient_id, $status = null){
-        try{
-          return $this->medicalAppointmentRepository->getMedicalAppointments($patient_id, $status, null);
-        }catch(\Exception $ex){
+    public function getPatientAppointments($patient_id, $status = null)
+    {
+        try {
+            return $this->medicalAppointmentRepository->getMedicalAppointments($patient_id, $status, null);
+        } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
     }
 
-    public function getPatientPendingAppointments($patient_id){
-        try{
-          return $this->medicalAppointmentRepository->getMedicalAppointments($patient_id, 'pending', null);
-        }catch(\Exception $ex){
+    public function getPatientPendingAppointments($patient_id)
+    {
+        try {
+            return $this->medicalAppointmentRepository->getMedicalAppointments($patient_id, 'pending', null);
+        } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
     }
 
-    public function getPatientConfirmedAppointments($patient_id){
-        try{
-          return $this->medicalAppointmentRepository->getMedicalAppointments($patient_id, 'confirmed', null);
-        }catch(\Exception $ex){
+    public function getPatientConfirmedAppointments($patient_id)
+    {
+        try {
+            return $this->medicalAppointmentRepository->getMedicalAppointments($patient_id, 'confirmed', null);
+        } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
     }
 
-    public function getPatientCompletedAppointments($patient_id){
-        try{
-          return $this->medicalAppointmentRepository->getMedicalAppointments($patient_id, 'completed', null);
-        }catch(\Exception $ex){
+    public function getPatientCompletedAppointments($patient_id)
+    {
+        try {
+            return $this->medicalAppointmentRepository->getMedicalAppointments($patient_id, 'completed', null);
+        } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
     }
 
-    public function getPatientCancelledAppointments($patient_id){
-        try{
-          return $this->medicalAppointmentRepository->getMedicalAppointments($patient_id, 'cancelled', null);
-        }catch(\Exception $ex){
+    public function getPatientCancelledAppointments($patient_id)
+    {
+        try {
+            return $this->medicalAppointmentRepository->getMedicalAppointments($patient_id, 'cancelled', null);
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
+    public function cancelAppointment(Request $request)
+    {
+
+        $validator = Validator::make($request->all(), [
+            'patient_id' => 'required|exists:users,id',
+            'appointment_number' => 'required|exists:medical_appointments,appointment_number'
+        ]);
+
+        try {
+
+            if ($validator->fails()) {
+                $message = $validator->errors()->all();
+                return Helper::sendFailedHttpResponse($message);
+            } else {
+
+                $patient_id = $request->input('patient_id');
+                $appointment_number = $request->input('appointment_number');
+
+                $this->medicalAppointmentRepository->cancelAppointment($patient_id, $appointment_number);
+                return response()->json(['message' => 'Appointment has been cancelled successfully'], 200);
+            }
+        } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
     }
@@ -141,7 +172,7 @@ class MedicalAppointmentController extends Controller
                     $data->appointment_date = $datetime->toDateString();
                     $data->appointment_time = date('H:i', strtotime($datetime->toTimeString()));
 
-                    return response($data, 200);
+                    return response()->json($data, 200);
                 }
             }
         } catch (\Exception $e) {
