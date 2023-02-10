@@ -68,7 +68,7 @@ class MedicalDoctorSeeder extends Seeder
             "profession" => $this->faker->randomElement(['Dentist', 'Nutrionist', 'Child life specialist', 'Dietitian', 'Orthoptist', 'Nurse', 'Physical therapist', 'Surgical first assistant', 'Phlebotomy technician', 'Medical physicist']),
             "languages" => serialize(['English', 'Luganda']),
             "experience" => "3 Yrs",
-            "image" => "https://purepng.com/public/uploads/large/purepng.com-doctorsdoctorsdoctors-and-nursesa-qualified-practitioner-of-medicine-aclinicianmedical-practitionermale-doctor-1421526856715fcree.png",
+            "image" => "https://thumbs.dreamstime.com/b/portrait-positive-black-doctor-holding-medical-chart-male-over-white-background-178499631.jpg",
             "specialty_id" => $this->faker->randomElement([1,2,3,4,5,6,7,8,9,10,11,12,13,14]),
             "service_fee" => $this->faker->numberBetween(10000, 95000),
         ]);
