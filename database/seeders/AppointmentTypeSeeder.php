@@ -16,7 +16,7 @@ class AppointmentTypeSeeder extends Seeder
     {
         AppointmentType::create(['name' => 'In Person']);
         AppointmentType::create(['name' => 'Audio Call']);
-        AppointmentType::create(['name' => 'Video Session']);
+        AppointmentType::create(['name' => 'Video Call']);
 
     }
 }
