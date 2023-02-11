@@ -70,6 +70,8 @@ class MedicalAppointmentRepository
     {
         $appointments = $this->medicalAppointment->with(['doctor' => function ($query) {
             $query->select(['id', 'first_name', 'last_name', 'specialty_id', 'title', 'phone_number', 'email', 'qualification', 'profession', 'experience', 'image', 'service_fee']);
+        }])->with(['appointmentType' => function ($query) {
+            $query->select(['id', 'name']);
         }]);
 
         if ($patient_id) {
@@ -86,22 +88,23 @@ class MedicalAppointmentRepository
 
         $appointments->orderBy('appointment_date', 'desc');
 
-        $data = $appointments->get();
 
-        foreach ($data as $appointment) {
+        $appointments = $appointments->get();
+
+
+        foreach ($appointments as $appointment) {
             $datetime = Carbon::parse($appointment->appointment_date);
+            $appointment['is_online'] = $appointment->isOnline();
             $appointment['appointment_date'] = $datetime->toDateString();
             $appointment['appointment_time'] = date('H:i A', strtotime($datetime->toTimeString()));
             $appointment['status'] = ucfirst($appointment->status);
-            $appointment['appointment_type'] = $this->appointmentType->find($appointment->appointment_type_id)->name;
             unset($appointment->appointment_type_id);
             $appointment->doctor->service_fee =  number_format(floatval($appointment->doctor->service_fee));
         }
 
+        $appointments->makeHidden(['created_at', 'updated_at']);
 
-        $data->makeHidden(['created_at', 'updated_at']);
-
-        return $data;
+        return $appointments;
     }
 
 

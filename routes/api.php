@@ -36,7 +36,12 @@ Route::group(['prefix' => 'medical', 'middleware' => ['auth:api']], function () 
 });
 
 Route::group(['prefix' => 'appointments', 'middleware' => ['auth:api']], function () {
+
+
+   
     Route::resource('/', MedicalAppointmentController::class);
+    Route::post('/', [MedicalAppointmentController::class, 'store'])->middleware('throttle:1,1');
+
     Route::resource('types', AppointmentTypeController::class);
     // Route::get('/patient/{patient_id}/{status?}', [MedicalAppointmentController::class, 'getPatientAppointments']);
     Route::get('/patient/{patient_id}/pending', [MedicalAppointmentController::class, 'getPatientPendingAppointments']);
