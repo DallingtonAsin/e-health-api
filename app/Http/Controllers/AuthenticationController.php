@@ -8,16 +8,19 @@ use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\SharedHelper as Helper;
 use App\Services\Transaction\Sms\SmsService;
+use App\Repositories\UserTypeRepository;
 
 class AuthenticationController extends Controller
 {
 
-    protected $smsService;
+    protected $smsService, $userTypeRepository;
 
-    public function __construct(SmsService $smsService)
+    public function __construct(SmsService $smsService, UserTypeRepository $userTypeRepository)
     {
         $this->smsService = $smsService;
+        $this->userTypeRepository = $userTypeRepository;
     }
+
     public function register(Request $request)
     {
 
@@ -37,7 +40,10 @@ class AuthenticationController extends Controller
                 return Helper::sendFailedHttpResponse($message);
             } else {
 
+                $user_type_id = $this->userTypeRepository->getPatientTypeId();
+
                 $validatedData = [
+                    'user_type_id' => $user_type_id,
                     'first_name' => $request->first_name,
                     'last_name' => $request->last_name,
                     'email' => $request->email,

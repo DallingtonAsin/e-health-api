@@ -15,12 +15,13 @@ class CreateUsersTable extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('user_type_id');
             $table->string('first_name')->nullable();
             $table->string('last_name')->nullable();
             $table->string('country_code');
             $table->string('phone_number');
             $table->string('email')->nullable()->unique();
-            $table->string('address')->nullable();
+            $table->string('address');
             $table->enum('gender', ['Male', 'Female'])->nullable();
             $table->date('dob')->nullable();
             $table->string('ip_address')->nullable();
@@ -34,6 +35,8 @@ class CreateUsersTable extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
+
+            $table->foreign('user_type_id')->references('id')->on('user_types');
         });
     }
 

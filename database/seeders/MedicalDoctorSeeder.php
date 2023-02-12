@@ -6,6 +6,9 @@ use Illuminate\Database\Seeder;
 use App\Models\MedicalDoctor;
 use Faker\Generator;
 use Illuminate\Container\Container;
+use App\Models\UserType;
+
+
 class MedicalDoctorSeeder extends Seeder
 {
 
@@ -43,11 +46,16 @@ class MedicalDoctorSeeder extends Seeder
      */
     public function run()
     {
+
+        $user_type_id = UserType::where('name', 'like', "%doctor%")->first()->id;
+
         MedicalDoctor::create([
+            "user_type_id" => $user_type_id,
             "first_name" => "Grace",
             "last_name" => "Kaisa",
             "title" => "Dr.",
-            "phone_number" => "0774014727",
+            "country_code" => '+256',
+            "phone_number" => "774014727",
             "email" => $this->faker->email,
             "qualification" => "MAM",
             "profession" => $this->faker->randomElement(['Dentist', 'Nutrionist', 'Child life specialist', 'Dietitian', 'Orthoptist', 'Nurse', 'Physical therapist', 'Surgical first assistant', 'Phlebotomy technician', 'Medical physicist']),
@@ -59,10 +67,12 @@ class MedicalDoctorSeeder extends Seeder
         ]);
 
         MedicalDoctor::create([
+            "user_type_id" => $user_type_id,
             "first_name" => "Moses",
             "last_name" => "MUkasa",
             "title" => "Dr.",
-            "phone_number" => "0704709074",
+            "country_code" => '+256',
+            "phone_number" => "704709074",
             "email" => $this->faker->email,
             "qualification" => "MBBS, DNB",
             "profession" => $this->faker->randomElement(['Dentist', 'Nutrionist', 'Child life specialist', 'Dietitian', 'Orthoptist', 'Nurse', 'Physical therapist', 'Surgical first assistant', 'Phlebotomy technician', 'Medical physicist']),
@@ -74,10 +84,12 @@ class MedicalDoctorSeeder extends Seeder
         ]);
 
         MedicalDoctor::create([
+            "user_type_id" => $user_type_id,
             "first_name" => "Francis",
             "last_name" => "Agaba",
             "title" => "Dr.",
-            "phone_number" => "0788246763",
+            "country_code" => '+256',
+            "phone_number" => "788246763",
             "email" => $this->faker->email,
             "qualification" => "MAM",
             "profession" => $this->faker->randomElement(['Dentist', 'Physiotherapist', 'Orthopaedic Officer', 'Nutrionist', 'Child life specialist', 'Dietitian', 'Orthoptist', 'Nurse', 'Physical therapist', 'Surgical first assistant', 'Phlebotomy technician', 'Medical physicist']),
@@ -90,10 +102,12 @@ class MedicalDoctorSeeder extends Seeder
 
 
         MedicalDoctor::create([
+            "user_type_id" => $user_type_id,
             "first_name" => "Herman",
             "last_name" => "Asiko",
             "title" => "Dr.",
-            "phone_number" => "0701595279",
+            "country_code" => '+256',
+            "phone_number" => "701595279",
             "email" => $this->faker->email,
             "qualification" => "BMBS",
             "profession" => $this->faker->randomElement(['Dentist', 'Nutrionist', 'Child life specialist', 'Dietitian', 'Orthoptist', 'Nurse', 'Physical therapist', 'Surgical first assistant', 'Phlebotomy technician', 'Medical physicist']),
@@ -105,10 +119,12 @@ class MedicalDoctorSeeder extends Seeder
         ]);
 
         MedicalDoctor::create([
+            "user_type_id" => $user_type_id,
             "first_name" => "Moses",
             "last_name" => "Asiimwe",
             "title" => "Dr.",
-            "phone_number" => "0700477421",
+            "country_code" => '+256',
+            "phone_number" => "700477421",
             "email" => $this->faker->email,
             "qualification" => "BM",
             "profession" => $this->faker->randomElement(['Dentist', 'Nutrionist', 'Child life specialist', 'Dietitian', 'Orthoptist', 'Nurse', 'Physical therapist', 'Surgical first assistant', 'Phlebotomy technician', 'Medical physicist']),
@@ -120,10 +136,12 @@ class MedicalDoctorSeeder extends Seeder
         ]);
 
         MedicalDoctor::create([
+            "user_type_id" => $user_type_id,
             "first_name" => "Dallington",
             "last_name" => "Asingwire",
             "title" => "Dr.",
-            "phone_number" => "0774014727",
+            "country_code" => '+256',
+            "phone_number" => "774014727",
             "email" => $this->faker->email,
             "qualification" => "DRCOG",
             "profession" => $this->faker->randomElement(['Dentist', 'Nutrionist', 'Child life specialist', 'Dietitian', 'Orthoptist', 'Nurse', 'Physical therapist', 'Surgical first assistant', 'Phlebotomy technician', 'Medical physicist']),
@@ -138,10 +156,12 @@ class MedicalDoctorSeeder extends Seeder
         // another list
 
         MedicalDoctor::create([
+            "user_type_id" => $user_type_id,
             "first_name" => "Annet",
             "last_name" => "Ninsiima",
             "title" => "Dr.",
-            "phone_number" => "0774014721",
+            "country_code" => '+256',
+            "phone_number" => "774014721",
             "email" => $this->faker->email,
             "qualification" => "DFFP",
             "profession" => $this->faker->randomElement(['Dentist', 'Nutrionist', 'Child life specialist', 'Dietitian', 'Orthoptist', 'Nurse', 'Physical therapist', 'Surgical first assistant', 'Phlebotomy technician', 'Medical physicist']),
@@ -153,10 +173,12 @@ class MedicalDoctorSeeder extends Seeder
         ]);
 
         MedicalDoctor::create([
+            "user_type_id" => $user_type_id,
             "first_name" => "Fred",
             "last_name" => "Mugisha",
             "title" => "Dr.",
-            "phone_number" => "0704709073",
+            "country_code" => '+256',
+            "phone_number" => "704709073",
             "email" => $this->faker->email,
             "qualification" => "CME",
             "profession" => $this->faker->randomElement(['Dentist', 'Nutrionist', 'Child life specialist', 'Dietitian', 'Orthoptist', 'Nurse', 'Physical therapist', 'Surgical first assistant', 'Phlebotomy technician', 'Medical physicist']),
@@ -168,10 +190,12 @@ class MedicalDoctorSeeder extends Seeder
         ]);
 
         MedicalDoctor::create([
+            "user_type_id" => $user_type_id,
             "first_name" => "Richard",
             "last_name" => "Bimanya",
             "title" => "Dr.",
-            "phone_number" => "0788246769",
+            "country_code" => '+256',
+            "phone_number" => "788246769",
             "email" => $this->faker->email,
             "qualification" => "BmedSci",
             "profession" => $this->faker->randomElement(['Dentist', 'Nutrionist', 'Child life specialist', 'Dietitian', 'Orthoptist', 'Nurse', 'Physical therapist', 'Surgical first assistant', 'Phlebotomy technician', 'Medical physicist']),
@@ -184,10 +208,12 @@ class MedicalDoctorSeeder extends Seeder
 
 
         MedicalDoctor::create([
+            "user_type_id" => $user_type_id,
             "first_name" => "John",
             "last_name" => "Matsiko",
             "title" => "Dr.",
-            "phone_number" => "0791595279",
+            "country_code" => '+256',
+            "phone_number" => "791595279",
             "email" => $this->faker->email,
             "qualification" => "MBChB",
             "profession" => $this->faker->randomElement(['Dentist', 'Nutrionist', 'Child life specialist', 'Dietitian', 'Orthoptist', 'Nurse', 'Physical therapist', 'Surgical first assistant', 'Phlebotomy technician', 'Medical physicist']),
@@ -199,10 +225,12 @@ class MedicalDoctorSeeder extends Seeder
         ]);
 
         MedicalDoctor::create([
+            "user_type_id" => $user_type_id,
             "first_name" => "Alfred",
             "last_name" => "Kalungi",
             "title" => "Dr.",
-            "phone_number" => "0700477422",
+            "country_code" => '+256',
+            "phone_number" => "700477422",
             "email" => $this->faker->email,
             "qualification" => "MRCGP",
             "profession" => $this->faker->randomElement(['Dentist', 'Nutrionist', 'Child life specialist', 'Dietitian', 'Orthoptist', 'Nurse', 'Physical therapist', 'Surgical first assistant', 'Phlebotomy technician', 'Medical physicist']),
@@ -214,10 +242,12 @@ class MedicalDoctorSeeder extends Seeder
         ]);
 
         MedicalDoctor::create([
+            "user_type_id" => $user_type_id,
             "first_name" => "Isaac",
             "last_name" => "Newton",
             "title" => "Dr.",
-            "phone_number" => "0774014733",
+            "country_code" => '+256',
+            "phone_number" => "774014733",
             "email" => $this->faker->email,
             "qualification" => "DRSH",
             "profession" => $this->faker->randomElement(['Dentist', 'Nutrionist', 'Child life specialist', 'Dietitian', 'Orthoptist', 'Nurse', 'Physical therapist', 'Surgical first assistant', 'Phlebotomy technician', 'Medical physicist']),

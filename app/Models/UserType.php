@@ -4,22 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\MedicalAppointment;
 
-class AppointmentType extends Model
+class UserType extends Model
 {
     use HasFactory;
 
-    protected $table = 'appointment_types';
+    protected $table = 'user_types';
 
     protected $fillable = [
         'name'
     ];
 
     public $timestamps = true;
-
-    public function appointments()
-    {
-        return $this->hasMany(MedicalAppointment::class);
-    }
 }
