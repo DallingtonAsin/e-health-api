@@ -1,6 +1,6 @@
 Application Programming Interface for e-health mobile
 
 Developer: PivoSoft Venture Ltd
-URL: https://pivosoft.com
+URL: https://pivosoftltd.com
 Author: PivoSoft Developers
-License: https://pivosoft.com/license/
+License: https://pivosoftltd.com/license/
