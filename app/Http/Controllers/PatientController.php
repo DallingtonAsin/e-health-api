@@ -80,11 +80,11 @@ class PatientController extends Controller
             } else {
 
                 $email = $request->email;
-                $user = auth('patient')->user();
-                $user_id = $user->id;
-                $userDetail = Patient::find($user_id);
+                $patient = auth('patient')->user();
+                $patient_id = $patient->id;
+                $patientDetail = Patient::find($patient_id);
                 
-                if($email != $userDetail->email){
+                if($email != $patientDetail->email){
                     $emailTaken = Patient::where('email', $email)->exists();
                     if($emailTaken){
                         return response()->json(['error' => 'The email has already been taken.'], 500);
@@ -100,9 +100,9 @@ class PatientController extends Controller
                     'dob' => date('Y-m-d', strtotime($request->dob))
                 ];
 
-                $this->patientRepository->update($user_id, $validatedData);
-                $user = $this->patientRepository->generateAccessToken($user_id);
-                return response(['message' => 'Profile updated successfully', 'user' => $user], 200);
+                $this->patientRepository->update($patient_id, $validatedData);
+                $patient = $this->patientRepository->generateAccessToken($patient_id);
+                return response(['message' => 'Profile updated successfully', 'user' => $patient], 200);
             }
 
         } catch (\Exception $e) {
