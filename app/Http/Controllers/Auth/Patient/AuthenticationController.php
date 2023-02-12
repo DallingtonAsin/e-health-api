@@ -30,7 +30,7 @@ class AuthenticationController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|max:55',
             'last_name' => 'required|max:55',
-            'email' => 'email|sometimes|nullable|unique:users',
+            'email' => 'email|sometimes|nullable|unique:patients',
             'gender' => 'required',
             'address' => 'required',
             'dob' => 'required'

@@ -80,7 +80,7 @@ class MedicalAppointmentController extends Controller
     {
 
         $validator = Validator::make($request->all(), [
-            'patient_id' => 'required|exists:users,id',
+            'patient_id' => 'required|exists:patients,id',
             'appointment_number' => 'required|exists:medical_appointments,appointment_number'
         ]);
 
@@ -121,7 +121,7 @@ class MedicalAppointmentController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'patient_id' => 'required|exists:users,id',
+            'patient_id' => 'required|exists:patients,id',
             'doctor_id' => 'required|exists:medical_doctors,id',
             'appointment_type' => 'required|exists:appointment_types,name',
             'appointment_date' => 'required',

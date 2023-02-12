@@ -13,6 +13,8 @@ class Patient extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+    protected $table = "patients";
+    
     /**
      * The attributes that are mass assignable.
      *
