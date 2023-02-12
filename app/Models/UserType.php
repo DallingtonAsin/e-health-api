@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\MedicalDoctor;
+use App\Models\Patient;
+
 
 class UserType extends Model
 {
@@ -16,4 +19,16 @@ class UserType extends Model
     ];
 
     public $timestamps = true;
+
+    public function patients()
+    {
+        return $this->hasMany(Patient::class);
+    }
+
+    public function doctors()
+    {
+        return $this->hasMany(MedicalDoctor::class);
+    }
+
+
 }

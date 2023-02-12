@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\User;
+use App\Models\Patient;
 use App\Models\MedicalDoctor;
 use App\Models\AppointmentType;
 
@@ -20,7 +20,7 @@ class MedicalAppointment extends Model
 
     public function patient()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Patient::class);
     }
 
     public function doctor()

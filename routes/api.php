@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthenticationController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\Auth\Patient\AuthenticationController;
+use App\Http\Controllers\PatientController;
 use App\Http\Controllers\MedicalSpecialtyController;
 use App\Http\Controllers\MedicalDoctorController;
 use App\Http\Controllers\AppointmentTypeController;
@@ -19,13 +19,13 @@ use App\Http\Controllers\MedicalAppointmentController;
 |
 */
 
-Route::post('/user/login', [AuthenticationController::class, 'sendVerificationCode']);
+Route::post('/patient/login', [AuthenticationController::class, 'sendVerificationCode']);
 
-Route::group(['prefix' => 'user', 'middleware' => ['auth:api']], function(){
+Route::group(['prefix' => 'patient', 'middleware' => ['auth:api']], function(){
 
     Route::post('verify', [AuthenticationController::class, 'verifyOTP']);
     Route::post('register', [AuthenticationController::class, 'register']);
-    Route::post('profile/update', [UserController::class, 'update']);
+    Route::post('profile/update', [PatientController::class, 'update']);
 
 });
 

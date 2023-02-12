@@ -30,7 +30,7 @@ class CreateMedicalAppointmentsTable extends Migration
             $table->timestamp('cancelled_at')->nullable();
             $table->timestamps();
 
-            $table->foreign('patient_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('patient_id')->references('id')->on('patients')->onDelete('cascade');
             $table->foreign('doctor_id')->references('id')->on('medical_doctors')->onDelete('cascade');
             $table->foreign('appointment_type_id')->references('id')->on('appointment_types')->onDelete('cascade');
         });

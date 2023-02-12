@@ -2,7 +2,7 @@
 
 namespace App\Helpers;
 use Illuminate\Support\Facades\Storage;
-use App\Models\User;
+use App\Models\Patient;
 use App\Helpers\Globals as Globals;
 use Haruncpi\LaravelIdGenerator\IdGenerator;
 
@@ -35,7 +35,7 @@ class SharedHelper
 
     public static function getUserInfo($user_id){
         try{
-            $user = User::find($user_id);
+            $user = Patient::find($user_id);
             $user->access_token = $user->createToken('User'.$user->country_code.''.$user->phone_number, ['user'])->accessToken;
             if(!empty($user->image)){
                 $user->image = Storage::disk('appImages')->url($user->image);

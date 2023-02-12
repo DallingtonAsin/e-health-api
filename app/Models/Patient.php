@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
+use App\Models\UserType;
 
-class User extends Authenticatable
+
+class Patient extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -18,6 +19,7 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
+        'user_type_id',
         'country_code',
         'phone_number',
         'email',
@@ -49,4 +51,13 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function userType(){
+        return $this->belongsTo(UserType::class, 'user_type_id');
+    }
+
+    public function isPatient(){
+        $user_type_name = $this->userType->name;
+        return stripos($user_type_name, 'patient') !== false;
+    }
 }

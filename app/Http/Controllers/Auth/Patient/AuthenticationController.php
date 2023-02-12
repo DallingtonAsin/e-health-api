@@ -1,23 +1,26 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Auth\Patient;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\User;
+use App\Models\Patient;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\SharedHelper as Helper;
 use App\Services\Transaction\Sms\SmsService;
 use App\Repositories\UserTypeRepository;
+use App\Repositories\PatientRepository;
+
 
 class AuthenticationController extends Controller
 {
 
-    protected $smsService, $userTypeRepository;
+    protected $smsService, $patientRepository, $userTypeRepository;
 
-    public function __construct(SmsService $smsService, UserTypeRepository $userTypeRepository)
+    public function __construct(SmsService $smsService, PatientRepository $patientRepository, UserTypeRepository $userTypeRepository)
     {
         $this->smsService = $smsService;
+        $this->patientRepository = $patientRepository;
         $this->userTypeRepository = $userTypeRepository;
     }
 
@@ -40,10 +43,7 @@ class AuthenticationController extends Controller
                 return Helper::sendFailedHttpResponse($message);
             } else {
 
-                $user_type_id = $this->userTypeRepository->getPatientTypeId();
-
                 $validatedData = [
-                    'user_type_id' => $user_type_id,
                     'first_name' => $request->first_name,
                     'last_name' => $request->last_name,
                     'email' => $request->email,
@@ -55,13 +55,11 @@ class AuthenticationController extends Controller
 
                 $user = auth('api')->user();
                 $user_id = $user->id;
-                User::where('id', $user_id)->update($validatedData);
-                $user = User::find($user_id);
-                $user->access_token = Helper::generateToken($user);
+                Patient::where('id', $user_id)->update($validatedData);
+                $user = $this->patientRepository->generateAccessToken($user_id);
                 return response($user, 200);
             }
-
-        } catch(\Exception $ex) {
+        } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
     }
@@ -95,13 +93,13 @@ class AuthenticationController extends Controller
                 $current_version = $request->current_version;
                 $ip_address = $request->ip_address;
 
-                $exists = User::where("country_code", "=", $country_code)
+                $exists = Patient::where("country_code", "=", $country_code)
                     ->where("phone_number", "=", $phone_number)
                     ->exists();
 
                 if ($exists) {
 
-                    $user = User::where("country_code", $country_code)
+                    $user = Patient::where("country_code", $country_code)
                         ->where("phone_number", $phone_number)
                         ->first();
 
@@ -111,10 +109,12 @@ class AuthenticationController extends Controller
                         'current_version' => $current_version,
                         'fcm_token' => $fcm_token
                     ]);
-
                 } else {
 
+                    $user_type_id = $this->userTypeRepository->getPatientTypeId();
+
                     $validatedData = [
+                        'user_type_id' => $user_type_id,
                         'country_code' => $country_code,
                         'phone_number' => $phone_number,
                         'unique_device_id' => $unique_device_id,
@@ -123,12 +123,11 @@ class AuthenticationController extends Controller
                         'ip_address' => $ip_address,
                     ];
 
-                    $user = User::create($validatedData);
+                    $user = Patient::create($validatedData);
                 }
 
                 $data = $this->sendCode($user);
                 return Helper::sendOkHttpResponse($data);
-
             }
         } catch (\Exception $ex) {
             $message = $ex->getMessage();
@@ -151,19 +150,16 @@ class AuthenticationController extends Controller
             $user_id = $user->id;
             $otp = request('otp');
 
-            $exists = User::where("id", $user_id)->where("otp", "=", $otp)->exists();
+            $exists = Patient::where("id", $user_id)->where("otp", "=", $otp)->exists();
 
             if ($exists) {
-                $user = User::find($user_id);
-                $user->update(["otp" => null]);
-                $user->access_token = Helper::generateToken($user);
+                $this->patientRepository->update($user_id, ["otp" => null]);
+                $user = $this->patientRepository->generateAccessToken($user_id);
                 return Helper::sendOkHttpResponse($user);
-
             } else {
                 $message = 'Invalid verification code';
                 return Helper::sendFailedHttpResponse($message);
             }
-
         }
     }
 
@@ -176,16 +172,12 @@ class AuthenticationController extends Controller
             $user_phone_number = $user->country_code . '' . $user->phone_number;
             $this->smsService->sendOTP($user_phone_number, $otp);
 
-            User::where("id", $user_id)->update(["otp" => $otp]);
-            $user = User::find($user_id);
-            $user->access_token = Helper::generateToken($user);
+            $this->patientRepository->update($user_id, ["otp" => $otp]);
+            $user = $this->patientRepository->generateAccessToken($user_id);
 
             return $user;
-
         } catch (\Exception $ex) {
             throw $ex;
         }
     }
-
-
 }
