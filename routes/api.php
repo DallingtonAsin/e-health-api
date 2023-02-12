@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthenticationController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\Auth\Patient\AuthenticationController;
+use App\Http\Controllers\PatientController;
 use App\Http\Controllers\MedicalSpecialtyController;
 use App\Http\Controllers\MedicalDoctorController;
 use App\Http\Controllers\AppointmentTypeController;
@@ -19,14 +19,13 @@ use App\Http\Controllers\MedicalAppointmentController;
 |
 */
 
-Route::post('/user/login', [AuthenticationController::class, 'sendVerificationCode']);
+Route::post('/patient/login', [AuthenticationController::class, 'sendVerificationCode']);
 
-Route::group(['prefix' => 'user', 'middleware' => ['auth:api']], function(){
+Route::group(['prefix' => 'patient', 'middleware' => ['auth:api']], function () {
 
     Route::post('verify', [AuthenticationController::class, 'verifyOTP']);
     Route::post('register', [AuthenticationController::class, 'register']);
-    Route::post('profile/update', [UserController::class, 'update']);
-
+    Route::post('profile/update', [PatientController::class, 'update']);
 });
 
 Route::group(['prefix' => 'medical', 'middleware' => ['auth:api']], function () {
@@ -37,23 +36,16 @@ Route::group(['prefix' => 'medical', 'middleware' => ['auth:api']], function () 
 
 Route::group(['prefix' => 'appointments', 'middleware' => ['auth:api']], function () {
 
-
-   
     Route::resource('/', MedicalAppointmentController::class);
     Route::post('/', [MedicalAppointmentController::class, 'store'])->middleware('throttle:1,1');
-
-    Route::resource('types', AppointmentTypeController::class);
-    // Route::get('/patient/{patient_id}/{status?}', [MedicalAppointmentController::class, 'getPatientAppointments']);
-    Route::get('/patient/{patient_id}/pending', [MedicalAppointmentController::class, 'getPatientPendingAppointments']);
-    Route::get('/patient/{patient_id}/confirmed', [MedicalAppointmentController::class, 'getPatientConfirmedAppointments']);
-    Route::get('/patient/{patient_id}/completed', [MedicalAppointmentController::class, 'getPatientCompletedAppointments']);
-    Route::get('/patient/{patient_id}/cancelled', [MedicalAppointmentController::class, 'getPatientCancelledAppointments']);
     Route::put('/cancel', [MedicalAppointmentController::class, 'cancelAppointment']);
+    Route::resource('types', AppointmentTypeController::class);
+
+    Route::group(['prefix' => 'patient'], function () {
+        Route::get('/{patient_id}/pending', [MedicalAppointmentController::class, 'getPatientPendingAppointments']);
+        Route::get('/{patient_id}/confirmed', [MedicalAppointmentController::class, 'getPatientConfirmedAppointments']);
+        Route::get('/{patient_id}/completed', [MedicalAppointmentController::class, 'getPatientCompletedAppointments']);
+        Route::get('/{patient_id}/cancelled', [MedicalAppointmentController::class, 'getPatientCancelledAppointments']);
+    });
+
 });
-
-
-
-
-
-
-// Route::apiResource('projects', ProjectController::class)->middleware('auth:api');

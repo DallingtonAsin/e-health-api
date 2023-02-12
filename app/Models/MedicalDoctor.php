@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\DoctorAvailability;
+use App\Models\UserType;
+
 
 class MedicalDoctor extends Model
 {
@@ -33,4 +35,14 @@ class MedicalDoctor extends Model
     {
         return $this->hasMany(DoctorAvailability::class, 'doctor_id');
     }
+
+    public function userType(){
+        return $this->belongsTo(UserType::class, 'user_type_id');
+    }
+
+    public function isPatient(){
+        $user_type_name = $this->userType->name;
+        return stripos($user_type_name, 'patient') !== false;
+    }
+
 }

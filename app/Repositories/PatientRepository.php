@@ -1,0 +1,57 @@
+<?php 
+namespace App\Repositories;
+
+use App\Models\Patient;
+
+class PatientRepository
+{
+    protected $patient;
+
+    public function __construct(Patient $patient)
+    {
+        $this->patient = $patient;
+    }
+
+    public function create($patientData)
+    {
+        return $this->patient->create($patientData);
+    }
+
+    public function get($id = null)
+    {
+        if($id){
+           return $this->patient->find($id);
+        }
+        return $this->patient->all();
+    }
+
+    public function update($id, $patientData)
+    {
+        $patient = $this->patient->find($id);
+        $patient->update($patientData);
+        return $patient;
+    }
+
+    public function delete($id)
+    {
+        $patient = $this->patient->find($id);
+        $patient->delete();
+        return $patient;
+    }
+
+    public function exists($id){
+        $patient = $this->patient->where('id', $id)->exists();
+        return $patient; 
+    }
+
+    public function generateAccessToken($id){
+
+        $patient = $this->patient->find($id);
+        $phone_number = $patient->country_code . '' . $patient->phone_number;
+        $access_token = $patient->createToken('User' . $phone_number, ['user'])->accessToken;
+        $patient->is_patient = $patient->isPatient();
+        $patient->access_token = $access_token;
+        return $patient;
+    }
+
+}

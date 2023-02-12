@@ -5,10 +5,19 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\SharedHelper as Helper;
-use App\Models\User;
+use App\Models\Patient;
+use App\Repositories\PatientRepository;
 
-class UserController extends Controller
+class PatientController extends Controller
 {
+
+    protected $patientRepository;
+
+    
+    public function __construct(PatientRepository $patientRepository)
+    {
+        $this->patientRepository = $patientRepository;
+    }
 
     public function update(Request $request)
     {
@@ -32,10 +41,10 @@ class UserController extends Controller
                 $email = $request->email;
                 $user = auth('api')->user();
                 $user_id = $user->id;
-                $userDetail = User::find($user_id);
+                $userDetail = Patient::find($user_id);
                 
                 if($email != $userDetail->email){
-                    $emailTaken = User::where('email', $email)->exists();
+                    $emailTaken = Patient::where('email', $email)->exists();
                     if($emailTaken){
                         return response()->json(['error' => 'The email has already been taken.'], 500);
                     }
@@ -50,9 +59,8 @@ class UserController extends Controller
                     'dob' => date('Y-m-d', strtotime($request->dob))
                 ];
 
-                User::where('id', $user_id)->update($validatedData);
-                $user = User::find($user_id);
-                $user->access_token = Helper::generateToken($user);
+                $this->patientRepository->update($user_id, $validatedData);
+                $user = $this->patientRepository->generateAccessToken($user_id);
                 return response(['message' => 'Profile updated successfully', 'user' => $user], 200);
             }
 
@@ -60,5 +68,7 @@ class UserController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+    
 
 }
