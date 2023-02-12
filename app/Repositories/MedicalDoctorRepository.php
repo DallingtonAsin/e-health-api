@@ -19,6 +19,14 @@ class MedicalDoctorRepository
         return $this->medicalDoctor->create($medicalDoctorData);
     }
 
+    public function find($id){
+        return $this->medicalDoctor->find($id);
+    }
+
+    public function checkIfEmailExists($email){
+        return $this->medicalDoctor->where('email', $email)->exists();
+    }
+
     public function get($id = null, $specialty = null)
     {
 
@@ -89,12 +97,34 @@ class MedicalDoctorRepository
         return $medicalDoctor;
     }
 
-    private function sortTimes($times)
+    public function isValidOTP($doctor_id, $otp)
     {
-        usort($times, function ($a, $b) {
-            return strtotime($a) - strtotime($b);
-        });
-
-        return $times;
+        return $this->medicalDoctor->where("id", $doctor_id)->where("otp", "=", $otp)->exists();
     }
+
+    public function checkIfPhoneNumberExists($country_code, $phone_number)
+    {
+        return $this->medicalDoctor->where("country_code", "=", $country_code)
+            ->where("phone_number", "=", $phone_number)
+            ->exists();
+    }
+
+    public function getDoctorDetailsByPhoneNumber($country_code, $phone_number)
+    {
+        return $this->medicalDoctor->where("country_code", $country_code)
+            ->where("phone_number", $phone_number)
+            ->first();
+    }
+
+    public function generateAccessToken($id){
+
+        $doctor = $this->medicalDoctor->find($id);
+        $phone_number = $doctor->country_code . '' . $doctor->phone_number;
+        $access_token = $doctor->createToken('Doctor' . $phone_number, ['doctor'])->accessToken;
+        $doctor->is_patient = $doctor->isPatient();
+        $doctor->access_token = $access_token;
+        return $doctor;
+        
+    }
+
 }

@@ -38,14 +38,21 @@ return [
     'guards' => [
         'web' => [
             'driver' => 'session',
-            'provider' => 'users',
+            'provider' => 'patients',
         ],
 
-        'api' => [
+        'patient' => [
             'driver' => 'passport',
-            'provider' => 'users',
+            'provider' => 'patients',
             'hash' => false
         ],
+
+        'doctor' => [
+            'driver' => 'passport',
+            'provider' => 'doctors',
+            'hash' => false
+        ],
+
     ],
 
     /*
@@ -66,15 +73,16 @@ return [
     */
 
     'providers' => [
-        'users' => [
+
+        'patients' => [
             'driver' => 'eloquent',
             'model' => App\Models\Patient::class,
         ],
 
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+        'doctors' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\MedicalDoctor::class,
+        ]
     ],
 
     /*

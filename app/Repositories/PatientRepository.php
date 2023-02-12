@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 namespace App\Repositories;
 
 use App\Models\Patient;
@@ -19,8 +20,8 @@ class PatientRepository
 
     public function get($id = null)
     {
-        if($id){
-           return $this->patient->find($id);
+        if ($id) {
+            return $this->patient->find($id);
         }
         return $this->patient->all();
     }
@@ -39,19 +40,39 @@ class PatientRepository
         return $patient;
     }
 
-    public function exists($id){
+    public function exists($id)
+    {
         $patient = $this->patient->where('id', $id)->exists();
-        return $patient; 
+        return $patient;
     }
 
-    public function generateAccessToken($id){
+    public function isValidOTP($patient_id, $otp)
+    {
+        return $this->patient->where("id", $patient_id)->where("otp", "=", $otp)->exists();
+    }
+
+    public function checkIfPhoneNumberExists($country_code, $phone_number)
+    {
+        return $this->patient->where("country_code", "=", $country_code)
+            ->where("phone_number", "=", $phone_number)
+            ->exists();
+    }
+
+    public function getPatientDetailsByPhoneNumber($country_code, $phone_number)
+    {
+        return $this->patient->where("country_code", $country_code)
+            ->where("phone_number", $phone_number)
+            ->first();
+    }
+
+    public function generateAccessToken($id)
+    {
 
         $patient = $this->patient->find($id);
         $phone_number = $patient->country_code . '' . $patient->phone_number;
-        $access_token = $patient->createToken('User' . $phone_number, ['user'])->accessToken;
+        $access_token = $patient->createToken('Patient' . $phone_number, ['patient'])->accessToken;
         $patient->is_patient = $patient->isPatient();
         $patient->access_token = $access_token;
         return $patient;
     }
-
 }

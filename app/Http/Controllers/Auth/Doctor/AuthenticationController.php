@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Auth\Patient;
+namespace App\Http\Controllers\Auth\Doctor;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -8,18 +8,18 @@ use Illuminate\Support\Facades\Validator;
 use App\Helpers\SharedHelper as Helper;
 use App\Services\Transaction\Sms\SmsService;
 use App\Repositories\UserTypeRepository;
-use App\Repositories\PatientRepository;
+use App\Repositories\MedicalDoctorRepository;
 
 
 class AuthenticationController extends Controller
 {
 
-    protected $smsService, $patientRepository, $userTypeRepository;
+    protected $smsService, $doctorRepository, $userTypeRepository;
 
-    public function __construct(SmsService $smsService, PatientRepository $patientRepository, UserTypeRepository $userTypeRepository)
+    public function __construct(SmsService $smsService, MedicalDoctorRepository $doctorRepository, UserTypeRepository $userTypeRepository)
     {
         $this->smsService = $smsService;
-        $this->patientRepository = $patientRepository;
+        $this->doctorRepository = $doctorRepository;
         $this->userTypeRepository = $userTypeRepository;
     }
 
@@ -52,13 +52,13 @@ class AuthenticationController extends Controller
                 $current_version = $request->current_version;
                 $ip_address = $request->ip_address;
 
-                $exists = $this->patientRepository->checkIfPhoneNumberExists($country_code, $phone_number);
+                $exists = $this->doctorRepository->checkIfPhoneNumberExists($country_code, $phone_number);
 
                 if ($exists) {
 
-                    $patient = $this->patientRepository->getPatientDetailsByPhoneNumber($country_code, $phone_number);
+                    $doctor = $this->doctorRepository->getDoctorDetailsByPhoneNumber($country_code, $phone_number);
 
-                    $patient->update([
+                    $doctor->update([
                         'unique_device_id' => $unique_device_id,
                         'ip_address' => $ip_address,
                         'current_version' => $current_version,
@@ -66,7 +66,7 @@ class AuthenticationController extends Controller
                     ]);
                 } else {
 
-                    $user_type_id = $this->userTypeRepository->getPatientTypeId();
+                    $user_type_id = $this->userTypeRepository->getDoctorTypeId();
 
                     $validatedData = [
                         'user_type_id' => $user_type_id,
@@ -78,10 +78,10 @@ class AuthenticationController extends Controller
                         'ip_address' => $ip_address,
                     ];
 
-                    $patient = $this->patientRepository->create($validatedData);
+                    $doctor = $this->doctorRepository->create($validatedData);
                 }
 
-                $data = $this->sendCode($patient);
+                $data = $this->sendCode($doctor);
                 return Helper::sendOkHttpResponse($data);
             }
         } catch (\Exception $ex) {
@@ -103,16 +103,16 @@ class AuthenticationController extends Controller
             return Helper::sendFailedHttpResponse($message);
         } else {
 
-            $patient = auth('patient')->user();
-            $patient_id = $patient->id;
+            $doctor = auth('doctor')->user();
+            $doctor_id = $doctor->id;
             $otp = request('otp');
 
-            $isValidOtp = $this->patientRepository->isValidOTP($patient_id, $otp);
+            $exists = $this->doctorRepository->isValidOTP($doctor_id, $otp);
 
-            if ($isValidOtp) {
-                $this->patientRepository->update($patient_id, ["otp" => null]);
-                $patient = $this->patientRepository->generateAccessToken($patient_id);
-                return Helper::sendOkHttpResponse($patient);
+            if ($exists) {
+                $this->doctorRepository->update($doctor_id, ["otp" => null]);
+                $doctor = $this->doctorRepository->generateAccessToken($doctor_id);
+                return Helper::sendOkHttpResponse($doctor);
             } else {
                 $message = 'Invalid verification code';
                 return Helper::sendFailedHttpResponse($message);
@@ -120,20 +120,21 @@ class AuthenticationController extends Controller
         }
     }
 
+ 
     // send code 
-    private function sendCode($patient)
+    private function sendCode($doctor)
     {
         try {
 
-            $patient_id = $patient->id;
+            $doctor_id = $doctor->id;
             $otp = $this->smsService->generateNumericOTP(4);
-            $patient_phone_number = $patient->country_code . '' . $patient->phone_number;
-            $this->smsService->sendOTP($patient_phone_number, $otp);
+            $doctor_phone_number = $doctor->country_code . '' . $doctor->phone_number;
+            $this->smsService->sendOTP($doctor_phone_number, $otp);
 
-            $this->patientRepository->update($patient_id, ["otp" => $otp]);
-            $patient = $this->patientRepository->generateAccessToken($patient_id);
+            $this->doctorRepository->update($doctor_id, ["otp" => $otp]);
+            $doctor = $this->doctorRepository->generateAccessToken($doctor_id);
 
-            return $patient;
+            return $doctor;
         } catch (\Exception $ex) {
             throw $ex;
         }
