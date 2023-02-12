@@ -31,7 +31,8 @@ class AuthServiceProvider extends ServiceProvider
 
 
         Passport::tokensCan([
-            'user' => 'User access',
+            'patient' => 'Patient access',
+            'doctor' => 'Doctor access',
         ]);
 
         Passport::tokensExpireIn(now()->addDays(15));

@@ -22,6 +22,8 @@ class Patient extends Authenticatable
      */
     protected $fillable = [
         'user_type_id',
+        'first_name',
+        'last_name',
         'country_code',
         'phone_number',
         'email',
@@ -30,10 +32,12 @@ class Patient extends Authenticatable
         'dob',
         'ip_address',
         'current_version',
-        'unique_Device_id',
+        'unique_device_id',
         'fcm_token',
         'otp',
-        'image'
+        'image',
+        'is_blocked',
+        'profile_status'
     ];
 
     /**
