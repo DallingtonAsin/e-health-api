@@ -9,61 +9,69 @@ use App\Helpers\SharedHelper as Helper;
 use App\Services\Transaction\Sms\SmsService;
 use App\Repositories\UserTypeRepository;
 use App\Repositories\MedicalDoctorRepository;
+use App\Repositories\DoctorAuthenticationRepository;
 
 
 class AuthenticationController extends Controller
 {
 
-    protected $smsService, $doctorRepository, $userTypeRepository;
+    protected $doctorRepository, $doctorAuthRepository, $userTypeRepository;
 
-    public function __construct(SmsService $smsService, MedicalDoctorRepository $doctorRepository, UserTypeRepository $userTypeRepository)
-    {
-        $this->smsService = $smsService;
+    public function __construct(
+        MedicalDoctorRepository $doctorRepository,
+        DoctorAuthenticationRepository $doctorAuthRepository,
+        UserTypeRepository $userTypeRepository
+    ) {
         $this->doctorRepository = $doctorRepository;
+        $this->doctorAuthRepository = $doctorAuthRepository;
         $this->userTypeRepository = $userTypeRepository;
     }
 
-    // send verification code
-    public function sendVerificationCode(Request $request)
+    // login doctor
+    public function login(Request $request)
     {
-
-        $dataObj = [
+        $validator = Validator::make($request->all(), [
             'country_code' => 'required',
             'phone_number' => 'required',
+            'otp' => 'required|min:4',
             'unique_device_id' => 'sometimes|nullable',
             'device_token' => 'sometimes|nullable',
             'ip_address' => 'sometimes|nullable',
-            'current_version' => 'required',
-        ];
+            'current_version' => 'sometimes|nullable',
+        ]);
 
-        $validator = Validator::make($request->all(), $dataObj);
+        if ($validator->fails()) {
+            $message = $validator->errors()->all();
+            return Helper::sendFailedHttpResponse($message);
+        } else {
 
-        try {
+            $country_code = $request->input('country_code');
+            $phone_number = $request->input('phone_number');
+            $otp = $request->input('otp');
 
-            if ($validator->fails()) {
-                $message = $validator->errors()->all();
-                return Helper::sendFailedHttpResponse($message);
-            } else {
+            $unique_device_id = $request->unique_device_id;
+            $fcm_token = $request->device_token;
+            $ip_address = $request->ip_address;
+            $current_version = $request->current_version;
 
-                $country_code = $request->country_code;
-                $phone_number = $request->phone_number;
-                $unique_device_id = $request->unique_device_id;
-                $fcm_token = $request->device_token;
-                $current_version = $request->current_version;
-                $ip_address = $request->ip_address;
 
-                $exists = $this->doctorRepository->checkIfPhoneNumberExists($country_code, $phone_number);
+            $exists = $this->doctorAuthRepository->isValidCode($country_code, $phone_number, $otp);
 
-                if ($exists) {
+            if ($exists) {
+
+                $isRegistered = $this->doctorRepository->checkIfPhoneNumberExists($country_code, $phone_number);
+
+                if ($isRegistered) {
 
                     $doctor = $this->doctorRepository->getDoctorDetailsByPhoneNumber($country_code, $phone_number);
 
                     $doctor->update([
                         'unique_device_id' => $unique_device_id,
                         'ip_address' => $ip_address,
+                        'fcm_token' => $fcm_token,
                         'current_version' => $current_version,
-                        'fcm_token' => $fcm_token
                     ]);
+
                 } else {
 
                     $user_type_id = $this->userTypeRepository->getDoctorTypeId();
@@ -81,62 +89,13 @@ class AuthenticationController extends Controller
                     $doctor = $this->doctorRepository->create($validatedData);
                 }
 
-                $data = $this->sendCode($doctor);
-                return Helper::sendOkHttpResponse($data);
-            }
-        } catch (\Exception $ex) {
-            $message = $ex->getMessage();
-            return Helper::sendFailedHttpResponse($message);
-        }
-    }
+                $doctor = $this->doctorRepository->generateAccessToken($doctor->id);
 
-
-    // verify code
-    public function verifyOTP(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'otp' => 'required|min:4',
-        ]);
-
-        if ($validator->fails()) {
-            $message = $validator->errors()->all();
-            return Helper::sendFailedHttpResponse($message);
-        } else {
-
-            $doctor = auth('doctor')->user();
-            $doctor_id = $doctor->id;
-            $otp = request('otp');
-
-            $exists = $this->doctorRepository->isValidOTP($doctor_id, $otp);
-
-            if ($exists) {
-                $this->doctorRepository->update($doctor_id, ["otp" => null]);
-                $doctor = $this->doctorRepository->generateAccessToken($doctor_id);
                 return Helper::sendOkHttpResponse($doctor);
             } else {
                 $message = 'Invalid verification code';
                 return Helper::sendFailedHttpResponse($message);
             }
-        }
-    }
-
- 
-    // send code 
-    private function sendCode($doctor)
-    {
-        try {
-
-            $doctor_id = $doctor->id;
-            $otp = $this->smsService->generateNumericOTP(4);
-            $doctor_phone_number = $doctor->country_code . '' . $doctor->phone_number;
-            $this->smsService->sendOTP($doctor_phone_number, $otp);
-
-            $this->doctorRepository->update($doctor_id, ["otp" => $otp]);
-            $doctor = $this->doctorRepository->generateAccessToken($doctor_id);
-
-            return $doctor;
-        } catch (\Exception $ex) {
-            throw $ex;
         }
     }
 }

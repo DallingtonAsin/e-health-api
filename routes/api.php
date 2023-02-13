@@ -22,7 +22,7 @@ use App\Http\Controllers\Auth\Doctor\AuthenticationController as DoctorAuthentic
 */
 
 Route::post('/patient/login', [PatientAuthenticationController::class, 'sendVerificationCode']);
-Route::post('/doctor/login', [DoctorAuthenticationController::class, 'sendVerificationCode']);
+Route::post('/doctor/login', [DoctorAuthenticationController::class, 'login']);
 
 Route::group(['prefix' => 'patient', 'middleware' => ['auth:patient']], function () {
     Route::post('verify', [PatientAuthenticationController::class, 'verifyOTP']);
@@ -31,7 +31,6 @@ Route::group(['prefix' => 'patient', 'middleware' => ['auth:patient']], function
 });
 
 Route::group(['prefix' => 'doctor', 'middleware' => ['auth:doctor']], function () {
-    Route::post('verify', [DoctorAuthenticationController::class, 'verifyOTP']);
     Route::post('register', [MedicalDoctorController::class, 'register']);
     Route::post('profile/update', [MedicalDoctorController::class, 'update']);
 });

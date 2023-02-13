@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             UserTypeSeeder::class,
             AppointmentTypeSeeder::class,
             MedicalSpecialtySeeder::class,
+            DoctorAuthenticationSeeder::class,
             MedicalDoctorSeeder::class,
             DoctorAvailabilitySeeder::class,
         ]);

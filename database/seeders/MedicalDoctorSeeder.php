@@ -124,7 +124,7 @@ class MedicalDoctorSeeder extends Seeder
             "last_name" => "Asiimwe",
             "title" => "Dr.",
             "country_code" => '+256',
-            "phone_number" => "700477421",
+            "phone_number" => "701477499",
             "email" => $this->faker->email,
             "qualification" => "BM",
             "profession" => $this->faker->randomElement(['Dentist', 'Nutrionist', 'Child life specialist', 'Dietitian', 'Orthoptist', 'Nurse', 'Physical therapist', 'Surgical first assistant', 'Phlebotomy technician', 'Medical physicist']),
