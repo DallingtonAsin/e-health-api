@@ -24,6 +24,8 @@ class MedicalDoctor extends Authenticatable
         'fcm_token', 'otp', 'is_blocked', 'profile_status'
     ];
 
+    public $timestamps = true;
+
     /**
      * The attributes that should be casted to native types.
      *
@@ -33,7 +35,6 @@ class MedicalDoctor extends Authenticatable
         'languages' => 'array',
     ];
 
-    public $timestamps = true;
 
     public function availability()
     {
