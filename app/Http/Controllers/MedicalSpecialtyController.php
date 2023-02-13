@@ -22,10 +22,29 @@ class MedicalSpecialtyController extends Controller
      */
     public function index()
     {
-        try{
+        try {
             $data = $this->medicalSpecialtyRepository->get();
             return response($data, 200);
-        }catch(\Exception $ex){
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
+    public function getDoctorSpecialties()
+    {
+        try {
+
+            $specialties = $this->medicalSpecialtyRepository->get();
+
+            foreach ($specialties as $specialty) {
+                $specialty->key =  $specialty->id;
+                $specialty->value =  $specialty->name;
+                unset($specialty->id);
+                unset($specialty->name);
+            }
+
+            return $specialties;
+        } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
     }

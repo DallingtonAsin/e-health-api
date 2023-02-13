@@ -93,7 +93,7 @@ class AuthenticationController extends Controller
 
                 return Helper::sendOkHttpResponse($doctor);
             } else {
-                $message = 'Invalid verification code';
+                $message = 'Invalid verification code. Contact admin if you have completely forgotten your code.';
                 return Helper::sendFailedHttpResponse($message);
             }
         }

@@ -22,7 +22,7 @@ class MedicalSpecialtyRepository
         if($id){
            return $this->medicalSpecialty->find($id);
         }
-        return $this->medicalSpecialty->get(['id', 'name'])->toArray();
+        return $this->medicalSpecialty->select(['id', 'name'])->get();
     }
 
     public function update($id, $medicalSpecialtyData)

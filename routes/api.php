@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PatientController;
+use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\MedicalSpecialtyController;
 use App\Http\Controllers\MedicalDoctorController;
 use App\Http\Controllers\AppointmentTypeController;
@@ -24,6 +25,7 @@ use App\Http\Controllers\Auth\Doctor\AuthenticationController as DoctorAuthentic
 Route::post('/patient/login', [PatientAuthenticationController::class, 'sendVerificationCode']);
 Route::post('/doctor/login', [DoctorAuthenticationController::class, 'login']);
 
+
 Route::group(['prefix' => 'patient', 'middleware' => ['auth:patient']], function () {
     Route::post('verify', [PatientAuthenticationController::class, 'verifyOTP']);
     Route::post('register', [PatientController::class, 'register']);
@@ -31,6 +33,8 @@ Route::group(['prefix' => 'patient', 'middleware' => ['auth:patient']], function
 });
 
 Route::group(['prefix' => 'doctor', 'middleware' => ['auth:doctor']], function () {
+    Route::get('/languages', [LanguageController::class, 'getDoctorLanguages']);
+    Route::get('/specialties', [MedicalSpecialtyController::class, 'getDoctorSpecialties']);
     Route::post('register', [MedicalDoctorController::class, 'register']);
     Route::post('profile/update', [MedicalDoctorController::class, 'update']);
 });
