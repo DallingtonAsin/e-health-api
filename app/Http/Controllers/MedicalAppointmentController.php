@@ -224,4 +224,41 @@ class MedicalAppointmentController extends Controller
     {
         //
     }
+
+
+    public function getDoctorPendingAppointments($doctor_id)
+    {
+        try {
+            return $this->medicalAppointmentRepository->getMedicalAppointments(null, 'pending', $doctor_id);
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
+    public function getDoctorConfirmedAppointments($doctor_id)
+    {
+        try {
+            return $this->medicalAppointmentRepository->getMedicalAppointments(null, 'confirmed', $doctor_id);
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
+    public function getDoctorCompletedAppointments($doctor_id)
+    {
+        try {
+            return $this->medicalAppointmentRepository->getMedicalAppointments(null, 'completed', $doctor_id);
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
+    public function getDoctorCancelledAppointments($doctor_id)
+    {
+        try {
+            return $this->medicalAppointmentRepository->getMedicalAppointments(null, 'cancelled', $doctor_id);
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
 }
