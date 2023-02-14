@@ -68,8 +68,10 @@ class MedicalAppointmentRepository
 
     public function getMedicalAppointments($patient_id = null, $status = null, $doctor_id = null)
     {
-        $appointments = $this->medicalAppointment->with(['doctor' => function ($query) {
-            $query->select(['id', 'first_name', 'last_name', 'specialty_id', 'title', 'phone_number', 'email', 'qualification', 'profession', 'experience', 'image', 'service_fee']);
+        $appointments = $this->medicalAppointment->with(['patient' => function ($query) {
+            $query->select(['id', 'first_name', 'last_name', 'country_code', 'phone_number', 'email', 'address', 'dob']);
+        }])->with(['doctor' => function ($query) {
+            $query->select(['id', 'first_name', 'last_name', 'specialty_id', 'title', 'country_code', 'phone_number', 'email', 'qualification', 'profession', 'experience', 'image', 'service_fee']);
         }])->with(['appointmentType' => function ($query) {
             $query->select(['id', 'name']);
         }]);

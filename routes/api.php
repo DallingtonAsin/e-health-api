@@ -45,17 +45,34 @@ Route::group(['prefix' => 'medical', 'middleware' => ['auth:patient']], function
     Route::resource('doctors', MedicalDoctorController::class);
 });
 
-Route::group(['prefix' => 'appointments', 'middleware' => ['auth:patient']], function () {
+Route::group(['prefix' => 'medical', 'middleware' => ['auth:doctor']], function () {
+    Route::get('doctors/specialty/{specialty}', [MedicalDoctorController::class, 'getDoctorsBySpecialty']);
+    Route::resource('specialties', MedicalSpecialtyController::class);
+    Route::resource('doctors', MedicalDoctorController::class);
+});
 
-    Route::resource('/', MedicalAppointmentController::class);
-    Route::post('/', [MedicalAppointmentController::class, 'store'])->middleware('throttle:1,1');
-    Route::put('/cancel', [MedicalAppointmentController::class, 'cancelAppointment']);
-    Route::resource('types', AppointmentTypeController::class);
 
-    Route::group(['prefix' => 'patient'], function () {
+Route::group(['prefix' => 'appointments'], function () {
+
+    Route::middleware(['auth:patient'])->group(function () {
+        Route::resource('/', MedicalAppointmentController::class);
+        Route::post('/', [MedicalAppointmentController::class, 'store'])->middleware('throttle:1,1');
+        Route::put('/cancel', [MedicalAppointmentController::class, 'cancelAppointment']);
+        Route::resource('types', AppointmentTypeController::class);
+    });
+
+    Route::group(['prefix' => 'patient', 'middleware' => ['auth:patient']], function () {
         Route::get('/{patient_id}/pending', [MedicalAppointmentController::class, 'getPatientPendingAppointments']);
         Route::get('/{patient_id}/confirmed', [MedicalAppointmentController::class, 'getPatientConfirmedAppointments']);
         Route::get('/{patient_id}/completed', [MedicalAppointmentController::class, 'getPatientCompletedAppointments']);
         Route::get('/{patient_id}/cancelled', [MedicalAppointmentController::class, 'getPatientCancelledAppointments']);
     });
+
+    Route::group(['prefix' => 'doctor', 'middleware' => ['auth:doctor']], function () {
+        Route::get('/{doctor_id}/pending', [MedicalAppointmentController::class, 'getDoctorPendingAppointments']);
+        Route::get('/{doctor_id}/confirmed', [MedicalAppointmentController::class, 'getDoctorConfirmedAppointments']);
+        Route::get('/{doctor_id}/completed', [MedicalAppointmentController::class, 'getDoctorCompletedAppointments']);
+        Route::get('/{doctor_id}/cancelled', [MedicalAppointmentController::class, 'getDoctorCancelledAppointments']);
+    });
+    
 });
