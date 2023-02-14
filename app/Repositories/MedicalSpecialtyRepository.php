@@ -44,4 +44,8 @@ class MedicalSpecialtyRepository
         return $medicalSpecialty; 
     }
 
+    public function getSpecialtyByName($name){
+        return $this->medicalSpecialty->where('name', $name)->select('id', 'name')->first();
+    }
+
 }

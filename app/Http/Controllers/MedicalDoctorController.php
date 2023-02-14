@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Repositories\MedicalDoctorRepository;
+use App\Repositories\MedicalSpecialtyRepository;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\SharedHelper as Helper;
 
@@ -11,11 +12,12 @@ use App\Helpers\SharedHelper as Helper;
 class MedicalDoctorController extends Controller
 {
 
-    protected $doctorRepository;
+    protected $doctorRepository, $medicalSpecialtyRepository;
 
-    public function __construct(MedicalDoctorRepository $doctorRepository)
+    public function __construct(MedicalDoctorRepository $doctorRepository, MedicalSpecialtyRepository $medicalSpecialtyRepository)
     {
         $this->doctorRepository = $doctorRepository;
+        $this->medicalSpecialtyRepository = $medicalSpecialtyRepository;
     }
     /**
      * Display a listing of the resource.
@@ -97,7 +99,7 @@ class MedicalDoctorController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|max:55',
             'last_name' => 'required|max:55',
-            'specialty_id' => 'required',
+            'specialty' => 'required|exists:medical_specialties,name',
             'title' => 'required',
             'email' => 'required|email|unique:medical_doctors',
             'address' => 'required',
@@ -117,10 +119,13 @@ class MedicalDoctorController extends Controller
                 return Helper::sendFailedHttpResponse($message);
             } else {
 
+                $specialty_name = $request->input('specialty');
+                $specialty = $this->medicalSpecialtyRepository->getSpecialtyByName($specialty_name);
+
                 $validatedData = [
                     'first_name' => $request->first_name,
                     'last_name' => $request->last_name,
-                    'specialty_id' => $request->specialty_id,
+                    'specialty_id' => $specialty->id,
                     'title' => $request->title,
                     'email' => $request->email,
                     'address' => $request->address,
@@ -152,7 +157,7 @@ class MedicalDoctorController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|max:55',
             'last_name' => 'required|max:55',
-            'specialty_id' => 'required',
+            'specialty' => 'required|exists:medical_specialties,name',
             'title' => 'required',
             'email' => 'required|email|unique:medical_doctors',
             'address' => 'required',
@@ -184,10 +189,13 @@ class MedicalDoctorController extends Controller
                     }
                 }
 
+                $specialty_name = $request->input('specialty');
+                $specialty = $this->medicalSpecialtyRepository->getSpecialtyByName($specialty_name);
+
                 $validatedData = [
                     'first_name' => $request->first_name,
                     'last_name' => $request->last_name,
-                    'specialty_id' => $request->specialty_id,
+                    'specialty_id' => $specialty->id,
                     'title' => $request->title,
                     'email' => $request->email,
                     'address' => $request->address,
