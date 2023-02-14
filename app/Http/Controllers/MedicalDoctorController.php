@@ -119,13 +119,13 @@ class MedicalDoctorController extends Controller
                 return Helper::sendFailedHttpResponse($message);
             } else {
 
-                $specialty_name = $request->specialty;
+                $specialty_name = $request->input('specialty');
                 $specialty = $this->medicalSpecialtyRepository->getSpecialtyByName($specialty_name);
 
                 $validatedData = [
                     'first_name' => $request->first_name,
                     'last_name' => $request->last_name,
-                    'specialty' => $specialty->id,
+                    'specialty_id' => $specialty->id,
                     'title' => $request->title,
                     'email' => $request->email,
                     'address' => $request->address,
@@ -189,7 +189,7 @@ class MedicalDoctorController extends Controller
                     }
                 }
 
-                $specialty_name = $request->specialty;
+                $specialty_name = $request->input('specialty');
                 $specialty = $this->medicalSpecialtyRepository->getSpecialtyByName($specialty_name);
 
                 $validatedData = [
