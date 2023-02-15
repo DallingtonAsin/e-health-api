@@ -6,6 +6,7 @@ use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\MedicalSpecialtyController;
 use App\Http\Controllers\MedicalDoctorController;
 use App\Http\Controllers\AppointmentTypeController;
+use App\Http\Controllers\DoctorScheduleController;
 use App\Http\Controllers\MedicalAppointmentController;
 use App\Http\Controllers\Auth\Patient\AuthenticationController as PatientAuthenticationController;
 use App\Http\Controllers\Auth\Doctor\AuthenticationController as DoctorAuthenticationController;
@@ -51,6 +52,15 @@ Route::group(['prefix' => 'medical', 'middleware' => ['auth:doctor']], function 
     Route::resource('doctors', MedicalDoctorController::class);
 });
 
+Route::group(['prefix' => 'doctor', 'middleware' => ['auth:doctor']], function () {
+
+    Route::resource('/schedule', DoctorScheduleController::class);
+    Route::get('/{doctor_id}/pending', [MedicalAppointmentController::class, 'getDoctorPendingAppointments']);
+    Route::get('/{doctor_id}/confirmed', [MedicalAppointmentController::class, 'getDoctorConfirmedAppointments']);
+    Route::get('/{doctor_id}/completed', [MedicalAppointmentController::class, 'getDoctorCompletedAppointments']);
+    Route::get('/{doctor_id}/cancelled', [MedicalAppointmentController::class, 'getDoctorCancelledAppointments']);
+});
+
 
 Route::group(['prefix' => 'appointments'], function () {
 
@@ -69,6 +79,7 @@ Route::group(['prefix' => 'appointments'], function () {
     });
 
     Route::group(['prefix' => 'doctor', 'middleware' => ['auth:doctor']], function () {
+
         Route::get('/{doctor_id}/pending', [MedicalAppointmentController::class, 'getDoctorPendingAppointments']);
         Route::get('/{doctor_id}/confirmed', [MedicalAppointmentController::class, 'getDoctorConfirmedAppointments']);
         Route::get('/{doctor_id}/completed', [MedicalAppointmentController::class, 'getDoctorCompletedAppointments']);
