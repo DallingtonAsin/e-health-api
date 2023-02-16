@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use Illuminate\Support\Facades\Storage;
 use App\Models\Patient;
 
 class PatientRepository
@@ -73,6 +74,9 @@ class PatientRepository
         $access_token = $patient->createToken('Patient' . $phone_number, ['patient'])->accessToken;
         $patient->is_patient = $patient->isPatient();
         $patient->access_token = $access_token;
+        if(!empty($patient->image)){
+            $patient->image = Storage::disk('images')->url($patient->image);
+        }
         return $patient;
     }
 }

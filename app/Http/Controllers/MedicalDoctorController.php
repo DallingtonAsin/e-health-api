@@ -7,6 +7,7 @@ use App\Repositories\MedicalDoctorRepository;
 use App\Repositories\MedicalSpecialtyRepository;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\SharedHelper as Helper;
+use Illuminate\Support\Facades\Storage;
 
 
 class MedicalDoctorController extends Controller
@@ -227,5 +228,80 @@ class MedicalDoctorController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+
+    public function updateProfilePicture(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|exists:patients,id',
+            'image' => 'required',
+            'extension' => 'required'
+        ]);
+
+        try {
+
+            if ($validator->fails()) {
+                $message = $validator->errors()->all();
+                return Helper::sendFailedHttpResponse($message);
+            } else {
+
+                $doctor_id = $request->input('id');
+                $file = $request->file('image');
+                $file_extension = $request->input('extension');
+
+                $exists = $this->doctorRepository->exists($doctor_id);
+                if ($exists) {
+
+                    $doctor = $this->doctorRepository->find($doctor_id);
+                    if (!empty($doctor->image)) {
+                        Storage::disk('public')->delete($doctor->image);
+                    }
+                    $fileName = $doctor_id . '' . time() . '.' . $file_extension;
+                    $filePath = $file->storeAs('images', $fileName, 'public');
+
+                    $input = ['image' => $filePath];
+                    $hasUpdated = $this->doctorRepository->update($doctor_id, $input);
+
+                    if ($hasUpdated) {
+                        $doctor = $this->doctorRepository->generateAccessToken($doctor_id);
+                        return response(['message' => 'Profile updated successfully', 'user' => $doctor], 200);
+                    } else {
+                        return response()->json(['error' => "Technical problem while updating your profile picture"], 400);
+                    }
+                } else {
+                    return response()->json(['error' => "System is unable to get your identity"], 400);
+                }
+            }
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
+
+    public function removeProfilePicture($id)
+    {
+
+        try {
+
+            $exists = $this->doctorRepository->exists($id);
+
+            if ($exists) {
+                $doctor = $this->doctorRepository->find($id);
+                if (!empty($doctor->image)) {
+                    Storage::disk('public')->delete($doctor->image);
+                }
+                $hasUpdated = $this->doctorRepository->update($id, ['image' => null]);
+                if ($hasUpdated) {
+                    $doctor = $this->doctorRepository->generateAccessToken($id);
+                    return Helper::sendOkHttpResponse(['message' => 'Profile picture has been removed successfully', 'user' => $doctor]);
+                } else {
+                    $message = "Technical error while removing profile picture";
+                    return Helper::sendFailedHttpResponse($message);
+                }
+            }
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
     }
 }
