@@ -65,7 +65,7 @@ class DoctorScheduleController extends Controller
                 $start_time = $request->input('start_time');
                 $end_time = $request->input('end_time');
 
-                $date = date('yy-m-d', strtotime($date));
+                $date = date('Y-m-d', strtotime($date));
                 $start_time = date('H:i', strtotime($start_time));
                 $end_time = date('H:i', strtotime($end_time));
 
@@ -148,7 +148,7 @@ class DoctorScheduleController extends Controller
                 $start_time = $request->input('start_time');
                 $end_time = $request->input('end_time');
 
-                $date = date('yy-m-d', strtotime($date));
+                $date = date('Y-m-d', strtotime($date));
                 $start_time = date('H:i', strtotime($start_time));
                 $end_time = date('H:i', strtotime($end_time));
 
