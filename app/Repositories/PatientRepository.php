@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use Illuminate\Support\Facades\Storage;
 use App\Models\Patient;
 
 class PatientRepository

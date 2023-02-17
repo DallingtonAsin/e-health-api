@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\SharedHelper as Helper;
-use App\Services\Transaction\Sms\SmsService;
 use App\Repositories\UserTypeRepository;
 use App\Repositories\MedicalDoctorRepository;
 use App\Repositories\DoctorAuthenticationRepository;
