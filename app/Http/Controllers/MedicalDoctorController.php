@@ -247,8 +247,15 @@ class MedicalDoctorController extends Controller
             } else {
 
                 $doctor_id = $request->input('id');
-                $file = $request->file('image');
+                $imageData = $request->input('image');
+                $image = base64_decode($imageData);
                 $file_extension = $request->input('extension');
+
+                // if($file){
+                //     return response()->json(['error' => $file], 400);
+                // }else{
+                //     return response()->json(['error' => "Doctor's id ".$doctor_id.", File ".$file." and Extension ".$file_extension." ".$file], 400);
+                // }
 
                 $exists = $this->doctorRepository->exists($doctor_id);
                 if ($exists) {
@@ -257,10 +264,11 @@ class MedicalDoctorController extends Controller
                     if (!empty($doctor->image)) {
                         Storage::disk('public')->delete($doctor->image);
                     }
-                    $fileName = $doctor_id . '' . time() . '.' . $file_extension;
-                    $filePath = $file->storeAs('images', $fileName, 'public');
 
-                    $input = ['image' => $filePath];
+                    $filename = $doctor_id . '' . time() . '.' . $file_extension;
+                    Storage::disk('public')->put($filename, $image);
+
+                    $input = ['image' => $filename];
                     $hasUpdated = $this->doctorRepository->update($doctor_id, $input);
 
                     if ($hasUpdated) {

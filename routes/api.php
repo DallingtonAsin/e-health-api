@@ -38,7 +38,7 @@ Route::group(['prefix' => 'doctor', 'middleware' => ['auth:doctor']], function (
     Route::get('/specialties', [MedicalSpecialtyController::class, 'getDoctorSpecialties']);
     Route::post('register', [MedicalDoctorController::class, 'register']);
     Route::post('profile/update', [MedicalDoctorController::class, 'update']);
-    Route::put('/{doctor_id}/profile-picture', [MedicalDoctorController::class, 'updateProfilePicture']);
+    Route::post('/{doctor_id}/profile-picture', [MedicalDoctorController::class, 'updateProfilePicture']);
     Route::delete('/{doctor_id}/profile-picture/delete', [MedicalDoctorController::class, 'removeProfilePicture']);
 });
 

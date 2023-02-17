@@ -125,7 +125,7 @@ class MedicalDoctorRepository
         $doctor->is_patient = $doctor->isPatient();
         $doctor->access_token = $access_token;
         if(!empty($doctor->image)){
-            $doctor->image = Storage::disk('images')->url($doctor->image);
+            $doctor->image = url('storage/'.$doctor->image.'');
         }
         return $doctor;
     }
