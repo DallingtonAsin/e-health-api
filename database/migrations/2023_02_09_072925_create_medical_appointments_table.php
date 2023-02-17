@@ -28,6 +28,8 @@ class CreateMedicalAppointmentsTable extends Migration
             $table->timestamp('completed_at')->nullable();
             $table->timestamp('rescheduled_at')->nullable();
             $table->timestamp('cancelled_at')->nullable();
+            $table->boolean('is_doctor_notified')->default(false);
+            $table->enum('alert_status', ["none", "patient", "doctor", "both"])->default("none");
             $table->timestamps();
 
             $table->foreign('patient_id')->references('id')->on('patients')->onDelete('cascade');
