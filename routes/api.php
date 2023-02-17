@@ -31,6 +31,8 @@ Route::group(['prefix' => 'patient', 'middleware' => ['auth:patient']], function
     Route::post('verify', [PatientAuthenticationController::class, 'verifyOTP']);
     Route::post('register', [PatientController::class, 'register']);
     Route::post('profile/update', [PatientController::class, 'update']);
+    Route::post('/{patient_id}/profile-picture', [PatientController::class, 'updateProfilePicture']);
+    Route::delete('/{patient_id}/profile-picture/delete', [PatientController::class, 'removeProfilePicture']);
 });
 
 Route::group(['prefix' => 'doctor', 'middleware' => ['auth:doctor']], function () {
