@@ -51,4 +51,13 @@ class MedicalDoctor extends Authenticatable
         $user_type_name = $this->userType->name;
         return stripos($user_type_name, 'patient') !== false;
     }
+
+    public function getImageAttribute($value)
+    {
+        if ($value) {
+            return url('storage/' . $value);
+        }
+        return null;
+    }
+    
 }

@@ -78,9 +78,6 @@ class PatientRepository
         $access_token = $patient->createToken('Patient' . $phone_number, ['patient'])->accessToken;
         $patient->is_patient = $patient->isPatient();
         $patient->access_token = $access_token;
-        if(!empty($patient->image)){
-            $patient->image = url('storage/'.$patient->image.'');
-        }
         return $patient;
     }
 }

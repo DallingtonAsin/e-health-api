@@ -124,9 +124,6 @@ class MedicalDoctorRepository
         $access_token = $doctor->createToken('Doctor' . $phone_number, ['doctor'])->accessToken;
         $doctor->is_patient = $doctor->isPatient();
         $doctor->access_token = $access_token;
-        if(!empty($doctor->image)){
-            $doctor->image = url('storage/'.$doctor->image.'');
-        }
         return $doctor;
     }
 
