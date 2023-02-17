@@ -251,12 +251,6 @@ class MedicalDoctorController extends Controller
                 $image = base64_decode($imageData);
                 $file_extension = $request->input('extension');
 
-                // if($file){
-                //     return response()->json(['error' => $file], 400);
-                // }else{
-                //     return response()->json(['error' => "Doctor's id ".$doctor_id.", File ".$file." and Extension ".$file_extension." ".$file], 400);
-                // }
-
                 $exists = $this->doctorRepository->exists($doctor_id);
                 if ($exists) {
 
