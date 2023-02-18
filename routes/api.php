@@ -68,7 +68,7 @@ Route::group(['prefix' => 'appointments'], function () {
 
     Route::middleware(['auth:patient'])->group(function () {
         Route::resource('/', MedicalAppointmentController::class);
-        Route::post('/', [MedicalAppointmentController::class, 'store'])->middleware('throttle:1,1');
+        Route::post('/', [MedicalAppointmentController::class, 'store'])->middleware('throttle:7,1');
         Route::put('/cancel', [MedicalAppointmentController::class, 'cancelAppointment']);
         Route::resource('types', AppointmentTypeController::class);
     });

@@ -7,19 +7,23 @@ use App\Helpers\SharedHelper as Helper;
 use Illuminate\Support\Facades\Validator;
 use App\Repositories\MedicalAppointmentRepository;
 use App\Repositories\AppointmentTypeRepository;
+use App\Repositories\MeetingTokenRepository;
 use Carbon\Carbon;
 
 class MedicalAppointmentController extends Controller
 {
 
 
-    protected $appointmentTypeRepository, $medicalAppointmentRepository;
+    protected $appointmentTypeRepository, $medicalAppointmentRepository, $meetingTokenRepository;
 
 
-    public function __construct(AppointmentTypeRepository $appointmentTypeRepository, MedicalAppointmentRepository $medicalAppointmentRepository)
+    public function __construct(AppointmentTypeRepository $appointmentTypeRepository,
+                                MedicalAppointmentRepository $medicalAppointmentRepository,
+                                MeetingTokenRepository $meetingTokenRepository)
     {
         $this->appointmentTypeRepository = $appointmentTypeRepository;
         $this->medicalAppointmentRepository = $medicalAppointmentRepository;
+        $this->meetingTokenRepository = $meetingTokenRepository;
     }
     /**
      * Display a listing of the resource.
@@ -168,6 +172,23 @@ class MedicalAppointmentController extends Controller
 
                     $data = $this->medicalAppointmentRepository->create($data);
                     $data->makeHidden(['id', 'created_at', 'updated_at']);
+
+                    $appointment = $this->medicalAppointmentRepository->get($data->id);
+                    $is_online = $appointment->isOnline();
+                    $patient = $appointment->patient;
+              
+                    if($is_online){
+                        $is_video = $appointment->isVideo();
+                        $meeting_token = $this->meetingTokenRepository->generateMeetingToken($patient, $appointment_number, $is_video);
+                        $meeting_details = [
+                            'appointment_id' => $data->id,
+                            'app_id' => env('AGORA_APP_ID'),
+                            'channel' => $appointment_number,
+                            'token' => $meeting_token
+                        ];
+                        $this->meetingTokenRepository->create($meeting_details);
+                    }
+                   
                     $datetime = Carbon::parse($data->appointment_date);
                     $data->appointment_date = $datetime->toDateString();
                     $data->appointment_time = date('H:i', strtotime($datetime->toTimeString()));

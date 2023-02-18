@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Patient;
 use App\Models\MedicalDoctor;
 use App\Models\AppointmentType;
+use App\Models\MeetingToken;
 
 class MedicalAppointment extends Model
 {
@@ -41,4 +42,10 @@ class MedicalAppointment extends Model
         $appointment_type_name = $this->appointmentType->name;
         return stripos($appointment_type_name, 'video') !== false;
     }
+
+    public function meetingAccess()
+    {
+        return $this->hasOne(MeetingToken::class, 'appointment_id');
+    }
+
 }

@@ -75,6 +75,8 @@ class MedicalAppointmentRepository
             $query->select(['id', 'first_name', 'last_name', 'specialty_id', 'title', 'country_code', 'phone_number', 'email', 'qualification', 'profession', 'experience', 'image', 'service_fee']);
         }])->with(['appointmentType' => function ($query) {
             $query->select(['id', 'name']);
+        }])->with(['meetingAccess' => function ($query) {
+            $query->select(['appointment_id', 'app_id as appId', 'channel', 'token']);
         }]);
 
         if ($patient_id) {
@@ -97,7 +99,13 @@ class MedicalAppointmentRepository
 
         $appointments = $appointments->get()
             ->map(function ($appointment) {
+
+                $is_online = $appointment->isOnline(); 
                 $appointment->is_online = $appointment->isOnline();
+                if($is_online){
+                    unset($appointment->meetingAccess->appointment_id);
+                }
+
                 $appointment->is_video = $appointment->isVideo();
                 $appointment->appointment_date = Carbon::parse($appointment->appointment_date)->toDateString();
                 $appointment->appointment_time = Carbon::parse($appointment->appointment_date)->toTimeString();
