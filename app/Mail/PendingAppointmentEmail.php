@@ -29,6 +29,6 @@ class PendingAppointmentEmail extends Mailable
      */
     public function build()
     {
-        return $this->markdown('emails.pending_appointment')->with('body', $this->body);
+        return $this->markdown('emails.pending_appointment')->with('body', $this->body)->subject('Pending Appointment Email');
     }
 }
