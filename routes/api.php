@@ -87,5 +87,4 @@ Route::group(['prefix' => 'appointments'], function () {
         Route::get('/{doctor_id}/completed', [MedicalAppointmentController::class, 'getDoctorCompletedAppointments']);
         Route::get('/{doctor_id}/cancelled', [MedicalAppointmentController::class, 'getDoctorCancelledAppointments']);
     });
-    
 });

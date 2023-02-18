@@ -36,4 +36,9 @@ class MedicalAppointment extends Model
         $appointment_type_name = $this->appointmentType->name;
         return stripos($appointment_type_name, 'audio') !== false || stripos($appointment_type_name, 'video') !== false;
     }
+
+    public function isVideo(){
+        $appointment_type_name = $this->appointmentType->name;
+        return stripos($appointment_type_name, 'video') !== false;
+    }
 }

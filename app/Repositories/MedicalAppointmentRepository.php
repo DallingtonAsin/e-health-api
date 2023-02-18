@@ -98,6 +98,7 @@ class MedicalAppointmentRepository
         $appointments = $appointments->get()
             ->map(function ($appointment) {
                 $appointment->is_online = $appointment->isOnline();
+                $appointment->is_video = $appointment->isVideo();
                 $appointment->appointment_date = Carbon::parse($appointment->appointment_date)->toDateString();
                 $appointment->appointment_time = Carbon::parse($appointment->appointment_date)->toTimeString();
                 $appointment->status = ucfirst($appointment->status);
