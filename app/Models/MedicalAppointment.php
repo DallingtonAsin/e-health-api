@@ -15,7 +15,7 @@ class MedicalAppointment extends Model
     protected $table = 'medical_appointments';
 
     protected $fillable = [
-        'patient_id', 'doctor_id', 'appointment_number', 'appointment_type_id', 'appointment_date', 'symptoms', 'notes'
+        'patient_id', 'doctor_id', 'appointment_number', 'appointment_type_id', 'appointment_date', 'symptoms', 'notes', 'is_doctor_notified', 'alert_status'
     ];
 
     public function patient()

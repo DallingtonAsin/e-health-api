@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\MailController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\MedicalSpecialtyController;
@@ -25,6 +26,8 @@ use App\Http\Controllers\Auth\Doctor\AuthenticationController as DoctorAuthentic
 
 Route::post('/patient/login', [PatientAuthenticationController::class, 'sendVerificationCode']);
 Route::post('/doctor/login', [DoctorAuthenticationController::class, 'login']);
+
+Route::post('/send/pending-appointment-emails', [MailController::class, 'sendPendingAppointmentMail']);
 
 
 Route::group(['prefix' => 'patient', 'middleware' => ['auth:patient']], function () {

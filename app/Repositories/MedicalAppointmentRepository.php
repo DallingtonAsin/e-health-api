@@ -67,7 +67,7 @@ class MedicalAppointmentRepository
         return Helper::generateUniqueNumber('medical_appointments', 'appointment_number', 10, 'APT');
     }
 
-    public function getMedicalAppointments($patient_id = null, $status = null, $doctor_id = null)
+    public function getMedicalAppointments($patient_id = null, $status = null, $doctor_id = null, $is_doctor_notified = null)
     {
         $appointments = $this->medicalAppointment->with(['patient' => function ($query) {
             $query->select(['id', 'first_name', 'last_name', 'country_code', 'phone_number', 'email', 'address', 'dob', 'image']);
@@ -88,6 +88,11 @@ class MedicalAppointmentRepository
         if ($status) {
             $appointments->where('status', $status);
         }
+
+        if(!is_null($is_doctor_notified)){
+            $appointments->where('is_doctor_notified', $is_doctor_notified);
+        }
+
         $appointments->orderBy('appointment_date', 'desc');
 
         $appointments = $appointments->get()
