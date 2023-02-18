@@ -53,11 +53,6 @@ Route::group(['prefix' => 'medical', 'middleware' => ['auth:patient']], function
     Route::resource('doctors', MedicalDoctorController::class);
 });
 
-Route::group(['prefix' => 'medical', 'middleware' => ['auth:doctor']], function () {
-    Route::get('doctors/specialty/{specialty}', [MedicalDoctorController::class, 'getDoctorsBySpecialty']);
-    Route::resource('specialties', MedicalSpecialtyController::class);
-    Route::resource('doctors', MedicalDoctorController::class);
-});
 
 Route::group(['prefix' => 'doctor', 'middleware' => ['auth:doctor']], function () {
 
