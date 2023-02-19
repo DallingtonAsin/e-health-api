@@ -2,7 +2,8 @@
 namespace App\Repositories;
 
 use App\Models\MeetingToken;
-use App\Class\AgoraDynamicKey\RtcTokenBuilder;
+use App\Agora\AgoraDynamicKey\RtcTokenBuilder;
+
 
 class MeetingTokenRepository
 {

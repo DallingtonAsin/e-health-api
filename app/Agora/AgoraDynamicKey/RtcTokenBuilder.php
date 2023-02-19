@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Class\AgoraDynamicKey;
+namespace App\Agora\AgoraDynamicKey;
 
 require_once "AccessToken.php";
 
