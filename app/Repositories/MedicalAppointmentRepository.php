@@ -103,7 +103,9 @@ class MedicalAppointmentRepository
                 $is_online = $appointment->isOnline(); 
                 $appointment->is_online = $appointment->isOnline();
                 if($is_online){
-                    unset($appointment->meetingAccess->appointment_id);
+                    if(!empty($appointment->meetingAccess->appointment_id)){
+                        unset($appointment->meetingAccess->appointment_id);
+                    }
                 }
 
                 $appointment->is_video = $appointment->isVideo();
