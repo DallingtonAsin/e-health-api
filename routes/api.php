@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MailController;
+use App\Http\Controllers\DrugController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\MedicalSpecialtyController;
@@ -53,6 +54,10 @@ Route::group(['prefix' => 'medical', 'middleware' => ['auth:patient']], function
     Route::resource('doctors', MedicalDoctorController::class);
 });
 
+
+Route::middleware(['auth:patient,doctor', 'patient.or.doctor'])->group(function () {
+    Route::resource('drugs', DrugController::class);
+});
 
 Route::group(['prefix' => 'doctor', 'middleware' => ['auth:doctor']], function () {
 
