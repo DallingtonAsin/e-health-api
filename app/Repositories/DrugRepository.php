@@ -41,6 +41,7 @@ class DrugRepository
         $drugs->map(function($drug){
             $drug->price = 'UGX. '.number_format($drug->price);
             $drug->in_stock = $drug->isInStock();
+            $drug->status = ucfirst(strtolower($drug->status));
         });
 
         return $drugs;
