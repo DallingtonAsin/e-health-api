@@ -16,11 +16,14 @@ class CreateDrugsTable extends Migration
         Schema::create('drugs', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
+            $table->unsignedBigInteger('category_id');
             $table->text('description');
             $table->double('price');
             $table->string('image')->nullable();
             $table->enum('status', ['In Stock', 'Out of Stock', 'Discontinued'])->default('In Stock');
             $table->timestamps();
+
+            $table->foreign('category_id')->references('id')->on('drug_categories')->onDelete('cascade');
         });
     }
 

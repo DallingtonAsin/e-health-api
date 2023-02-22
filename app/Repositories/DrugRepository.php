@@ -26,11 +26,18 @@ class DrugRepository
     public function get($id = null)
     {
 
+        $drugs = $this->drug->with(['category' => function ($query) {
+                   $query->select(['id', 'name']);
+        }]);
+      
+
        if($id){
-        $drugs = $this->drug->select(['id', 'name', 'description', 'price', 'image', 'status'])->where('id', $id)->orderBy('id', 'asc')->get();
+             $drugs->where('id', $id);
        }
 
-        $drugs = $this->drug->select(['id', 'name', 'description', 'price', 'image', 'status'])->orderBy('id', 'asc')->get();
+        $drugs->orderBy('id', 'asc');
+        $drugs = $drugs->get();
+  
         $drugs->map(function($drug){
             $drug->price = 'UGX. '.number_format($drug->price);
             $drug->in_stock = $drug->isInStock();
