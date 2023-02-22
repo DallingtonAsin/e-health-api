@@ -18,4 +18,8 @@ class Drug extends Model
 
     public $timestamps = true;
 
+    public function isInStock(){
+        return stripos($this->status, 'in stock') !== false;
+    }
+
 }
