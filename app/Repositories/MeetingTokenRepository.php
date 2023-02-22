@@ -47,7 +47,7 @@ class MeetingTokenRepository
         $channelName = $appointment_number;
         $user = $patient->first_name . " ". $patient->last_name;
         $role = RtcTokenBuilder::RoleAttendee;
-        $expireTimeInSeconds = 3600;
+        $expireTimeInSeconds = 86400;
         $currentTimestamp = now()->getTimestamp();
         $privilegeExpiredTs = $currentTimestamp + $expireTimeInSeconds;
 
