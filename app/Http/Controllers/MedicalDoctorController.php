@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Repositories\MedicalDoctorRepository;
 use App\Repositories\MedicalSpecialtyRepository;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 use App\Helpers\SharedHelper as Helper;
 use Illuminate\Support\Facades\Storage;
 
@@ -247,22 +248,23 @@ class MedicalDoctorController extends Controller
             } else {
 
                 $doctor_id = $request->input('id');
-                $imageData = $request->input('image');
-                $image = base64_decode($imageData);
                 $file_extension = $request->input('extension');
 
                 $exists = $this->doctorRepository->exists($doctor_id);
                 if ($exists) {
 
                     $doctor = $this->doctorRepository->find($doctor_id);
-                    if (!empty($doctor->image)) {
-                        Storage::disk('public')->delete($doctor->image);
+                    if (!is_null($doctor->image)) {
+                        if(Storage::disk('public')->exists($doctor->image)){
+                            Storage::disk('public')->delete($doctor->image);
+                        }
                     }
 
+                    $file = $request->file('image');
                     $filename = $doctor_id . '' . time() . '.' . $file_extension;
-                    Storage::disk('public')->put($filename, $image);
+                    $filePath = $file->storeAs('images/doctors', $filename, 'public');
 
-                    $input = ['image' => $filename];
+                    $input = ['image' => $filePath];
                     $hasUpdated = $this->doctorRepository->update($doctor_id, $input);
 
                     if ($hasUpdated) {
@@ -290,9 +292,12 @@ class MedicalDoctorController extends Controller
 
             if ($exists) {
                 $doctor = $this->doctorRepository->find($id);
-                if (!empty($doctor->image)) {
-                    Storage::disk('public')->delete($doctor->image);
+                if (!is_null($doctor->image)) {
+                    if(Storage::disk('public')->exists($doctor->image)){
+                        Storage::disk('public')->delete($doctor->image);
+                    }
                 }
+                
                 $hasUpdated = $this->doctorRepository->update($id, ['image' => null]);
                 if ($hasUpdated) {
                     $doctor = $this->doctorRepository->generateAccessToken($id);

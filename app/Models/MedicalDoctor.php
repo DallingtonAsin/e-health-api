@@ -52,10 +52,18 @@ class MedicalDoctor extends Authenticatable
         return stripos($user_type_name, 'patient') !== false;
     }
 
-    public function getImageAttribute($value)
+    // public function getImageAttribute($value)
+    // {
+    //     if ($value) {
+    //         return url('storage/' . $value);
+    //     }
+    //     return null;
+    // }
+
+    public function thumbnail()
     {
-        if ($value) {
-            return url('storage/' . $value);
+        if ($this->image) {
+            return url('storage/' . $this->image);
         }
         return null;
     }

@@ -127,22 +127,23 @@ class PatientController extends Controller
             } else {
 
                 $patient_id = $request->input('id');
-                $imageData = $request->input('image');
-                $image = base64_decode($imageData);
                 $file_extension = $request->input('extension');
 
                 $exists = $this->patientRepository->exists($patient_id);
                 if ($exists) {
 
                     $patient = $this->patientRepository->find($patient_id);
-                    if (!empty($patient->image)) {
-                        Storage::disk('public')->delete($patient->image);
+                    if (!is_null($patient->image)) {
+                        if(Storage::disk('public')->exists($patient->image)){
+                            Storage::disk('public')->delete($patient->image);
+                        }
                     }
 
+                    $file = $request->file('image');
                     $filename = $patient_id . '' . time() . '.' . $file_extension;
-                    Storage::disk('public')->put($filename, $image);
+                    $filePath = $file->storeAs('images/patients', $filename, 'public');
 
-                    $input = ['image' => $filename];
+                    $input = ['image' => $filePath];
                     $hasUpdated = $this->patientRepository->update($patient_id, $input);
 
                     if ($hasUpdated) {
@@ -169,10 +170,14 @@ class PatientController extends Controller
             $exists = $this->patientRepository->exists($id);
 
             if ($exists) {
+                
                 $patient = $this->patientRepository->find($id);
-                if (!empty($patient->image)) {
-                    Storage::disk('public')->delete($patient->image);
+                if (!is_null($patient->image)) {
+                    if(Storage::disk('public')->exists($patient->image)){
+                        Storage::disk('public')->delete($patient->image);
+                    }
                 }
+
                 $hasUpdated = $this->patientRepository->update($id, ['image' => null]);
                 if ($hasUpdated) {
                     $patient = $this->patientRepository->generateAccessToken($id);
