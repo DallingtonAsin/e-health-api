@@ -77,6 +77,7 @@ class PatientRepository
         $phone_number = $patient->country_code . '' . $patient->phone_number;
         $access_token = $patient->createToken('Patient' . $phone_number, ['patient'])->accessToken;
         $patient->is_patient = $patient->isPatient();
+        $patient->image = $patient->thumbnail();
         $patient->access_token = $access_token;
         return $patient;
     }

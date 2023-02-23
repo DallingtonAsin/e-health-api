@@ -123,6 +123,7 @@ class MedicalDoctorRepository
         $phone_number = $doctor->country_code . '' . $doctor->phone_number;
         $access_token = $doctor->createToken('Doctor' . $phone_number, ['doctor'])->accessToken;
         $doctor->is_patient = $doctor->isPatient();
+        $doctor->image = $doctor->thumbnail();
         $doctor->access_token = $access_token;
         return $doctor;
     }
