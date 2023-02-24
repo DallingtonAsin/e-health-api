@@ -112,6 +112,8 @@ class MedicalAppointmentRepository
                 $appointment->appointment_date = Carbon::parse($appointment->appointment_date)->toDateString();
                 $appointment->appointment_time = Carbon::parse($appointment->appointment_date)->toTimeString();
                 $appointment->status = ucfirst($appointment->status);
+                $appointment->patient->thumbnail = $appointment->patient->thumbnail();
+                $appointment->doctor->thumbnail = $appointment->doctor->thumbnail();
                 $appointment->doctor->service_fee = number_format(floatval($appointment->doctor->service_fee));
                 return $appointment;
             });

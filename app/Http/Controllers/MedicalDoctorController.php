@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use App\Repositories\MedicalDoctorRepository;
 use App\Repositories\MedicalSpecialtyRepository;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Log;
 use App\Helpers\SharedHelper as Helper;
 use Illuminate\Support\Facades\Storage;
 
