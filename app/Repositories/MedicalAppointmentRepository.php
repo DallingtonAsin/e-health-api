@@ -109,8 +109,8 @@ class MedicalAppointmentRepository
                 }
 
                 $appointment->is_video = $appointment->isVideo();
+                $appointment->appointment_time =  Carbon::parse($appointment->appointment_date)->format('H:i');
                 $appointment->appointment_date = Carbon::parse($appointment->appointment_date)->toDateString();
-                $appointment->appointment_time = Carbon::parse($appointment->appointment_date)->toTimeString();
                 $appointment->status = ucfirst($appointment->status);
                 $appointment->patient->thumbnail = $appointment->patient->thumbnail();
                 $appointment->doctor->thumbnail = $appointment->doctor->thumbnail();
