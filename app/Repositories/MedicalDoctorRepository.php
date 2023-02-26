@@ -47,11 +47,12 @@ class MedicalDoctorRepository
         $doctors->makeHidden(['created_at', 'updated_at']);
 
         foreach ($doctors as $doctor) {
+
             $doctor['languages'] = implode(", ", unserialize(($doctor->languages)));
             $doctor['service_fee'] = config('app.currency') . '. ' . number_format($doctor->service_fee);
-            $doctor->availability->makeHidden(['id', 'created_at', 'updated_at']);
+            $doctor['image'] = $doctor->thumbnail();
 
-            $timeSlots = [];
+            $doctor->availability->makeHidden(['id', 'created_at', 'updated_at']);
 
             $timeSlots = [];
             $dates = [];
