@@ -51,8 +51,11 @@ class MeetingTokenRepository
         $currentTimestamp = now()->getTimestamp();
         $privilegeExpiredTs = $currentTimestamp + $expireTimeInSeconds;
 
-        $token = RtcTokenBuilder::buildTokenWithUserAccount($appID, $appCertificate, $channelName, $user, $role, $privilegeExpiredTs);
-
+        $token = env('AGORA_TEMP_TOKEN');
+        if(is_null($token)){
+            $token = RtcTokenBuilder::buildTokenWithUserAccount($appID, $appCertificate, $channelName, $user, $role, $privilegeExpiredTs);
+        }
+        
         return $token;
     }
 
