@@ -3,7 +3,7 @@ namespace App\Repositories;
 
 use App\Models\MeetingToken;
 use App\Agora\AgoraDynamicKey\RtcTokenBuilder;
-
+use Illuminate\Broadcasting\Channel;
 
 class MeetingTokenRepository
 {
@@ -32,6 +32,11 @@ class MeetingTokenRepository
         $meetingToken = $this->meetingToken->find($id);
         $meetingToken->update($meetingTokenData);
         return $meetingToken;
+    }
+
+
+    public function getMeetingDetails($appointment_id){
+        return $this->meetingToken->where('appointment_id', $appointment_id)->select('app_id as appId', 'channel', 'token')->get();
     }
 
     public function delete($id)
