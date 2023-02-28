@@ -286,7 +286,8 @@ class MedicalAppointmentController extends Controller
 
     public function getAppointmentMeetingDetails($appointment_id){
         try {
-            return $this->meetingTokenRepository->getMeetingDetails($appointment_id);
+            $meeting = $this->meetingTokenRepository->getMeetingDetails($appointment_id);
+            return $meeting[0];
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
