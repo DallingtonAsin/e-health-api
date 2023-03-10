@@ -173,6 +173,7 @@ class MedicalAppointmentController extends Controller
                     $data->appointment_date = $datetime->toDateString();
                     $data->appointment_time = date('H:i', strtotime($datetime->toTimeString()));
                     $this->notificationService->sendAppointmentBookedMessage($patient_id, $data);
+                    $this->notificationService->sendDoctorNewAppointmentMessage($appointment->doctor_id, $data);
 
                     return response()->json($data, 200);
                 }

@@ -2,12 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Repositories\NotificationRepository;
-use App\Helpers\SharedHelper as Helper;
 
-
-class NotificationController extends Controller
+class PatientNotificationController extends Controller
 {
     protected $notificationRepository;
 
@@ -16,7 +13,7 @@ class NotificationController extends Controller
         $this->notificationRepository = $notificationRepository;
     }
 
-    public function getPatientNotifications()
+    public function getNotifications()
     {
         try {
 
@@ -32,7 +29,7 @@ class NotificationController extends Controller
         }
     }
 
-    public function getPatientReadNotifications()
+    public function getReadNotifications()
     {
         try {
             $patient_id = auth('patient')->user()->id;
@@ -43,7 +40,7 @@ class NotificationController extends Controller
         }
     }
 
-    public function getPatientUnReadNotifications()
+    public function getUnReadNotifications()
     {
         try {
 
@@ -59,7 +56,7 @@ class NotificationController extends Controller
     {
         try {
             $patient_id = auth('patient')->user()->id;
-            $this->notificationRepository->markAsRead($patient_id, $notification_id);
+            $this->notificationRepository->markPatientNotificationAsRead($patient_id, $notification_id);
             return response()->json(['message' => 'Notification marked as read.'], 200);
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);

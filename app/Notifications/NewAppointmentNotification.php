@@ -3,9 +3,10 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
-class AppointmentBookedNotification extends Notification
+class NewAppointmentNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -24,7 +25,7 @@ class AppointmentBookedNotification extends Notification
 
     public function toDatabase($notifiable)
     {
-        $message = 'Your medical appointment has been booked.';
+        $message = 'Your new medical appointment';
         if ($this->message) {
             $message = $this->message;
         }
@@ -32,7 +33,7 @@ class AppointmentBookedNotification extends Notification
         return [
             'appointment_id' => $this->appointment->id,
             'appointment_number' => $this->appointment->appointment_number,
-            'message' => $message,
+            'message' => $message
         ];
     }
 }

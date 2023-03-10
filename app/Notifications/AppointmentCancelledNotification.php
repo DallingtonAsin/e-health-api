@@ -31,6 +31,7 @@ class AppointmentCancelledNotification extends Notification
 
         return [
             'appointment_id' => $this->appointment->id,
+            'appointment_number' => $this->appointment->appointment_number,
             'message' => $message
         ];
     }
