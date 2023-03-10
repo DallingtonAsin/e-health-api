@@ -17,21 +17,21 @@ class NotificationRepository
     public function getPatientNotifications($patient_id)
     {
         $patient = $this->findPatient($patient_id);
-        $notifications = $patient->notifications()->select(['id', 'notifiable_id', 'data', 'read_at'])->get();
+        $notifications = $patient->notifications()->select(['id', 'notifiable_id', 'data', 'read_at'])->orderBy('created_at', 'desc')->get();
         return $notifications;
     }
 
     public function getPatientReadNotifications($patient_id)
     {
         $patient = $this->findPatient($patient_id);
-        $notifications = $patient->readNotifications()->select(['id', 'notifiable_id', 'data', 'read_at'])->get();
+        $notifications = $patient->readNotifications()->select(['id', 'notifiable_id', 'data', 'read_at'])->orderBy('created_at', 'desc')->get();
         return $notifications;
     }
 
     public function getPatientUnreadNotifications($patient_id)
     {
         $patient = $this->findPatient($patient_id);
-        $notifications = $patient->unreadNotifications()->select(['id', 'notifiable_id', 'data', 'read_at'])->get();
+        $notifications = $patient->unreadNotifications()->select(['id', 'notifiable_id', 'data', 'read_at'])->orderBy('created_at', 'desc')->get();
         return $notifications;
     }
 
@@ -76,21 +76,21 @@ class NotificationRepository
     public function getDoctorNotifications($doctor_id)
     {
         $doctor = $this->findDoctor($doctor_id);
-        $notifications = $doctor->notifications()->select(['id', 'notifiable_id', 'data', 'read_at'])->get();
+        $notifications = $doctor->notifications()->select(['id', 'notifiable_id', 'data', 'read_at'])->orderBy('created_at', 'desc')->get();
         return $notifications;
     }
 
     public function getDoctorReadNotifications($doctor_id)
     {
         $doctor = $this->findDoctor($doctor_id);
-        $notifications = $doctor->readNotifications()->select(['id', 'notifiable_id', 'data', 'read_at'])->get();
+        $notifications = $doctor->readNotifications()->select(['id', 'notifiable_id', 'data', 'read_at'])->orderBy('created_at', 'desc')->get();
         return $notifications;
     }
 
     public function getDoctorUnreadNotifications($doctor_id)
     {
         $doctor = $this->findDoctor($doctor_id);
-        $notifications = $doctor->unreadNotifications()->select(['id', 'notifiable_id', 'data', 'read_at'])->get();
+        $notifications = $doctor->unreadNotifications()->select(['id', 'notifiable_id', 'data', 'read_at'])->orderBy('created_at', 'desc')->get();
         return $notifications;
     }
 

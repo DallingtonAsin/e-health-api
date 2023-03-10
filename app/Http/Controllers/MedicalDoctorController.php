@@ -234,7 +234,7 @@ class MedicalDoctorController extends Controller
     public function updateProfilePicture(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'id' => 'required|exists:patients,id',
+            'id' => 'required|exists:medical_doctors,id',
             'image' => 'required',
             'extension' => 'required'
         ]);
@@ -254,7 +254,7 @@ class MedicalDoctorController extends Controller
 
                     $doctor = $this->doctorRepository->find($doctor_id);
                     if (!is_null($doctor->image)) {
-                        if(Storage::disk('public')->exists($doctor->image)){
+                        if (Storage::disk('public')->exists($doctor->image)) {
                             Storage::disk('public')->delete($doctor->image);
                         }
                     }
@@ -292,11 +292,11 @@ class MedicalDoctorController extends Controller
             if ($exists) {
                 $doctor = $this->doctorRepository->find($id);
                 if (!is_null($doctor->image)) {
-                    if(Storage::disk('public')->exists($doctor->image)){
+                    if (Storage::disk('public')->exists($doctor->image)) {
                         Storage::disk('public')->delete($doctor->image);
                     }
                 }
-                
+
                 $hasUpdated = $this->doctorRepository->update($id, ['image' => null]);
                 if ($hasUpdated) {
                     $doctor = $this->doctorRepository->generateAccessToken($id);
