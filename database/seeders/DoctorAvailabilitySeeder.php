@@ -56,7 +56,7 @@ class DoctorAvailabilitySeeder extends Seeder
     private function generateRandomDate()
     {
         $start = Carbon::now();
-        $end = Carbon::createFromDate(2023, 2, 28);
+        $end = Carbon::createFromDate(2023, date('n') , 28);
         $randomTimestamp = mt_rand($start->getTimestamp(), $end->getTimestamp());
         $randomDate = Carbon::createFromTimestamp($randomTimestamp);
         $formattedDate = $randomDate->toDateString();
