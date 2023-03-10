@@ -7,6 +7,7 @@ use App\Http\Controllers\PatientController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\MedicalSpecialtyController;
 use App\Http\Controllers\MedicalDoctorController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\AppointmentTypeController;
 use App\Http\Controllers\DoctorScheduleController;
 use App\Http\Controllers\MedicalAppointmentController;
@@ -37,6 +38,11 @@ Route::group(['prefix' => 'patient', 'middleware' => ['auth:patient']], function
     Route::post('profile/update', [PatientController::class, 'update']);
     Route::post('/{patient_id}/profile-picture', [PatientController::class, 'updateProfilePicture']);
     Route::delete('/{patient_id}/profile-picture/delete', [PatientController::class, 'removeProfilePicture']);
+
+    Route::get('{id}/notifications', [NotificationController::class, 'getPatientNotifications']);
+    Route::get('{id}/notifications/read', [NotificationController::class, 'getPatientReadNotifications']);
+    Route::get('{id}/notifications/unread', [NotificationController::class, 'getPatientUnReadNotifications']);
+    Route::post('notifications/mark-as-read/{id}', [NotificationController::class, 'markAsRead']);
 });
 
 Route::group(['prefix' => 'doctor', 'middleware' => ['auth:doctor']], function () {

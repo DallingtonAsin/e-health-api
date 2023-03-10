@@ -29,7 +29,7 @@ class MedicalDoctorController extends Controller
     {
         try {
             $medical_doctors = $this->doctorRepository->get();
-            return response($medical_doctors, 200);
+            return response()->json($medical_doctors, 200);
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
@@ -39,7 +39,7 @@ class MedicalDoctorController extends Controller
     {
         try {
             $medical_doctors = $this->doctorRepository->get(null, $speciality_id);
-            return response($medical_doctors, 200);
+            return response()->json($medical_doctors, 200);
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
@@ -76,7 +76,7 @@ class MedicalDoctorController extends Controller
     {
         try {
             $doctor = $this->doctorRepository->get($id, null);
-            return response($doctor[0], 200);
+            return response()->json($doctor[0], 200);
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
@@ -144,7 +144,7 @@ class MedicalDoctorController extends Controller
                 $doctor_id = $doctor->id;
                 $this->doctorRepository->update($doctor_id, $validatedData);
                 $doctor = $this->doctorRepository->generateAccessToken($doctor_id);
-                return response($doctor, 200);
+                return response()->json($doctor, 200);
             }
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
