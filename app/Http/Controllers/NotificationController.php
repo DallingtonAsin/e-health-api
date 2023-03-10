@@ -19,9 +19,14 @@ class NotificationController extends Controller
     public function getPatientNotifications()
     {
         try {
+
             $patient_id = auth('patient')->user()->id;
             $notifications = $this->notificationRepository->getPatientNotifications($patient_id);
-            return response()->json($notifications, 200);
+            $stats = $this->notificationRepository->getPatientNotificationsCountStats($patient_id);
+            $data['notifications'] = $notifications;
+            $data['stats'] = $stats;
+
+            return response()->json($data, 200);
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }

@@ -35,6 +35,21 @@ class NotificationRepository
         return $notifications;
     }
 
+    public function getPatientNotificationsCountStats($patient_id)
+    {
+        $patient = $this->findPatient($patient_id);
+        $total = $patient->notifications()->count();
+        $readCount = $patient->readNotifications()->count();
+        $unreadCount = $patient->unreadNotifications()->count();
+
+        $stats = [
+            'total' => $total,
+            'readCount' => $readCount,
+            'unreadCount' => $unreadCount
+        ];
+
+        return $stats;
+    }
 
     public function markAsRead($patient_id, $notification_id)
     {
