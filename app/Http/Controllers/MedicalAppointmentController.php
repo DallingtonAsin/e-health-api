@@ -8,22 +8,27 @@ use Illuminate\Support\Facades\Validator;
 use App\Repositories\MedicalAppointmentRepository;
 use App\Repositories\AppointmentTypeRepository;
 use App\Repositories\MeetingTokenRepository;
+use App\Services\NotificationService;
 use Carbon\Carbon;
 
 class MedicalAppointmentController extends Controller
 {
 
 
-    protected $appointmentTypeRepository, $medicalAppointmentRepository, $meetingTokenRepository;
+    protected $appointmentTypeRepository, $medicalAppointmentRepository, $meetingTokenRepository, $notificationService;
 
 
-    public function __construct(AppointmentTypeRepository $appointmentTypeRepository,
-                                MedicalAppointmentRepository $medicalAppointmentRepository,
-                                MeetingTokenRepository $meetingTokenRepository)
-    {
+    public function __construct(
+        AppointmentTypeRepository $appointmentTypeRepository,
+        MedicalAppointmentRepository $medicalAppointmentRepository,
+        MeetingTokenRepository $meetingTokenRepository,
+        NotificationService $notificationService
+
+    ) {
         $this->appointmentTypeRepository = $appointmentTypeRepository;
         $this->medicalAppointmentRepository = $medicalAppointmentRepository;
         $this->meetingTokenRepository = $meetingTokenRepository;
+        $this->notificationService = $notificationService;
     }
     /**
      * Display a listing of the resource.
@@ -80,31 +85,6 @@ class MedicalAppointmentController extends Controller
         }
     }
 
-    public function cancelAppointment(Request $request)
-    {
-
-        $validator = Validator::make($request->all(), [
-            'patient_id' => 'required|exists:patients,id',
-            'appointment_number' => 'required|exists:medical_appointments,appointment_number'
-        ]);
-
-        try {
-
-            if ($validator->fails()) {
-                $message = $validator->errors()->all();
-                return Helper::sendFailedHttpResponse($message);
-            } else {
-
-                $patient_id = $request->input('patient_id');
-                $appointment_number = $request->input('appointment_number');
-
-                $this->medicalAppointmentRepository->cancelAppointment($patient_id, $appointment_number);
-                return response()->json(['message' => 'Appointment has been cancelled successfully'], 200);
-            }
-        } catch (\Exception $ex) {
-            return response()->json(['error' => $ex->getMessage()], 500);
-        }
-    }
 
     /**
      * Show the form for creating a new resource.
@@ -171,33 +151,64 @@ class MedicalAppointmentController extends Controller
                     ];
 
                     $data = $this->medicalAppointmentRepository->create($data);
-                    $data->makeHidden(['id', 'created_at', 'updated_at']);
+                    $data->makeHidden(['created_at', 'updated_at']);
 
                     $appointment = $this->medicalAppointmentRepository->get($data->id);
                     $is_online = $appointment->isOnline();
                     $patient = $appointment->patient;
-              
-                    if($is_online){
+
+                    if ($is_online) {
                         $is_video = $appointment->isVideo();
                         $meeting_token = $this->meetingTokenRepository->generateMeetingToken($patient, $appointment_number, $is_video);
                         $meeting_details = [
                             'appointment_id' => $data->id,
                             'app_id' => env('AGORA_APP_ID'),
-                            'channel' => 'MeetingRoomStream', // $appointment_number,
+                            'channel' => 'MeetingRoomStream',
                             'token' => $meeting_token
                         ];
                         $this->meetingTokenRepository->create($meeting_details);
                     }
-                   
+
                     $datetime = Carbon::parse($data->appointment_date);
                     $data->appointment_date = $datetime->toDateString();
                     $data->appointment_time = date('H:i', strtotime($datetime->toTimeString()));
+                    $this->notificationService->sendAppointmentBookedMessage($patient_id, $data);
 
                     return response()->json($data, 200);
                 }
             }
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+
+    public function cancelAppointment(Request $request)
+    {
+
+        $validator = Validator::make($request->all(), [
+            'patient_id' => 'required|exists:patients,id',
+            'appointment_number' => 'required|exists:medical_appointments,appointment_number'
+        ]);
+
+        try {
+
+            if ($validator->fails()) {
+                $message = $validator->errors()->all();
+                return Helper::sendFailedHttpResponse($message);
+            } else {
+
+                $patient_id = $request->input('patient_id');
+                $appointment_number = $request->input('appointment_number');
+
+                $this->medicalAppointmentRepository->cancelAppointment($patient_id, $appointment_number);
+                $appointment = $this->medicalAppointmentRepository->findAppointmentByNumber($appointment_number);
+                $this->notificationService->sendAppointmentCancelledMessage($patient_id, $appointment);
+
+                return response()->json(['message' => 'Appointment has been cancelled successfully'], 200);
+            }
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
         }
     }
 
@@ -284,7 +295,8 @@ class MedicalAppointmentController extends Controller
     }
 
 
-    public function getAppointmentMeetingDetails($appointment_id){
+    public function getAppointmentMeetingDetails($appointment_id)
+    {
         try {
             $meeting = $this->meetingTokenRepository->getMeetingDetails($appointment_id);
             return $meeting[0];
@@ -292,5 +304,4 @@ class MedicalAppointmentController extends Controller
             return response()->json(['error' => $ex->getMessage()], 500);
         }
     }
-
 }
