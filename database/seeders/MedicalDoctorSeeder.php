@@ -69,7 +69,7 @@ class MedicalDoctorSeeder extends Seeder
         MedicalDoctor::create([
             "user_type_id" => $user_type_id,
             "first_name" => "Moses",
-            "last_name" => "MUkasa",
+            "last_name" => "Mukasa",
             "title" => "Dr.",
             "country_code" => '+256',
             "phone_number" => "704709001",
