@@ -7,6 +7,8 @@ use App\Http\Controllers\PatientController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\MedicalSpecialtyController;
 use App\Http\Controllers\MedicalDoctorController;
+use App\Http\Controllers\PatientNotificationController;
+use App\Http\Controllers\DoctorNotificationController;
 use App\Http\Controllers\AppointmentTypeController;
 use App\Http\Controllers\DoctorScheduleController;
 use App\Http\Controllers\MedicalAppointmentController;
@@ -37,6 +39,11 @@ Route::group(['prefix' => 'patient', 'middleware' => ['auth:patient']], function
     Route::post('profile/update', [PatientController::class, 'update']);
     Route::post('/{patient_id}/profile-picture', [PatientController::class, 'updateProfilePicture']);
     Route::delete('/{patient_id}/profile-picture/delete', [PatientController::class, 'removeProfilePicture']);
+
+    Route::get('notifications', [PatientNotificationController::class, 'getNotifications']);
+    Route::get('notifications/read', [PatientNotificationController::class, 'getReadNotifications']);
+    Route::get('notifications/unread', [PatientNotificationController::class, 'getUnReadNotifications']);
+    Route::post('notifications/mark-as-read/{id}', [PatientNotificationController::class, 'markAsRead']);
 });
 
 Route::group(['prefix' => 'doctor', 'middleware' => ['auth:doctor']], function () {
@@ -46,6 +53,11 @@ Route::group(['prefix' => 'doctor', 'middleware' => ['auth:doctor']], function (
     Route::post('profile/update', [MedicalDoctorController::class, 'update']);
     Route::post('/{doctor_id}/profile-picture', [MedicalDoctorController::class, 'updateProfilePicture']);
     Route::delete('/{doctor_id}/profile-picture/delete', [MedicalDoctorController::class, 'removeProfilePicture']);
+
+    Route::get('notifications', [DoctorNotificationController::class, 'getNotifications']);
+    Route::get('notifications/read', [DoctorNotificationController::class, 'getReadNotifications']);
+    Route::get('notifications/unread', [DoctorNotificationController::class, 'getUnReadNotifications']);
+    Route::post('notifications/mark-as-read/{id}', [DoctorNotificationController::class, 'markAsRead']);
 });
 
 Route::group(['prefix' => 'medical', 'middleware' => ['auth:patient']], function () {
