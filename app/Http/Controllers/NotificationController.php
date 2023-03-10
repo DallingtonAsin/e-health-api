@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Repositories\NotificationRepository;
 use App\Helpers\SharedHelper as Helper;
-use Illuminate\Support\Facades\Validator;
 
 
 class NotificationController extends Controller
@@ -17,9 +16,10 @@ class NotificationController extends Controller
         $this->notificationRepository = $notificationRepository;
     }
 
-    public function getPatientNotifications($patient_id)
+    public function getPatientNotifications()
     {
         try {
+            $patient_id = auth('patient')->user()->id;
             $notifications = $this->notificationRepository->getPatientNotifications($patient_id);
             return response()->json($notifications, 200);
         } catch (\Exception $ex) {
@@ -27,10 +27,10 @@ class NotificationController extends Controller
         }
     }
 
-    public function getPatientReadNotifications($patient_id)
+    public function getPatientReadNotifications()
     {
         try {
-
+            $patient_id = auth('patient')->user()->id;
             $notifications = $this->notificationRepository->getPatientReadNotifications($patient_id);
             return response()->json($notifications, 200);
         } catch (\Exception $ex) {
@@ -38,10 +38,11 @@ class NotificationController extends Controller
         }
     }
 
-    public function getPatientUnReadNotifications($patient_id)
+    public function getPatientUnReadNotifications()
     {
         try {
 
+            $patient_id = auth('patient')->user()->id;
             $notifications = $this->notificationRepository->getPatientUnReadNotifications($patient_id);
             return response()->json($notifications, 200);
         } catch (\Exception $ex) {

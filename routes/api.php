@@ -39,9 +39,9 @@ Route::group(['prefix' => 'patient', 'middleware' => ['auth:patient']], function
     Route::post('/{patient_id}/profile-picture', [PatientController::class, 'updateProfilePicture']);
     Route::delete('/{patient_id}/profile-picture/delete', [PatientController::class, 'removeProfilePicture']);
 
-    Route::get('{id}/notifications', [NotificationController::class, 'getPatientNotifications']);
-    Route::get('{id}/notifications/read', [NotificationController::class, 'getPatientReadNotifications']);
-    Route::get('{id}/notifications/unread', [NotificationController::class, 'getPatientUnReadNotifications']);
+    Route::get('notifications', [NotificationController::class, 'getPatientNotifications']);
+    Route::get('notifications/read', [NotificationController::class, 'getPatientReadNotifications']);
+    Route::get('notifications/unread', [NotificationController::class, 'getPatientUnReadNotifications']);
     Route::post('notifications/mark-as-read/{id}', [NotificationController::class, 'markAsRead']);
 });
 
