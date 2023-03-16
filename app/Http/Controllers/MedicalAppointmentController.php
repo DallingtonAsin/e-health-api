@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Helpers\SharedHelper as Helper;
-use App\Models\MedicalHistory;
 use Illuminate\Support\Facades\Validator;
 use App\Repositories\MedicalAppointmentRepository;
 use App\Repositories\AppointmentTypeRepository;
@@ -16,21 +15,21 @@ use Carbon\Carbon;
 class MedicalAppointmentController extends Controller
 {
 
-    protected $appointmentTypeRepository, $medicalAppointmentRepository, $meetingTokenRepository, $notificationService;
+    protected $appointmentTypeRepository, $medicalAppointmentRepository, $meetingTokenRepository, $notificationService, $medicalHistoryRepository;
 
     public function __construct(
         AppointmentTypeRepository $appointmentTypeRepository,
         MedicalAppointmentRepository $medicalAppointmentRepository,
         MeetingTokenRepository $meetingTokenRepository,
         NotificationService $notificationService,
-        MedicalHistoryRepository $medicalHistoryRepository,
+        MedicalHistoryRepository $medicalHistoryRepository
 
     ) {
         $this->appointmentTypeRepository = $appointmentTypeRepository;
         $this->medicalAppointmentRepository = $medicalAppointmentRepository;
         $this->meetingTokenRepository = $meetingTokenRepository;
         $this->notificationService = $notificationService;
-        $this->$medicalHistoryRepository = $$medicalHistoryRepository;
+        $this->medicalHistoryRepository = $medicalHistoryRepository;
     }
 
     /**
