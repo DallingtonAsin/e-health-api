@@ -110,10 +110,12 @@ class MedicalAppointmentController extends Controller
             'patient_id' => 'required|exists:patients,id',
             'doctor_id' => 'required|exists:medical_doctors,id',
             'appointment_type' => 'required|exists:appointment_types,name',
-            'appointment_date' => 'required',
+            'appointment_date' => 'required|date|after_or_equal:today',
             'appointment_time' => 'required',
             'reason' => 'sometimes|nullable',
-            'notes' => 'sometimes|nullable'
+            'past_medical_history' => 'sometimes|nullable',
+            'current_treatment' => 'sometimes|nullable',
+
         ]);
 
         try {
@@ -129,7 +131,9 @@ class MedicalAppointmentController extends Controller
                 $date = $request->input('appointment_date');
                 $time = $request->input('appointment_time');
                 $reason = $request->input('reason');
-                $notes = $request->input('notes');
+                $past_medical_history = $request->input('past_medical_history');
+                $current_treatment = $request->input('current_treatment');
+
 
                 $appointment_type = $this->appointmentTypeRepository->getAppointmentTypeByName($appointment_type_name);
                 $appointment_date = Carbon::parse($date . ' ' . $time);
@@ -149,11 +153,19 @@ class MedicalAppointmentController extends Controller
                         'appointment_type_id' => $appointment_type->id,
                         'appointment_date' => $appointment_date,
                         'reason' => $reason,
-                        'notes' => $notes
                     ];
 
                     $data = $this->medicalAppointmentRepository->create($data);
                     $data->makeHidden(['created_at', 'updated_at']);
+
+                    $medical_history_data = [
+                        'patient_id' => $patient_id,
+                        'appointment_id' => $data->id,
+                        'past_medical_history' => $past_medical_history,
+                        'current_treatment' => $current_treatment
+                    ];
+
+                    $this->medicalHistoryRepository->create($medical_history_data);
 
                     $appointment = $this->medicalAppointmentRepository->get($data->id);
                     $is_online = $appointment->isOnline();
