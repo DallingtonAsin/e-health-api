@@ -3,9 +3,16 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Repositories\MedicalHistoryRepository;
 
 class MedicalHistoryController extends Controller
 {
+
+    protected $medicalHistoryRepository;
+    public function __construct(MedicalHistoryRepository $medicalHistoryRepository)
+    {
+        $this->medicalHistoryRepository = $medicalHistoryRepository;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -14,6 +21,15 @@ class MedicalHistoryController extends Controller
     public function index()
     {
         //
+    }
+
+    public function getPatientMedicalHistory($patient_id)
+    {
+        try {
+            return $this->medicalHistoryRepository->get($patient_id);
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
     }
 
     /**

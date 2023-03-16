@@ -12,6 +12,7 @@ use App\Http\Controllers\DoctorNotificationController;
 use App\Http\Controllers\AppointmentTypeController;
 use App\Http\Controllers\DoctorScheduleController;
 use App\Http\Controllers\MedicalAppointmentController;
+use App\Http\Controllers\MedicalHistoryController;
 use App\Http\Controllers\Auth\Patient\AuthenticationController as PatientAuthenticationController;
 use App\Http\Controllers\Auth\Doctor\AuthenticationController as DoctorAuthenticationController;
 
@@ -27,18 +28,19 @@ use App\Http\Controllers\Auth\Doctor\AuthenticationController as DoctorAuthentic
 |
 */
 
-Route::post('/patient/login', [PatientAuthenticationController::class, 'sendVerificationCode']);
-Route::post('/doctor/login', [DoctorAuthenticationController::class, 'login']);
+Route::post('patient/login', [PatientAuthenticationController::class, 'sendVerificationCode']);
+Route::post('doctor/login', [DoctorAuthenticationController::class, 'login']);
 
-Route::post('/send/pending-appointment-emails', [MailController::class, 'sendPendingAppointmentMail']);
+Route::post('send/pending-appointment-emails', [MailController::class, 'sendPendingAppointmentMail']);
 
 
 Route::group(['prefix' => 'patient', 'middleware' => ['auth:patient']], function () {
+
     Route::post('verify', [PatientAuthenticationController::class, 'verifyOTP']);
     Route::post('register', [PatientController::class, 'register']);
     Route::post('profile/update', [PatientController::class, 'update']);
-    Route::post('/{patient_id}/profile-picture', [PatientController::class, 'updateProfilePicture']);
-    Route::delete('/{patient_id}/profile-picture/delete', [PatientController::class, 'removeProfilePicture']);
+    Route::post('{patient_id}/profile-picture', [PatientController::class, 'updateProfilePicture']);
+    Route::delete('{patient_id}/profile-picture/delete', [PatientController::class, 'removeProfilePicture']);
 
     Route::get('notifications', [PatientNotificationController::class, 'getNotifications']);
     Route::get('notifications/read', [PatientNotificationController::class, 'getReadNotifications']);
@@ -47,12 +49,12 @@ Route::group(['prefix' => 'patient', 'middleware' => ['auth:patient']], function
 });
 
 Route::group(['prefix' => 'doctor', 'middleware' => ['auth:doctor']], function () {
-    Route::get('/languages', [LanguageController::class, 'getDoctorLanguages']);
-    Route::get('/specialties', [MedicalSpecialtyController::class, 'getDoctorSpecialties']);
+    Route::get('languages', [LanguageController::class, 'getDoctorLanguages']);
+    Route::get('specialties', [MedicalSpecialtyController::class, 'getDoctorSpecialties']);
     Route::post('register', [MedicalDoctorController::class, 'register']);
     Route::post('profile/update', [MedicalDoctorController::class, 'update']);
-    Route::post('/{doctor_id}/profile-picture', [MedicalDoctorController::class, 'updateProfilePicture']);
-    Route::delete('/{doctor_id}/profile-picture/delete', [MedicalDoctorController::class, 'removeProfilePicture']);
+    Route::post('{doctor_id}/profile-picture', [MedicalDoctorController::class, 'updateProfilePicture']);
+    Route::delete('{doctor_id}/profile-picture/delete', [MedicalDoctorController::class, 'removeProfilePicture']);
 
     Route::get('notifications', [DoctorNotificationController::class, 'getNotifications']);
     Route::get('notifications/read', [DoctorNotificationController::class, 'getReadNotifications']);
@@ -70,39 +72,39 @@ Route::group(['prefix' => 'medical', 'middleware' => ['auth:patient']], function
 Route::middleware(['auth:patient,doctor', 'patient.or.doctor'])->group(function () {
     Route::resource('drugs', DrugController::class);
     Route::get('appointments/meeting/{appointment_id}', [MedicalAppointmentController::class, 'getAppointmentMeetingDetails']);
+    Route::get('medical-history/patient/{patient_id}', [MedicalHistoryController::class, 'getPatientMedicalHistory']);
 });
 
 Route::group(['prefix' => 'doctor', 'middleware' => ['auth:doctor']], function () {
-
-    Route::resource('/schedule', DoctorScheduleController::class);
-    Route::get('/{doctor_id}/pending', [MedicalAppointmentController::class, 'getDoctorPendingAppointments']);
-    Route::get('/{doctor_id}/confirmed', [MedicalAppointmentController::class, 'getDoctorConfirmedAppointments']);
-    Route::get('/{doctor_id}/completed', [MedicalAppointmentController::class, 'getDoctorCompletedAppointments']);
-    Route::get('/{doctor_id}/cancelled', [MedicalAppointmentController::class, 'getDoctorCancelledAppointments']);
+    Route::resource('schedule', DoctorScheduleController::class);
+    Route::get('{doctor_id}/pending', [MedicalAppointmentController::class, 'getDoctorPendingAppointments']);
+    Route::get('{doctor_id}/confirmed', [MedicalAppointmentController::class, 'getDoctorConfirmedAppointments']);
+    Route::get('{doctor_id}/completed', [MedicalAppointmentController::class, 'getDoctorCompletedAppointments']);
+    Route::get('{doctor_id}/cancelled', [MedicalAppointmentController::class, 'getDoctorCancelledAppointments']);
 });
 
 
 Route::group(['prefix' => 'appointments'], function () {
 
     Route::middleware(['auth:patient'])->group(function () {
-        Route::resource('/', MedicalAppointmentController::class);
-        Route::post('/', [MedicalAppointmentController::class, 'store'])->middleware('throttle:7,1');
-        Route::put('/cancel', [MedicalAppointmentController::class, 'cancelAppointment']);
+        Route::resource('', MedicalAppointmentController::class);
+        Route::post('', [MedicalAppointmentController::class, 'store'])->middleware('throttle:7,1');
+        Route::put('cancel', [MedicalAppointmentController::class, 'cancelAppointment']);
         Route::resource('types', AppointmentTypeController::class);
     });
 
     Route::group(['prefix' => 'patient', 'middleware' => ['auth:patient']], function () {
-        Route::get('/{patient_id}/pending', [MedicalAppointmentController::class, 'getPatientPendingAppointments']);
-        Route::get('/{patient_id}/confirmed', [MedicalAppointmentController::class, 'getPatientConfirmedAppointments']);
-        Route::get('/{patient_id}/completed', [MedicalAppointmentController::class, 'getPatientCompletedAppointments']);
-        Route::get('/{patient_id}/cancelled', [MedicalAppointmentController::class, 'getPatientCancelledAppointments']);
+        Route::get('{patient_id}/pending', [MedicalAppointmentController::class, 'getPatientPendingAppointments']);
+        Route::get('{patient_id}/confirmed', [MedicalAppointmentController::class, 'getPatientConfirmedAppointments']);
+        Route::get('{patient_id}/completed', [MedicalAppointmentController::class, 'getPatientCompletedAppointments']);
+        Route::get('{patient_id}/cancelled', [MedicalAppointmentController::class, 'getPatientCancelledAppointments']);
     });
 
     Route::group(['prefix' => 'doctor', 'middleware' => ['auth:doctor']], function () {
 
-        Route::get('/{doctor_id}/pending', [MedicalAppointmentController::class, 'getDoctorPendingAppointments']);
-        Route::get('/{doctor_id}/confirmed', [MedicalAppointmentController::class, 'getDoctorConfirmedAppointments']);
-        Route::get('/{doctor_id}/completed', [MedicalAppointmentController::class, 'getDoctorCompletedAppointments']);
-        Route::get('/{doctor_id}/cancelled', [MedicalAppointmentController::class, 'getDoctorCancelledAppointments']);
+        Route::get('{doctor_id}/pending', [MedicalAppointmentController::class, 'getDoctorPendingAppointments']);
+        Route::get('{doctor_id}/confirmed', [MedicalAppointmentController::class, 'getDoctorConfirmedAppointments']);
+        Route::get('{doctor_id}/completed', [MedicalAppointmentController::class, 'getDoctorCompletedAppointments']);
+        Route::get('{doctor_id}/cancelled', [MedicalAppointmentController::class, 'getDoctorCancelledAppointments']);
     });
 });
