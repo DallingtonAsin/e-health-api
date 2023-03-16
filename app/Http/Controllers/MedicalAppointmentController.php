@@ -4,32 +4,35 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Helpers\SharedHelper as Helper;
+use App\Models\MedicalHistory;
 use Illuminate\Support\Facades\Validator;
 use App\Repositories\MedicalAppointmentRepository;
 use App\Repositories\AppointmentTypeRepository;
 use App\Repositories\MeetingTokenRepository;
+use App\Repositories\MedicalHistoryRepository;
 use App\Services\NotificationService;
 use Carbon\Carbon;
 
 class MedicalAppointmentController extends Controller
 {
 
-
     protected $appointmentTypeRepository, $medicalAppointmentRepository, $meetingTokenRepository, $notificationService;
-
 
     public function __construct(
         AppointmentTypeRepository $appointmentTypeRepository,
         MedicalAppointmentRepository $medicalAppointmentRepository,
         MeetingTokenRepository $meetingTokenRepository,
-        NotificationService $notificationService
+        NotificationService $notificationService,
+        MedicalHistoryRepository $medicalHistoryRepository,
 
     ) {
         $this->appointmentTypeRepository = $appointmentTypeRepository;
         $this->medicalAppointmentRepository = $medicalAppointmentRepository;
         $this->meetingTokenRepository = $meetingTokenRepository;
         $this->notificationService = $notificationService;
+        $this->$medicalHistoryRepository = $$medicalHistoryRepository;
     }
+
     /**
      * Display a listing of the resource.
      *
@@ -110,7 +113,7 @@ class MedicalAppointmentController extends Controller
             'appointment_type' => 'required|exists:appointment_types,name',
             'appointment_date' => 'required',
             'appointment_time' => 'required',
-            'symptoms' => 'sometimes|nullable',
+            'reason' => 'sometimes|nullable',
             'notes' => 'sometimes|nullable'
         ]);
 
@@ -126,7 +129,7 @@ class MedicalAppointmentController extends Controller
                 $appointment_type_name = $request->input('appointment_type');
                 $date = $request->input('appointment_date');
                 $time = $request->input('appointment_time');
-                $symptoms = $request->input('symptoms');
+                $reason = $request->input('reason');
                 $notes = $request->input('notes');
 
                 $appointment_type = $this->appointmentTypeRepository->getAppointmentTypeByName($appointment_type_name);
@@ -146,7 +149,7 @@ class MedicalAppointmentController extends Controller
                         'appointment_number' => $appointment_number,
                         'appointment_type_id' => $appointment_type->id,
                         'appointment_date' => $appointment_date,
-                        'symptoms' => $symptoms,
+                        'reason' => $reason,
                         'notes' => $notes
                     ];
 

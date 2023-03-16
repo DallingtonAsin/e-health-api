@@ -8,7 +8,7 @@ Appointment Date: {{ $body['appointment_date'] }}<br>
 Patient Name: {{ $body['patient_name'] }}<br>
 Patient Telephone Number: {{ $body['patient_phone_number'] }}<br>
 Patient Address: {{ $body['patient_address'] }}<br>
-Patient symptoms: {{ $body['symptoms'] }}<br>
+Reason for appointment: {{ $body['reason'] }}<br>
 </p>
 <p>Please make sure to be available for the appointment.</p>
 <p>Thank you</p>

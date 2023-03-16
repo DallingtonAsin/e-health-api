@@ -20,7 +20,7 @@ class CreateMedicalAppointmentsTable extends Migration
             $table->string('appointment_number')->unique();
             $table->unsignedBigInteger('appointment_type_id');
             $table->dateTime('appointment_date');
-            $table->text('symptoms')->nullable();
+            $table->text('reason')->nullable();
             $table->text('notes')->nullable();
             $table->enum('status', ['pending', 'confirmed', 'completed', 'cancelled', 'missed', 'rescheduled', 'in progress', 'arrived', 'postponed'])->default('pending');
             $table->timestamp('confirmed_at')->nullable();

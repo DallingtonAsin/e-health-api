@@ -21,6 +21,8 @@ class DatabaseSeeder extends Seeder
             DoctorAuthenticationSeeder::class,
             MedicalDoctorSeeder::class,
             DoctorAvailabilitySeeder::class,
+            DrugCategorySeeder::class,
+            DrugSeeder::class
         ]);
     }
 }
