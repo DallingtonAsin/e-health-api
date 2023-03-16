@@ -93,6 +93,10 @@ Route::group(['prefix' => 'appointments'], function () {
         Route::resource('types', AppointmentTypeController::class);
     });
 
+    Route::middleware(['auth:doctor'])->group(function () {
+        Route::put('{appointment_id}/complete', [MedicalAppointmentController::class, 'completeAppointment']);
+    });
+
     Route::group(['prefix' => 'patient', 'middleware' => ['auth:patient']], function () {
         Route::get('{patient_id}/pending', [MedicalAppointmentController::class, 'getPatientPendingAppointments']);
         Route::get('{patient_id}/confirmed', [MedicalAppointmentController::class, 'getPatientConfirmedAppointments']);

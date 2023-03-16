@@ -2,23 +2,27 @@
 
 namespace App\Services;
 
+use App\Notifications\NewAppointmentNotification;
 use App\Notifications\AppointmentBookedNotification;
 use App\Notifications\AppointmentCancelledNotification;
-use App\Notifications\NewAppointmentNotification;
+use App\Notifications\AppointmentCompletedNotification;
 use App\Repositories\PatientRepository;
 use App\Repositories\MedicalDoctorRepository;
-use App\Models\DoctorNotification;
 use Carbon\Carbon;
 
 class NotificationService
 {
 
-    protected $patient, $patientRepository, $medicalDoctorRepository;
+    protected $patient, $patientRepository, $medicalDoctorRepository, $current_time;
 
     public function __construct(PatientRepository $patientRepository, MedicalDoctorRepository $medicalDoctorRepository)
     {
         $this->patientRepository = $patientRepository;
         $this->medicalDoctorRepository = $medicalDoctorRepository;
+
+        $current_date = Carbon::now()->format('Y-m-d');
+        $current_time = Carbon::now()->format('H:i A');
+        $this->current_time = $current_date. ' '. $current_time;
     }
 
     public function sendAppointmentBookedMessage($patient_id, $appointment)
@@ -47,18 +51,38 @@ class NotificationService
         }
     }
 
+    public function sendAppointmentCompletedMessage($appointment, $is_patient)
+    {
+        try {
+            $user = $is_patient ? $this->patientRepository->find($appointment->patient_id) : $this->medicalDoctorRepository->find($appointment->doctor_id);
+            $message = $this->appointmentCompletedMessage($appointment, $is_patient);
+            $notification = new AppointmentCompletedNotification($appointment, $message);
+            $user->notify($notification);
+        } catch (\Exception $ex) {
+            throw $ex;
+        }
+    }
+
+
     public function sendDoctorNewAppointmentMessage($doctor_id, $appointment)
+    {
+        try {
+            $doctor = $this->medicalDoctorRepository->find($doctor_id);
+            $message = $this->newAppointmentMessage($appointment);
+            $notification = new NewAppointmentNotification($appointment, $message);
+            $doctor->notify($notification);
+        } catch (\Exception $ex) {
+            throw $ex;
+        }
+    }
+
+    public function sendDoctorAppointmentCancelledMessage($doctor_id, $appointment)
     {
         try {
 
             $doctor = $this->medicalDoctorRepository->find($doctor_id);
-            $message = $this->newAppointmentMessage($appointment);
-            $notificationData = [
-                'message' => $message,
-                'appointment_id' => $appointment->id,
-                'appointment_number' => $appointment->appointment_number,
-            ];
-            $notification = new NewAppointmentNotification($appointment, $message);
+            $message = $this->doctorAppointmentCancelledMessage($appointment);
+            $notification = new AppointmentCancelledNotification($appointment, $message);
             $doctor->notify($notification);
         } catch (\Exception $ex) {
             throw $ex;
@@ -78,10 +102,8 @@ class NotificationService
     private function appointmentCancelledMessage($appointment)
     {
         try {
-
-            $current_date = Carbon::now()->format('Y-m-d');
-            $current_time = Carbon::now()->format('H:i:s');
-            $message = "Your medical appointment (#" . $appointment->appointment_number . ") on " . $current_date . " at " . $current_time . " has been successfully cancelled. Please reschedule your appointment at your earliest convenience. Thank you for using our app!";
+          
+            $message = "Your appointment (#" . $appointment->appointment_number . ") scheduled for " . $appointment->appointment_date . " at " . $appointment->appointment_time . " has been successfully cancelled at ".$this->current_time.".";
             return $message;
         } catch (\Exception $ex) {
             throw $ex;
@@ -99,4 +121,36 @@ class NotificationService
             throw $ex;
         }
     }
+
+    private function doctorAppointmentCancelledMessage($appointment)
+    {
+        try {
+            $patient = $this->patientRepository->find($appointment->patient_id);
+            $patient_name = $patient->first_name . ' ' . $patient->last_name;
+            $message = 'Medical appointment (#' . $appointment->appointment_number . ')  with ' . $patient_name . ', originally scheduled for ' . $appointment->appointment_date . ' at ' . $appointment->appointment_time . ', has been cancelled at '.$this->current_time.'.';
+            return $message;
+        } catch (\Exception $ex) {
+            throw $ex;
+        }
+    }
+
+    private function appointmentCompletedMessage($appointment, $is_patient = true)
+    {
+        try {
+            $patient = $this->patientRepository->find($appointment->patient_id);
+            $doctor = $this->medicalDoctorRepository->find($appointment->doctor_id);
+
+            $patient_name = $patient->first_name . ' ' . $patient->last_name;
+            $doctor_name = $doctor->first_name . ' ' . $doctor->last_name;
+
+            $message = "Your appointment (#" . $appointment->appointment_number . ") with doctor ".$doctor_name." on " . $appointment->appointment_date . " at " . $appointment->appointment_time . " has been completed at ".$this->current_time.".";
+            if(!$is_patient){
+                $message = "Your appointment (#" . $appointment->appointment_number . ") with patient ".$patient_name." on " . $appointment->appointment_date . " at " . $appointment->appointment_time . " has been completed at ".$this->current_time.".";
+            }
+            return $message;
+        } catch (\Exception $ex) {
+            throw $ex;
+        }
+    }
+
 }

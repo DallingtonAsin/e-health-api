@@ -51,4 +51,10 @@ class MedicalHistoryRepository
         $medicalHistory = $this->medicalHistory->where('id', $id)->exists();
         return $medicalHistory;
     }
+
+    public function updateMedicalHistory($patient_id, $appointment_id, $medicalHistoryData)
+    {
+        $medicalHistory = $this->medicalHistory->where('patient_id', $patient_id)->where('appointment_id', $appointment_id)->first();
+        return $medicalHistory->update($medicalHistoryData);
+    }
 }
