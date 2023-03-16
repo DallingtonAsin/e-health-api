@@ -25,9 +25,9 @@ class MedicalHistoryRepository
 
     public function get($patient_id = null)
     {
-        $history = $this->medicalHistory->select(['id', 'patient_id', 'appointment_id', 'past_medical_history', 'current_treatment', 'illness', 'diagnosis_date', 'treatment'])->get();
+        $history = $this->medicalHistory->whereNotNull('diagnosis_date')->select(['id', 'patient_id', 'appointment_id', 'past_medical_history', 'current_treatment', 'illness', 'diagnosis_date', 'treatment'])->get();
         if ($patient_id) {
-            $history = $this->medicalHistory->where('patient_id', $patient_id)->select(['id', 'patient_id', 'appointment_id', 'past_medical_history', 'current_treatment', 'illness', 'diagnosis_date', 'treatment'])->get();
+            $history = $this->medicalHistory->where('patient_id', $patient_id)->whereNotNull('diagnosis_date')->select(['id', 'patient_id', 'appointment_id', 'past_medical_history', 'current_treatment', 'illness', 'diagnosis_date', 'treatment'])->get();
         }
         return $history;
     }
