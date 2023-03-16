@@ -321,18 +321,24 @@ class MedicalAppointmentController extends Controller
                     'treatment' => $treatment
                 ];
 
-                $this->medicalAppointmentRepository->completeAppointment($patient_id, $appointment_id);
-                $this->medicalHistoryRepository->updateMedicalHistory($patient_id, $appointment_id, $data);
                 $appointment = $this->medicalAppointmentRepository->get($appointment_id);
+                $status = $appointment->status;
 
-                $datetime = Carbon::parse($appointment->appointment_date);
-                $appointment->appointment_date = $datetime->toDateString();
-                $appointment->appointment_time = date('H:i', strtotime($datetime->toTimeString()));
+                if (is_null($status) || $status === 'pending') {
+                    $this->medicalAppointmentRepository->completeAppointment($patient_id, $appointment_id);
+                    $this->medicalHistoryRepository->updateMedicalHistory($patient_id, $appointment_id, $data);
 
-                $this->notificationService->sendAppointmentCompletedMessage($appointment, true);
-                $this->notificationService->sendAppointmentCompletedMessage($appointment, false);
+                    $datetime = Carbon::parse($appointment->appointment_date);
+                    $appointment->appointment_date = $datetime->toDateString();
+                    $appointment->appointment_time = date('H:i', strtotime($datetime->toTimeString()));
 
-                return response()->json(['message' => 'Appointment has been completed successfully'], 200);
+                    $this->notificationService->sendAppointmentCompletedMessage($appointment, true);
+                    $this->notificationService->sendAppointmentCompletedMessage($appointment, false);
+
+                    return response()->json(['message' => 'Appointment has been completed successfully'], 200);
+                } else {
+                    return response()->json(['message' => 'Sorry! This appointment has already been marked ' . $appointment->status . '.'], 400);
+                }
             }
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
@@ -357,17 +363,22 @@ class MedicalAppointmentController extends Controller
                 $patient_id = $request->input('patient_id');
                 $appointment_number = $request->input('appointment_number');
 
-                $this->medicalAppointmentRepository->cancelAppointment($patient_id, $appointment_number);
                 $appointment = $this->medicalAppointmentRepository->findAppointmentByNumber($appointment_number);
+                $status = $appointment->status;
 
-                $datetime = Carbon::parse($appointment->appointment_date);
-                $appointment->appointment_date = $datetime->toDateString();
-                $appointment->appointment_time = date('H:i', strtotime($datetime->toTimeString()));
+                if (is_null($status) || $status === 'pending') {
+                    $this->medicalAppointmentRepository->cancelAppointment($patient_id, $appointment_number);
+                    $datetime = Carbon::parse($appointment->appointment_date);
+                    $appointment->appointment_date = $datetime->toDateString();
+                    $appointment->appointment_time = date('H:i', strtotime($datetime->toTimeString()));
 
-                $this->notificationService->sendAppointmentCancelledMessage($patient_id, $appointment);
-                $this->notificationService->sendDoctorAppointmentCancelledMessage($appointment->doctor_id, $appointment);
+                    $this->notificationService->sendAppointmentCancelledMessage($patient_id, $appointment);
+                    $this->notificationService->sendDoctorAppointmentCancelledMessage($appointment->doctor_id, $appointment);
 
-                return response()->json(['message' => 'Appointment has been cancelled successfully'], 200);
+                    return response()->json(['message' => 'Appointment has been cancelled successfully'], 200);
+                } else {
+                    return response()->json(['message' => 'Sorry! This appointment has already been marked ' . $appointment->status . '.'], 400);
+                }
             }
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
