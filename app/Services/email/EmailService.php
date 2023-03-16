@@ -31,7 +31,7 @@ class EmailService{
                     'patient_name' => $appointment->patient->first_name . " " . $appointment->patient->last_name,
                     'patient_phone_number' => $appointment->patient->country_code . "" . $appointment->patient->phone_number,
                     'patient_address' => $appointment->patient->address,
-                    'symptoms' => $appointment->symptoms,
+                    'reason' => $appointment->reason,
                 ];
 
                 if ($appointment->doctor->email) {

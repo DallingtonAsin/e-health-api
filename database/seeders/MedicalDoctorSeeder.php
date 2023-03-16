@@ -51,7 +51,7 @@ class MedicalDoctorSeeder extends Seeder
 
         MedicalDoctor::create([
             "user_type_id" => $user_type_id,
-            "first_name" => "Moses",
+            "first_name" => "David",
             "last_name" => "Taremwa",
             "title" => "Dr.",
             "country_code" => '+256',
@@ -120,7 +120,7 @@ class MedicalDoctorSeeder extends Seeder
 
         MedicalDoctor::create([
             "user_type_id" => $user_type_id,
-            "first_name" => "Moses",
+            "first_name" => "John",
             "last_name" => "Asiimwe",
             "title" => "Dr.",
             "country_code" => '+256',
@@ -206,7 +206,7 @@ class MedicalDoctorSeeder extends Seeder
 
         MedicalDoctor::create([
             "user_type_id" => $user_type_id,
-            "first_name" => "John",
+            "first_name" => "Peter",
             "last_name" => "Matsiko",
             "title" => "Dr.",
             "country_code" => '+256',
