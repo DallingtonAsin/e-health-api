@@ -16,4 +16,12 @@ class MedicalHistory extends Model
     ];
 
     public $timestamps = true;
+
+    public function appointment()
+    {
+        return $this->belongsTo(MedicalAppointment::class, 'appointment_id');
+    }
+
+
+
 }

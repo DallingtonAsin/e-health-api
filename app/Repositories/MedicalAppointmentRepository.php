@@ -77,6 +77,8 @@ class MedicalAppointmentRepository
             $query->select(['id', 'name']);
         }])->with(['meetingAccess' => function ($query) {
             $query->select(['appointment_id', 'app_id as appId', 'channel', 'token']);
+        }])->with(['medicalHistory' => function ($query) {
+            $query->select(['id', 'patient_id', 'appointment_id', 'past_medical_history', 'current_treatment', 'illness', 'diagnosis_date', 'treatment']);
         }]);
 
         if ($patient_id) {
