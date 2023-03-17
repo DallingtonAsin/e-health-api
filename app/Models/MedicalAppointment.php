@@ -8,6 +8,7 @@ use App\Models\Patient;
 use App\Models\MedicalDoctor;
 use App\Models\AppointmentType;
 use App\Models\MeetingToken;
+use App\Models\MedicalHistory;
 
 class MedicalAppointment extends Model
 {
@@ -46,6 +47,11 @@ class MedicalAppointment extends Model
     public function meetingAccess()
     {
         return $this->hasOne(MeetingToken::class, 'appointment_id');
+    }
+
+    public function medicalHistory()
+    {
+        return $this->hasOne(MedicalHistory::class, 'appointment_id');
     }
 
 }
