@@ -4,8 +4,8 @@ namespace App\Repositories;
 
 use App\Models\MedicalAppointment;
 use App\Models\AppointmentType;
+use App\Models\MedicalSpecialty;
 use App\Helpers\SharedHelper as Helper;
-use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 
 
@@ -93,7 +93,7 @@ class MedicalAppointmentRepository
             $appointments->where('status', $status);
         }
 
-        if(!is_null($is_doctor_notified)){
+        if (!is_null($is_doctor_notified)) {
             $appointments->where('is_doctor_notified', $is_doctor_notified);
         }
 
@@ -101,21 +101,21 @@ class MedicalAppointmentRepository
 
         $appointments = $appointments->get()
             ->map(function ($appointment) {
-
-                $is_online = $appointment->isOnline(); 
+                $is_online = $appointment->isOnline();
                 $appointment->is_online = $appointment->isOnline();
-                if($is_online){
-                    if(!empty($appointment->meetingAccess->appointment_id)){
+                if ($is_online) {
+                    if (!empty($appointment->meetingAccess->appointment_id)) {
                         unset($appointment->meetingAccess->appointment_id);
                     }
                 }
-
+                
                 $appointment->is_video = $appointment->isVideo();
                 $appointment->appointment_time =  Carbon::parse($appointment->appointment_date)->format('H:i');
                 $appointment->appointment_date = Carbon::parse($appointment->appointment_date)->toDateString();
                 $appointment->status = ucfirst($appointment->status);
                 $appointment->patient->thumbnail = $appointment->patient->thumbnail();
                 $appointment->doctor->thumbnail = $appointment->doctor->thumbnail();
+                $appointment->doctor->specialty = MedicalSpecialty::where('id', $appointment->doctor->specialty_id)->value('name');
                 $appointment->doctor->service_fee = number_format(floatval($appointment->doctor->service_fee));
                 return $appointment;
             });
@@ -137,7 +137,8 @@ class MedicalAppointmentRepository
             ->update(['status' => 'cancelled', 'cancelled_at' => Carbon::now()]);
     }
 
-    public function findAppointmentByNumber($appointment_number){
+    public function findAppointmentByNumber($appointment_number)
+    {
         return $this->medicalAppointment->where('appointment_number', $appointment_number)->first();
     }
 }
