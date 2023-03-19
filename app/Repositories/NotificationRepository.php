@@ -18,6 +18,7 @@ class NotificationRepository
     {
         $patient = $this->findPatient($patient_id);
         $notifications = $patient->notifications()->select(['id', 'notifiable_id', 'data', 'read_at'])->orderBy('created_at', 'desc')->get();
+        $notifications = $this->modifyNotifications($notifications);
         return $notifications;
     }
 
@@ -25,6 +26,7 @@ class NotificationRepository
     {
         $patient = $this->findPatient($patient_id);
         $notifications = $patient->readNotifications()->select(['id', 'notifiable_id', 'data', 'read_at'])->orderBy('created_at', 'desc')->get();
+        $notifications = $this->modifyNotifications($notifications);
         return $notifications;
     }
 
@@ -32,6 +34,7 @@ class NotificationRepository
     {
         $patient = $this->findPatient($patient_id);
         $notifications = $patient->unreadNotifications()->select(['id', 'notifiable_id', 'data', 'read_at'])->orderBy('created_at', 'desc')->get();
+        $notifications = $this->modifyNotifications($notifications);
         return $notifications;
     }
 
@@ -77,6 +80,7 @@ class NotificationRepository
     {
         $doctor = $this->findDoctor($doctor_id);
         $notifications = $doctor->notifications()->select(['id', 'notifiable_id', 'data', 'read_at'])->orderBy('created_at', 'desc')->get();
+        $notifications = $this->modifyNotifications($notifications);
         return $notifications;
     }
 
@@ -84,6 +88,7 @@ class NotificationRepository
     {
         $doctor = $this->findDoctor($doctor_id);
         $notifications = $doctor->readNotifications()->select(['id', 'notifiable_id', 'data', 'read_at'])->orderBy('created_at', 'desc')->get();
+        $notifications = $this->modifyNotifications($notifications);
         return $notifications;
     }
 
@@ -91,6 +96,7 @@ class NotificationRepository
     {
         $doctor = $this->findDoctor($doctor_id);
         $notifications = $doctor->unreadNotifications()->select(['id', 'notifiable_id', 'data', 'read_at'])->orderBy('created_at', 'desc')->get();
+        $notifications = $this->modifyNotifications($notifications);
         return $notifications;
     }
 
@@ -124,5 +130,13 @@ class NotificationRepository
         } catch (\Exception $ex) {
             throw $ex;
         }
+    }
+
+    private function modifyNotifications($notifications){
+        $notifications = $notifications->map(function ($notification) {
+             $notification->status = !is_null($notification->read_at) ? 'read' : 'unread';
+             return $notification;
+        }); 
+        return $notifications;
     }
 }
