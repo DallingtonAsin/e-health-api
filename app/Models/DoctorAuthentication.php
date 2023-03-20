@@ -9,7 +9,7 @@ class DoctorAuthentication extends Model
 {
     use HasFactory;
 
-    protected $table = 'doctor_authentication';
+    protected $table = 'doctor_preassigned_otps';
 
 
     protected $fillable = [

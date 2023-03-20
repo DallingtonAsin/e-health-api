@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateDoctorAuthenticationTable extends Migration
+class CreateDoctorPreassignedOtpsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,10 @@ class CreateDoctorAuthenticationTable extends Migration
      */
     public function up()
     {
-        Schema::create('doctor_authentication', function (Blueprint $table) {
+        Schema::create('doctor_preassigned_otps', function (Blueprint $table) {
             $table->id();
-            $table->string('country_code');
-            $table->string('phone_number');
+            $table->string('country_code', 5);
+            $table->string('phone_number', 15);
             $table->string('auth_code', 4);
             $table->timestamps();
         });
@@ -29,6 +29,6 @@ class CreateDoctorAuthenticationTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('doctor_authentication');
+        Schema::dropIfExists('doctor_preassigned_otps');
     }
 }
