@@ -134,7 +134,7 @@ class NotificationRepository
 
     private function modifyNotifications($notifications){
         $notifications = $notifications->map(function ($notification) {
-             $notification->status = !is_null($notification->read_at) ? 'read' : 'unread';
+             $notification->read = !is_null($notification->read_at) ? true : false;
              return $notification;
         }); 
         return $notifications;
