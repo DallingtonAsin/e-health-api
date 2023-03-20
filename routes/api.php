@@ -62,7 +62,7 @@ Route::group(['prefix' => 'doctor', 'middleware' => ['auth:doctor']], function (
     Route::post('notifications/mark-as-read/{id}', [DoctorNotificationController::class, 'markAsRead']);
 });
 
-Route::group(['prefix' => 'medical', 'middleware' => ['auth:patient']], function () {
+Route::group(['prefix' => 'medical', 'middleware' => ['auth:patient,doctor', 'patient.or.doctor']], function () {
     Route::get('doctors/specialty/{specialty}', [MedicalDoctorController::class, 'getDoctorsBySpecialty']);
     Route::resource('specialties', MedicalSpecialtyController::class);
     Route::resource('doctors', MedicalDoctorController::class);
