@@ -28,6 +28,7 @@ use App\Http\Controllers\Auth\Doctor\AuthenticationController as DoctorAuthentic
 |
 */
 
+Route::post('send-sms', [PatientAuthenticationController::class, 'sendSms']);
 Route::post('patient/login', [PatientAuthenticationController::class, 'sendVerificationCode']);
 Route::post('doctor/login', [DoctorAuthenticationController::class, 'login']);
 

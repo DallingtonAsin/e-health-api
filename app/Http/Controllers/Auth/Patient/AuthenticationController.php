@@ -23,6 +23,31 @@ class AuthenticationController extends Controller
         $this->userTypeRepository = $userTypeRepository;
     }
 
+    public function sendSms(Request $request){
+        $dataObj = [
+            'phone_number' => 'required',
+            'message' => 'required'
+        ];
+
+        $validator = Validator::make($request->all(), $dataObj);
+
+        try {
+
+            if ($validator->fails()) {
+                $message = $validator->errors()->all();
+                return Helper::sendFailedHttpResponse($message);
+            } else {
+                $phone_number = $request->phone_number;
+                $message = $request->message;
+                $response = $this->smsService->sendMessage($phone_number, $message);
+                return response()->json($response, 200);
+            }
+        } catch (\Exception $ex) {
+            $message = $ex->getMessage();
+            return Helper::sendFailedHttpResponse($message);
+        }
+    }
+
     // send verification code
     public function sendVerificationCode(Request $request)
     {
@@ -128,7 +153,7 @@ class AuthenticationController extends Controller
             $patient_id = $patient->id;
             $otp = $this->smsService->generateNumericOTP(4);
             $patient_phone_number = $patient->country_code . '' . $patient->phone_number;
-            $this->smsService->sendOTP($patient_phone_number, $otp);
+            // $this->smsService->sendOTP($patient_phone_number, $otp);
 
             $this->patientRepository->update($patient_id, ["otp" => $otp]);
             $patient = $this->patientRepository->generateAccessToken($patient_id);
