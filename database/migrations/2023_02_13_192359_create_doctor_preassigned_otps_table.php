@@ -17,7 +17,7 @@ class CreateDoctorPreassignedOtpsTable extends Migration
             $table->id();
             $table->string('country_code', 5);
             $table->string('phone_number', 15);
-            $table->string('auth_code', 4);
+            $table->string('auth_code', 10);
             $table->timestamps();
         });
     }
