@@ -151,7 +151,7 @@ class AuthenticationController extends Controller
         try {
 
             $patient_id = $patient->id;
-            $otp = $this->smsService->generateNumericOTP(4);
+            $otp = $this->smsService->generateNumericOTP(6);
             $patient_phone_number = $patient->country_code . '' . $patient->phone_number;
             // $this->smsService->sendOTP($patient_phone_number, $otp);
 

@@ -18,18 +18,18 @@ class DoctorAuthenticationSeeder extends Seeder
         DoctorAuthentication::create([
             'country_code' => '+256',
             'phone_number' => '700477421',
-            'auth_code' => '7878',
+            'auth_code' => '787878',
         ]);
         DoctorAuthentication::create([
             'country_code' => '+256',
             'phone_number' => '786857180',
-            'auth_code' => '5050',
+            'auth_code' => '505050',
         ]);
 
         DoctorAuthentication::create([
             'country_code' => '+256',
             'phone_number' => '772833275',
-            'auth_code' => '1010',
+            'auth_code' => '101010',
         ]);
     }
 }
