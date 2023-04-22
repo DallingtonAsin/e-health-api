@@ -28,7 +28,10 @@ use App\Http\Controllers\Auth\Doctor\AuthenticationController as DoctorAuthentic
 |
 */
 
+// Development routes
 Route::post('send-sms', [PatientAuthenticationController::class, 'sendSms']);
+
+
 Route::post('patient/login', [PatientAuthenticationController::class, 'sendVerificationCode']);
 Route::post('doctor/login', [DoctorAuthenticationController::class, 'login']);
 
@@ -50,9 +53,10 @@ Route::group(['prefix' => 'patient', 'middleware' => ['auth:patient']], function
 });
 
 Route::group(['prefix' => 'doctor', 'middleware' => ['auth:doctor']], function () {
+    Route::post('verify', [DoctorAuthenticationController::class, 'verifyOTP']);
+    Route::post('register', [MedicalDoctorController::class, 'register']);
     Route::get('languages', [LanguageController::class, 'getDoctorLanguages']);
     Route::get('specialties', [MedicalSpecialtyController::class, 'getDoctorSpecialties']);
-    Route::post('register', [MedicalDoctorController::class, 'register']);
     Route::post('profile/update', [MedicalDoctorController::class, 'update']);
     Route::post('{doctor_id}/profile-picture', [MedicalDoctorController::class, 'updateProfilePicture']);
     Route::delete('{doctor_id}/profile-picture/delete', [MedicalDoctorController::class, 'removeProfilePicture']);

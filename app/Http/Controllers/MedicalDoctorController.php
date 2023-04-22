@@ -8,7 +8,7 @@ use App\Repositories\MedicalSpecialtyRepository;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\SharedHelper as Helper;
 use Illuminate\Support\Facades\Storage;
-
+use Carbon\Carbon;
 
 class MedicalDoctorController extends Controller
 {
@@ -95,6 +95,54 @@ class MedicalDoctorController extends Controller
 
     // register doctor
     public function register(Request $request)
+    {
+
+        $validator = Validator::make($request->all(), [
+            'first_name' => 'required|max:55',
+            'last_name' => 'required|max:55',
+            'email' => 'required|email|unique:medical_doctors',
+            'gender' => 'required',
+            'dob' => 'required|date',
+        ]);
+
+        try {
+
+            if ($validator->fails()) {
+                $message = $validator->errors()->all();
+                return Helper::sendFailedHttpResponse($message);
+            } else {
+
+
+                $dob = date('Y-m-d', strtotime($request->dob));
+                $age = $this->getAge($dob);
+                if ($age >=  18) {
+
+                    $validatedData = [
+                        'first_name' => $request->first_name,
+                        'last_name' => $request->last_name,
+                        'email' => $request->email,
+                        'gender' => ucfirst($request->gender),
+                        'dob' => $dob,
+                        'profile_status' => 1
+                    ];
+
+                    $doctor = auth('doctor')->user();
+                    $doctor_id = $doctor->id;
+                    $this->doctorRepository->update($doctor_id, $validatedData);
+                    $doctor = $this->doctorRepository->generateAccessToken($doctor_id);
+                    return response()->json($doctor, 200);
+                } else {
+                    return Helper::sendFailedHttpResponse('You must be above 18 years to register as a doctor');
+                }
+            }
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
+
+    // complete registration
+    public function completeRegistration(Request $request)
     {
 
         $validator = Validator::make($request->all(), [
@@ -308,6 +356,17 @@ class MedicalDoctorController extends Controller
             }
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
+    private function getAge($birthdate)
+    {
+        try {
+            $birthday = Carbon::parse($birthdate);
+            $age = $birthday->age;
+            return $age;
+        } catch (\Exception $ex) {
+            throw $ex;
         }
     }
 }

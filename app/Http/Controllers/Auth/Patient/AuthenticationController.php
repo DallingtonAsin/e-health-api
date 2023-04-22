@@ -57,7 +57,7 @@ class AuthenticationController extends Controller
 
                 if ($exists) {
 
-                    $patient = $this->patientRepository->getPatientDetailsByPhoneNumber($country_code, $phone_number);
+                    $patient = $this->patientRepository->getDetailsByPhoneNumber($country_code, $phone_number);
 
                     $patient->update([
                         'unique_device_id' => $unique_device_id,
@@ -132,8 +132,8 @@ class AuthenticationController extends Controller
 
             $patient_id = $patient->id;
             $otp = $this->smsService->generateNumericOTP(6);
-            $patient_phone_number = $patient->country_code . '' . $patient->phone_number;
-            // $this->smsService->sendOTP($patient_phone_number, $otp);
+            $phone_number = $patient->country_code . '' . $patient->phone_number;
+            // $this->smsService->sendOTP($phone_number, $otp);
 
             $this->patientRepository->update($patient_id, ["otp" => $otp]);
             $patient = $this->patientRepository->generateAccessToken($patient_id);
