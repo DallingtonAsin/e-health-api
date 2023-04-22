@@ -14,7 +14,7 @@ class Patient extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     protected $table = "patients";
-    
+
     /**
      * The attributes that are mass assignable.
      *
@@ -36,8 +36,9 @@ class Patient extends Authenticatable
         'fcm_token',
         'otp',
         'image',
-        'is_blocked',
-        'profile_status'
+        'profile_status',
+        'is_verified',
+        'is_blocked'
     ];
 
     /**
@@ -58,11 +59,13 @@ class Patient extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function userType(){
+    public function userType()
+    {
         return $this->belongsTo(UserType::class, 'user_type_id');
     }
 
-    public function isPatient(){
+    public function isPatient()
+    {
         $user_type_name = $this->userType->name;
         return stripos($user_type_name, 'patient') !== false;
     }
