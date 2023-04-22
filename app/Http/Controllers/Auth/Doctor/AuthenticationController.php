@@ -88,9 +88,13 @@ class AuthenticationController extends Controller
                     $doctor = $this->doctorRepository->create($validatedData);
                 }
 
-                $doctor = $this->doctorRepository->generateAccessToken($doctor->id);
+                if($doctor->is_blocked){
+                    return Helper::sendFailedHttpResponse("Sorry, your account has been blocked. Please contact support for more information.");
+                }else{
+                    $doctor = $this->doctorRepository->generateAccessToken($doctor->id);
+                    return Helper::sendOkHttpResponse($doctor);
+                }
 
-                return Helper::sendOkHttpResponse($doctor);
             } else {
                 $message = 'Invalid verification code. Contact admin if you have completely forgotten your code.';
                 return Helper::sendFailedHttpResponse($message);
