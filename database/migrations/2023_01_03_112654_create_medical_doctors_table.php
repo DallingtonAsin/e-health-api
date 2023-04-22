@@ -39,6 +39,7 @@ class CreateMedicalDoctorsTable extends Migration
             $table->string('fcm_token')->nullable();
             $table->string('otp')->nullable();
             $table->string('image')->nullable();
+            $table->string('identification_doc_path')->nullable();
             $table->boolean('profile_status')->default(false);
             $table->boolean('is_verified')->default(false);
             $table->boolean('is_blocked')->default(false);

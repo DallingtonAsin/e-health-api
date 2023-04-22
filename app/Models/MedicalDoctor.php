@@ -21,7 +21,7 @@ class MedicalDoctor extends Authenticatable
        'user_type_id', 'first_name', 'last_name', 'specialty_id',
         'title', 'country_code', 'phone_number', 'email', 'address', 'gender', 'qualification',
         'profession', 'dob', 'languages', 'experience', 'image', 'service_fee', 'ip_address', 'current_version', 'unique_device_id',
-        'fcm_token', 'otp', 'is_blocked', 'profile_status'
+        'fcm_token', 'otp', 'profile_status', 'is_verified', 'is_blocked'
     ];
 
     public $timestamps = true;

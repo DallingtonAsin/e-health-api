@@ -48,6 +48,7 @@ class PatientController extends Controller
                         'address' => $request->address,
                         'dob' => date('Y-m-d', strtotime($request->dob)),
                         'profile_status' => 1,
+                        'is_verified' => 1
                     ];
     
                     $patient = auth('patient')->user();

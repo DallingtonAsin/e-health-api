@@ -23,30 +23,6 @@ class AuthenticationController extends Controller
         $this->userTypeRepository = $userTypeRepository;
     }
 
-    public function sendSms(Request $request){
-        $dataObj = [
-            'phone_number' => 'required',
-            'message' => 'required'
-        ];
-
-        $validator = Validator::make($request->all(), $dataObj);
-
-        try {
-
-            if ($validator->fails()) {
-                $message = $validator->errors()->all();
-                return Helper::sendFailedHttpResponse($message);
-            } else {
-                $phone_number = $request->phone_number;
-                $message = $request->message;
-                $response = $this->smsService->sendMessage($phone_number, $message);
-                return response()->json($response, 200);
-            }
-        } catch (\Exception $ex) {
-            $message = $ex->getMessage();
-            return Helper::sendFailedHttpResponse($message);
-        }
-    }
 
     // send verification code
     public function sendVerificationCode(Request $request)
@@ -106,9 +82,9 @@ class AuthenticationController extends Controller
                     $patient = $this->patientRepository->create($validatedData);
                 }
 
-                if($patient->is_blocked){
+                if ($patient->is_blocked) {
                     return Helper::sendFailedHttpResponse("Sorry, your account has been blocked. Please contact support for more information.");
-                }else{
+                } else {
                     $data = $this->sendCode($patient);
                     return Helper::sendOkHttpResponse($data);
                 }
@@ -118,7 +94,6 @@ class AuthenticationController extends Controller
             return Helper::sendFailedHttpResponse($message);
         }
     }
-
 
     // verify code
     public function verifyOTP(Request $request)
@@ -149,6 +124,7 @@ class AuthenticationController extends Controller
         }
     }
 
+
     // send code 
     private function sendCode($patient)
     {
@@ -165,6 +141,33 @@ class AuthenticationController extends Controller
             return $patient;
         } catch (\Exception $ex) {
             throw $ex;
+        }
+    }
+
+
+    public function sendSms(Request $request)
+    {
+        $dataObj = [
+            'phone_number' => 'required',
+            'message' => 'required'
+        ];
+
+        $validator = Validator::make($request->all(), $dataObj);
+
+        try {
+
+            if ($validator->fails()) {
+                $message = $validator->errors()->all();
+                return Helper::sendFailedHttpResponse($message);
+            } else {
+                $phone_number = $request->phone_number;
+                $message = $request->message;
+                $response = $this->smsService->sendMessage($phone_number, $message);
+                return response()->json($response, 200);
+            }
+        } catch (\Exception $ex) {
+            $message = $ex->getMessage();
+            return Helper::sendFailedHttpResponse($message);
         }
     }
 }
