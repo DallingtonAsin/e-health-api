@@ -106,8 +106,12 @@ class AuthenticationController extends Controller
                     $patient = $this->patientRepository->create($validatedData);
                 }
 
-                $data = $this->sendCode($patient);
-                return Helper::sendOkHttpResponse($data);
+                if($patient->is_blocked){
+                    return Helper::sendFailedHttpResponse("Sorry, your account has been blocked. Please contact support for more information.");
+                }else{
+                    $data = $this->sendCode($patient);
+                    return Helper::sendOkHttpResponse($data);
+                }
             }
         } catch (\Exception $ex) {
             $message = $ex->getMessage();
