@@ -63,7 +63,7 @@ class PatientRepository
             ->exists();
     }
 
-    public function getPatientDetailsByPhoneNumber($country_code, $phone_number)
+    public function getDetailsByPhoneNumber($country_code, $phone_number)
     {
         return $this->patient->where("country_code", $country_code)
             ->where("phone_number", $phone_number)

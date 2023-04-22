@@ -111,7 +111,7 @@ class MedicalDoctorRepository
             ->exists();
     }
 
-    public function getDoctorDetailsByPhoneNumber($country_code, $phone_number)
+    public function getDetailsByPhoneNumber($country_code, $phone_number)
     {
         return $this->medicalDoctor->where("country_code", $country_code)
             ->where("phone_number", $phone_number)
