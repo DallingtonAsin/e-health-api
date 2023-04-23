@@ -33,7 +33,7 @@ Route::post('send-sms', [PatientAuthenticationController::class, 'sendSms']);
 
 
 Route::post('patient/login', [PatientAuthenticationController::class, 'sendVerificationCode']);
-Route::post('doctor/login', [DoctorAuthenticationController::class, 'login']);
+Route::post('doctor/login', [DoctorAuthenticationController::class, 'sendVerificationCode']);
 
 Route::post('send/pending-appointment-emails', [MailController::class, 'sendPendingAppointmentMail']);
 
@@ -56,6 +56,7 @@ Route::group(['prefix' => 'doctor', 'middleware' => ['auth:doctor']], function (
     Route::post('verify', [DoctorAuthenticationController::class, 'verifyOTP']);
     Route::post('register', [MedicalDoctorController::class, 'register']);
     Route::post('profile/complete', [MedicalDoctorController::class, 'completeRegistration']);
+    Route::get('is-verified', [MedicalDoctorController::class, 'isVerified']);
     Route::get('languages', [LanguageController::class, 'getDoctorLanguages']);
     Route::get('specialties', [MedicalSpecialtyController::class, 'getDoctorSpecialties']);
     Route::post('profile/update', [MedicalDoctorController::class, 'update']);

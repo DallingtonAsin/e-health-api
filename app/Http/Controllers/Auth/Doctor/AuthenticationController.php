@@ -72,7 +72,7 @@ class AuthenticationController extends Controller
                     ]);
                 } else {
 
-                    $user_type_id = $this->userTypeRepository->getPatientTypeId();
+                    $user_type_id = $this->userTypeRepository->getDoctorTypeId();
 
                     $validatedData = [
                         'user_type_id' => $user_type_id,
