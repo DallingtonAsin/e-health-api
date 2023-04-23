@@ -159,10 +159,10 @@ class MedicalDoctorController extends Controller
             'languages' => 'required',
             'experience' => 'required',
             'service_fee' => 'required|numeric',
-            'id_front_file' => 'required',
-            'id_front_extension' => 'required',
-            'id_back_file' => 'required',
-            'id_back_extension' => 'required'
+            'front_image' => 'required',
+            'back_image' => 'required',
+            // 'id_front_extension' => 'required',
+            // 'id_back_extension' => 'required'
         ]);
 
         try {
@@ -175,45 +175,51 @@ class MedicalDoctorController extends Controller
                 $doctor = auth('doctor')->user();
                 $doctor_id = $doctor->id;
 
-                $id_front_file = $request->input('id_front_file');
-                $id_front_extension = $request->input('id_front_extension');
-                $id_back_file = $request->input('id_back_file');
-                $id_back_extension = $request->input('id_back_extension');
+                if ($request->hasFile('front_image') && $request->hasFile('back_image')) {
 
-                $front_file_path = $this->doctorIdentificationRepository->saveIdentificationFrontFile($doctor_id, $id_front_file, $id_front_extension);
-                $back_file_path = $this->doctorIdentificationRepository->saveIdentificationBackFile($doctor_id, $id_back_file, $id_back_extension);
+                    $front_image = $request->file('front_image');
+                    $back_image = $request->file('back_image');
 
-                $identificationData = [
-                    'doctor_id' => $doctor_id,
-                    'front' => $front_file_path,
-                    'back' => $back_file_path
-                ];
+                    $front_image_extension = $front_image->getClientOriginalExtension();
+                    $back_image_extension = $back_image->getClientOriginalExtension();
 
-                $saveDocIdDetails = $this->doctorIdentificationRepository->create($identificationData);
-                if ($saveDocIdDetails) {
+                    $front_image_path = $this->doctorIdentificationRepository->saveIdentificationFrontFile($doctor_id, $front_image, $front_image_extension);
+                    $back_image_path = $this->doctorIdentificationRepository->saveIdentificationBackFile($doctor_id, $back_image, $back_image_extension);
 
-                    $specialty_name = $request->input('specialty');
-                    $specialty = $this->medicalSpecialtyRepository->getSpecialtyByName($specialty_name);
-
-                    $validatedData = [
-                        'specialty_id' => $specialty->id,
-                        'title' => $request->input('title'),
-                        'address' => $request->input('address'),
-                        'qualification' => $request->input('qualification'),
-                        'profession' => $request->input('profession'),
-                        'languages' => serialize($request->input('languages')),
-                        'experience' => $request->input('experience'),
-                        'service_fee' => floatval($request->input('service_fee')),
-                        'profile_status' => 1,
-                        'is_registered' => 1
+                    $identificationData = [
+                        'doctor_id' => $doctor_id,
+                        'front' => $front_image_path,
+                        'back' => $back_image_path
                     ];
 
+                    $saveDocIdDetails = $this->doctorIdentificationRepository->create($identificationData);
+                    if ($saveDocIdDetails) {
 
-                    $this->doctorRepository->update($doctor_id, $validatedData);
-                    $doctor = $this->doctorRepository->generateAccessToken($doctor_id);
-                    return response()->json($doctor, 200);
+                        $specialty_name = $request->input('specialty');
+                        $specialty = $this->medicalSpecialtyRepository->getSpecialtyByName($specialty_name);
+
+                        $validatedData = [
+                            'specialty_id' => $specialty->id,
+                            'title' => $request->input('title'),
+                            'address' => $request->input('address'),
+                            'qualification' => $request->input('qualification'),
+                            'profession' => $request->input('profession'),
+                            'languages' => serialize($request->input('languages')),
+                            'experience' => $request->input('experience'),
+                            'service_fee' => floatval($request->input('service_fee')),
+                            'profile_status' => 1,
+                            'is_registered' => 1
+                        ];
+
+
+                        $this->doctorRepository->update($doctor_id, $validatedData);
+                        $doctor = $this->doctorRepository->generateAccessToken($doctor_id);
+                        return response()->json($doctor, 200);
+                    } else {
+                        return Helper::sendFailedHttpResponse('System is unable to save your identification documents. Please try again later.');
+                    }
                 } else {
-                    return Helper::sendFailedHttpResponse('System is unable to save your identification documents. Please try again later.');
+                    return Helper::sendFailedHttpResponse('System is unable to get your identification documents. Please try uploading the documents again.');
                 }
             }
         } catch (\Exception $ex) {
