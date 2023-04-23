@@ -55,6 +55,7 @@ Route::group(['prefix' => 'patient', 'middleware' => ['auth:patient']], function
 Route::group(['prefix' => 'doctor', 'middleware' => ['auth:doctor']], function () {
     Route::post('verify', [DoctorAuthenticationController::class, 'verifyOTP']);
     Route::post('register', [MedicalDoctorController::class, 'register']);
+    Route::post('profile/complete', [MedicalDoctorController::class, 'completeRegistration']);
     Route::get('languages', [LanguageController::class, 'getDoctorLanguages']);
     Route::get('specialties', [MedicalSpecialtyController::class, 'getDoctorSpecialties']);
     Route::post('profile/update', [MedicalDoctorController::class, 'update']);

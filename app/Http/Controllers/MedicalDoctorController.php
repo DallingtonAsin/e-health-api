@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Repositories\MedicalDoctorRepository;
 use App\Repositories\MedicalSpecialtyRepository;
+use App\Repositories\DoctorIdentificationRepository;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\SharedHelper as Helper;
 use Illuminate\Support\Facades\Storage;
@@ -13,12 +14,16 @@ use Carbon\Carbon;
 class MedicalDoctorController extends Controller
 {
 
-    protected $doctorRepository, $medicalSpecialtyRepository;
+    protected $doctorRepository, $medicalSpecialtyRepository, $doctorIdentificationRepository;
 
-    public function __construct(MedicalDoctorRepository $doctorRepository, MedicalSpecialtyRepository $medicalSpecialtyRepository)
-    {
+    public function __construct(
+        MedicalDoctorRepository $doctorRepository,
+        MedicalSpecialtyRepository $medicalSpecialtyRepository,
+        DoctorIdentificationRepository $doctorIdentificationRepository
+    ) {
         $this->doctorRepository = $doctorRepository;
         $this->medicalSpecialtyRepository = $medicalSpecialtyRepository;
+        $this->doctorIdentificationRepository = $doctorIdentificationRepository;
     }
     /**
      * Display a listing of the resource.
@@ -146,19 +151,18 @@ class MedicalDoctorController extends Controller
     {
 
         $validator = Validator::make($request->all(), [
-            'first_name' => 'required|max:55',
-            'last_name' => 'required|max:55',
             'specialty' => 'required|exists:medical_specialties,name',
             'title' => 'required',
-            'email' => 'required|email|unique:medical_doctors',
             'address' => 'required',
-            'gender' => 'required',
             'qualification' => 'required',
             'profession' => 'required',
-            'dob' => 'required',
             'languages' => 'required',
             'experience' => 'required',
-            'service_fee' => 'required|numeric'
+            'service_fee' => 'required|numeric',
+            'id_front_file' => 'required',
+            'id_front_extension' => 'required',
+            'id_back_file' => 'required',
+            'id_back_extension' => 'required'
         ]);
 
         try {
@@ -168,31 +172,49 @@ class MedicalDoctorController extends Controller
                 return Helper::sendFailedHttpResponse($message);
             } else {
 
-                $specialty_name = $request->input('specialty');
-                $specialty = $this->medicalSpecialtyRepository->getSpecialtyByName($specialty_name);
-
-                $validatedData = [
-                    'first_name' => $request->first_name,
-                    'last_name' => $request->last_name,
-                    'specialty_id' => $specialty->id,
-                    'title' => $request->title,
-                    'email' => $request->email,
-                    'address' => $request->address,
-                    'gender' => ucfirst($request->gender),
-                    'qualification' => $request->qualification,
-                    'profession' => $request->profession,
-                    'dob' => date('Y-m-d', strtotime($request->dob)),
-                    'languages' => serialize($request->languages),
-                    'experience' => $request->experience,
-                    'service_fee' => floatval($request->service_fee),
-                    'profile_status' => 1
-                ];
-
                 $doctor = auth('doctor')->user();
                 $doctor_id = $doctor->id;
-                $this->doctorRepository->update($doctor_id, $validatedData);
-                $doctor = $this->doctorRepository->generateAccessToken($doctor_id);
-                return response()->json($doctor, 200);
+
+                $id_front_file = $request->input('id_front_file');
+                $id_front_extension = $request->input('id_front_extension');
+                $id_back_file = $request->input('id_back_file');
+                $id_back_extension = $request->input('id_back_extension');
+
+                $front_file_path = $this->doctorIdentificationRepository->saveIdentificationFrontFile($doctor_id, $id_front_file, $id_front_extension);
+                $back_file_path = $this->doctorIdentificationRepository->saveIdentificationBackFile($doctor_id, $id_back_file, $id_back_extension);
+
+                $identificationData = [
+                    'doctor_id' => $doctor_id,
+                    'front' => $front_file_path,
+                    'back' => $back_file_path
+                ];
+
+                $saveDocIdDetails = $this->doctorIdentificationRepository->create($identificationData);
+                if ($saveDocIdDetails) {
+
+                    $specialty_name = $request->input('specialty');
+                    $specialty = $this->medicalSpecialtyRepository->getSpecialtyByName($specialty_name);
+
+                    $validatedData = [
+                        'specialty_id' => $specialty->id,
+                        'title' => $request->input('title'),
+                        'address' => $request->input('address'),
+                        'qualification' => $request->input('qualification'),
+                        'profession' => $request->input('profession'),
+                        'languages' => serialize($request->input('languages')),
+                        'experience' => $request->input('experience'),
+                        'service_fee' => floatval($request->input('service_fee')),
+                        'profile_status' => 1,
+                        'is_registered' => 1
+                    ];
+
+
+                    $this->doctorRepository->update($doctor_id, $validatedData);
+                    $doctor = $this->doctorRepository->generateAccessToken($doctor_id);
+                    return response()->json($doctor, 200);
+                } else {
+                    return Helper::sendFailedHttpResponse('System is unable to save your identification documents. Please try again later.');
+                }
             }
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
@@ -216,7 +238,7 @@ class MedicalDoctorController extends Controller
             'dob' => 'required',
             'languages' => 'required',
             'experience' => 'required',
-            'service_fee' => 'required|numeric'
+            'service_fee' => 'required|numeric',
         ]);
 
         try {
