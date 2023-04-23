@@ -61,7 +61,7 @@ class DoctorIdentificationRepository
                     }
                 }
             }
-            $filename = $doctor_id . '' . time() . '.' . $file_extension;
+            $filename = 'font_'. $doctor_id . '' . time() . '.' . $file_extension;
             $filePath = $file->storeAs('images/doctors/identification', $filename, 'public');
 
             return $filePath;
@@ -82,7 +82,7 @@ class DoctorIdentificationRepository
                     }
                 }
             }
-            $filename = $doctor_id . '' . time() . '.' . $file_extension;
+            $filename = 'back_'.$doctor_id . '' . time() . '.' . $file_extension;
             $filePath = $file->storeAs('images/doctors/identification', $filename, 'public');
 
             return $filePath;
