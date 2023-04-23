@@ -33,7 +33,7 @@ Route::post('send-sms', [PatientAuthenticationController::class, 'sendSms']);
 
 
 Route::post('patient/login', [PatientAuthenticationController::class, 'sendVerificationCode']);
-Route::post('doctor/login', [DoctorAuthenticationController::class, 'login']);
+Route::post('doctor/login', [DoctorAuthenticationController::class, 'sendVerificationCode']);
 
 Route::post('send/pending-appointment-emails', [MailController::class, 'sendPendingAppointmentMail']);
 
