@@ -37,6 +37,7 @@ class Patient extends Authenticatable
         'otp',
         'image',
         'profile_status',
+        'is_registered',
         'is_verified',
         'is_blocked'
     ];

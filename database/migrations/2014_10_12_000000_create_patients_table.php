@@ -34,6 +34,7 @@ class CreatePatientsTable extends Migration
             $table->string('otp')->nullable();
             $table->string('image')->nullable();
             $table->boolean('profile_status')->default(false);
+            $table->boolean('is_registered')->default(false);
             $table->boolean('is_verified')->default(false);
             $table->boolean('is_blocked')->default(false);
             $table->timestamp('email_verified_at')->nullable();

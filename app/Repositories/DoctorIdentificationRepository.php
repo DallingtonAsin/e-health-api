@@ -1,0 +1,93 @@
+<?php
+
+namespace App\Repositories;
+
+use App\Models\DoctorIdentificationDocument;
+use Illuminate\Support\Facades\Storage;
+
+class DoctorIdentificationRepository
+{
+    protected $doctorIdentification;
+
+    public function __construct(DoctorIdentificationDocument $doctorIdentification)
+    {
+        $this->doctorIdentification = $doctorIdentification;
+    }
+
+    public function create($doctorIdentificationData)
+    {
+        return $this->doctorIdentification->create($doctorIdentificationData);
+    }
+
+    public function find($id)
+    {
+        return $this->doctorIdentification->find($id);
+    }
+
+    public function get()
+    {
+        return $this->doctorIdentification->all();
+    }
+
+    public function update($id, $doctorIdentificationData)
+    {
+        $doctorIdentification = $this->doctorIdentification->find($id);
+        $doctorIdentification->update($doctorIdentificationData);
+        return $doctorIdentification;
+    }
+
+    public function delete($id)
+    {
+        $doctorIdentification = $this->doctorIdentification->find($id);
+        $doctorIdentification->delete();
+        return $doctorIdentification;
+    }
+
+    public function exists($id)
+    {
+        $doctorIdentification = $this->doctorIdentification->where('id', $id)->exists();
+        return $doctorIdentification;
+    }
+
+    public function saveIdentificationFrontFile($doctor_id, $file, $file_extension)
+    {
+        try {
+            $doctor_identification = $this->doctorIdentification->where('doctor_id', $doctor_id);
+            if ($doctor_identification->exists()) {
+                $doctor_identification = $doctor_identification->first();
+                if (!is_null($doctor_identification->front)) {
+                    if (Storage::disk('public')->exists($doctor_identification->front)) {
+                        Storage::disk('public')->delete($doctor_identification->front);
+                    }
+                }
+            }
+            $filename = $doctor_id . '' . time() . '.' . $file_extension;
+            $filePath = $file->storeAs('images/doctors/identification', $filename, 'public');
+
+            return $filePath;
+        } catch (\Exception $ex) {
+            throw $ex;
+        }
+    }
+
+    public function saveIdentificationBackFile($doctor_id, $file, $file_extension)
+    {
+        try {
+            $doctor_identification = $this->doctorIdentification->where('doctor_id', $doctor_id);
+            if ($doctor_identification->exists()) {
+                $doctor_identification = $doctor_identification->first();
+                if (!is_null($doctor_identification->back)) {
+                    if (Storage::disk('public')->exists($doctor_identification->back)) {
+                        Storage::disk('public')->delete($doctor_identification->back);
+                    }
+                }
+            }
+            $filename = $doctor_id . '' . time() . '.' . $file_extension;
+            $filePath = $file->storeAs('images/doctors/identification', $filename, 'public');
+
+            return $filePath;
+        } catch (\Exception $ex) {
+            throw $ex;
+        }
+    }
+}
