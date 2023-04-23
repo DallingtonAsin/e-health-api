@@ -20,11 +20,13 @@ class MedicalDoctorRepository
         return $this->medicalDoctor->create($medicalDoctorData);
     }
 
-    public function find($id){
+    public function find($id)
+    {
         return $this->medicalDoctor->find($id);
     }
 
-    public function checkIfEmailExists($email){
+    public function checkIfEmailExists($email)
+    {
         return $this->medicalDoctor->where('email', $email)->exists();
     }
 
@@ -48,7 +50,9 @@ class MedicalDoctorRepository
 
         foreach ($doctors as $doctor) {
 
-            $doctor['languages'] = implode(", ", unserialize(($doctor->languages)));
+            $languages = unserialize($doctor->languages);
+            // $languageString = implode(', ', $languages);
+            $doctor['languages'] =  $languages;
             $doctor['service_fee'] = config('app.currency') . '. ' . number_format($doctor->service_fee);
             $doctor['image'] = $doctor->thumbnail();
 
@@ -66,7 +70,7 @@ class MedicalDoctorRepository
                 $time = $startTime;
                 while ($time <= $endTime) {
                     $timeSlots[$date][] = date('H:i', $time);
-                    $time += 60 * 60; 
+                    $time += 60 * 60;
                 }
             }
 
@@ -118,7 +122,8 @@ class MedicalDoctorRepository
             ->first();
     }
 
-    public function generateAccessToken($id){
+    public function generateAccessToken($id)
+    {
 
         $doctor = $this->medicalDoctor->find($id);
         $phone_number = $doctor->country_code . '' . $doctor->phone_number;
@@ -128,5 +133,4 @@ class MedicalDoctorRepository
         $doctor->access_token = $access_token;
         return $doctor;
     }
-
 }

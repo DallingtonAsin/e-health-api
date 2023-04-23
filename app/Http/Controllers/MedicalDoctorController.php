@@ -204,7 +204,7 @@ class MedicalDoctorController extends Controller
                             'address' => $request->input('address'),
                             'qualification' => $request->input('qualification'),
                             'profession' => $request->input('profession'),
-                            'languages' => serialize($request->input('languages')),
+                            'languages' => serialize($request->languages),
                             'experience' => $request->input('experience'),
                             'service_fee' => floatval($request->input('service_fee')),
                             'profile_status' => 1,
