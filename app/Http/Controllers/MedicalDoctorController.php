@@ -306,6 +306,23 @@ class MedicalDoctorController extends Controller
         //
     }
 
+    public function isVerified()
+    {
+        try {
+            $authenticated_user = auth('doctor')->user();
+            $doctor_id = $authenticated_user->id;
+            $doctor = $this->doctorRepository->find($doctor_id);
+            if ($doctor->is_verified) {
+                $verified_doctor = $this->doctorRepository->generateAccessToken($doctor_id);
+                return response()->json($verified_doctor, 200);
+            } else {
+                return Helper::sendFailedHttpResponse('Thank you for registering with us. Please wait as your account is awaiting approval.');
+            }
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
 
     public function updateProfilePicture(Request $request)
     {
