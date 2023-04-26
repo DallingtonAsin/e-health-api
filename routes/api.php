@@ -15,7 +15,7 @@ use App\Http\Controllers\MedicalAppointmentController;
 use App\Http\Controllers\MedicalHistoryController;
 use App\Http\Controllers\Auth\Patient\AuthenticationController as PatientAuthenticationController;
 use App\Http\Controllers\Auth\Doctor\AuthenticationController as DoctorAuthenticationController;
-
+use App\Http\Controllers\MedicalFacilityController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,8 +43,8 @@ Route::group(['prefix' => 'patient', 'middleware' => ['auth:patient']], function
     Route::post('verify', [PatientAuthenticationController::class, 'verifyOTP']);
     Route::post('register', [PatientController::class, 'register']);
     Route::post('profile/update', [PatientController::class, 'update']);
-    Route::post('{patient_id}/profile-picture', [PatientController::class, 'updateProfilePicture']);
-    Route::delete('{patient_id}/profile-picture/delete', [PatientController::class, 'removeProfilePicture']);
+    Route::post('profile-picture/update', [PatientController::class, 'updateProfilePicture']);
+    Route::delete('profile-picture/delete', [PatientController::class, 'removeProfilePicture']);
 
     Route::get('notifications', [PatientNotificationController::class, 'getNotifications']);
     Route::get('notifications/read', [PatientNotificationController::class, 'getReadNotifications']);
@@ -59,9 +59,9 @@ Route::group(['prefix' => 'doctor', 'middleware' => ['auth:doctor']], function (
     Route::get('is-verified', [MedicalDoctorController::class, 'isVerified']);
     Route::get('languages', [LanguageController::class, 'getDoctorLanguages']);
     Route::get('specialties', [MedicalSpecialtyController::class, 'getDoctorSpecialties']);
-    Route::post('profile/update', [MedicalDoctorController::class, 'update']);
-    Route::post('{doctor_id}/profile-picture', [MedicalDoctorController::class, 'updateProfilePicture']);
-    Route::delete('{doctor_id}/profile-picture/delete', [MedicalDoctorController::class, 'removeProfilePicture']);
+    Route::put('profile/update', [MedicalDoctorController::class, 'update']);
+    Route::put('profile-picture/update', [MedicalDoctorController::class, 'updateProfilePicture']);
+    Route::delete('profile-picture/delete', [MedicalDoctorController::class, 'removeProfilePicture']);
 
     Route::get('notifications', [DoctorNotificationController::class, 'getNotifications']);
     Route::get('notifications/read', [DoctorNotificationController::class, 'getReadNotifications']);
@@ -73,6 +73,7 @@ Route::group(['prefix' => 'medical', 'middleware' => ['auth:patient,doctor', 'pa
     Route::get('doctors/specialty/{specialty}', [MedicalDoctorController::class, 'getDoctorsBySpecialty']);
     Route::resource('specialties', MedicalSpecialtyController::class);
     Route::resource('doctors', MedicalDoctorController::class);
+    Route::resource('facilities', MedicalFacilityController::class);
 });
 
 

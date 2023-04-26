@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateDoctorPreassignedOtpsTable extends Migration
+class CreateMedicalFacilitiesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,10 @@ class CreateDoctorPreassignedOtpsTable extends Migration
      */
     public function up()
     {
-        Schema::create('doctor_preassigned_otps', function (Blueprint $table) {
+        Schema::create('medical_facilities', function (Blueprint $table) {
             $table->id();
-            $table->string('country_code', 5);
-            $table->string('phone_number', 15);
-            $table->string('auth_code', 10);
+            $table->string('district');
+            $table->string('name');
             $table->timestamps();
         });
     }
@@ -29,6 +28,6 @@ class CreateDoctorPreassignedOtpsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('doctor_preassigned_otps');
+        Schema::dropIfExists('medical_facilities');
     }
 }

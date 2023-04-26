@@ -21,18 +21,20 @@ class CreateMedicalDoctorsTable extends Migration
             $table->string('first_name')->nullable();
             $table->string('last_name')->nullable();
             $table->unsignedBigInteger('specialty_id')->nullable();
-            $table->string('title')->nullable();
             $table->string('country_code');
             $table->string('phone_number');
             $table->string('email')->nullable()->unique();
+            $table->date('dob')->nullable();
             $table->string('address')->nullable();
             $table->enum('gender', ['Male', 'Female'])->nullable();
             $table->string('qualification')->nullable();
-            $table->string('profession')->nullable();
-            $table->date('dob')->nullable();
-            $table->json('languages')->nullable();
-            $table->string('experience')->nullable();
+            $table->unsignedBigInteger('primary_facility_id')->nullable();
+            $table->json('other_facilities')->nullable();
+            $table->string('training_institute')->nullable();
+            $table->string('umdp_lincense_id')->nullable();
+            $table->text('bio_summary')->nullable();
             $table->double('service_fee')->nullable();
+            $table->string('password')->nullable();
             $table->string('ip_address')->nullable();
             $table->string('current_version')->nullable();
             $table->string('unique_device_id')->nullable();
@@ -48,6 +50,7 @@ class CreateMedicalDoctorsTable extends Migration
 
             $table->foreign('user_type_id')->references('id')->on('user_types');
             $table->foreign('specialty_id')->references('id')->on('medical_specialties');
+            $table->foreign('primary_facility_id')->references('id')->on('medical_facilities');
         });
     }
 
@@ -61,6 +64,5 @@ class CreateMedicalDoctorsTable extends Migration
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         Schema::dropIfExists('medical_doctors');
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-       
     }
 }

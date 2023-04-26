@@ -18,10 +18,34 @@ class MedicalDoctor extends Authenticatable
 
 
     protected $fillable = [
-       'user_type_id', 'first_name', 'last_name', 'specialty_id',
-        'title', 'country_code', 'phone_number', 'email', 'address', 'gender', 'qualification',
-        'profession', 'dob', 'languages', 'experience', 'image', 'service_fee', 'ip_address', 'current_version', 'unique_device_id',
-        'fcm_token', 'otp', 'profile_status', 'is_registered', 'is_verified', 'is_blocked'
+        'user_type_id',
+        'first_name',
+        'last_name',
+        'specialty_id',
+        'country_code',
+        'phone_number',
+        'email',
+        'dob',
+        'address',
+        'gender',
+        'qualification',
+        'primary_facility_id',
+        'other_facilities',
+        'training_institute',
+        'umdp_lincense_id',
+        'bio_summary',
+        'service_fee',
+        'password',
+        'ip_address',
+        'current_version',
+        'unique_device_id',
+        'fcm_token',
+        'otp',
+        'image',
+        'profile_status',
+        'is_registered',
+        'is_verified',
+        'is_blocked'
     ];
 
     public $timestamps = true;
@@ -67,5 +91,4 @@ class MedicalDoctor extends Authenticatable
         }
         return null;
     }
-    
 }
