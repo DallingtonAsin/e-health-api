@@ -8,6 +8,7 @@ use App\Helpers\SharedHelper as Helper;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Patient;
 use App\Repositories\PatientRepository;
+use Illuminate\Support\Facades\Hash;
 
 class PatientController extends Controller
 {
@@ -30,7 +31,8 @@ class PatientController extends Controller
             'email' => 'email|sometimes|nullable|unique:patients',
             'gender' => 'required',
             'address' => 'required',
-            'dob' => 'required'
+            'dob' => 'required',
+            'password' => 'required|min:8|confirmed'
         ]);
 
         try {
@@ -40,6 +42,8 @@ class PatientController extends Controller
                 return Helper::sendFailedHttpResponse($message);
             } else {
 
+                $password = Hash::make($request->input('password'));
+                
                 $validatedData = [
                     'first_name' => $request->first_name,
                     'last_name' => $request->last_name,
@@ -47,6 +51,7 @@ class PatientController extends Controller
                     'gender' => ucfirst($request->gender),
                     'address' => $request->address,
                     'dob' => date('Y-m-d', strtotime($request->dob)),
+                    'password' => $password,
                     'profile_status' => 1,
                     'is_registered' => 1,
                     'is_verified' => 1

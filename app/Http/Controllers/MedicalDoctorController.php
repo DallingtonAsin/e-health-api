@@ -9,6 +9,7 @@ use App\Repositories\DoctorIdentificationRepository;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\SharedHelper as Helper;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 
 class MedicalDoctorController extends Controller
@@ -108,6 +109,7 @@ class MedicalDoctorController extends Controller
             'email' => 'required|email|unique:medical_doctors',
             'gender' => 'required',
             'dob' => 'required|date',
+            'password' => 'required|min:8|confirmed',
         ]);
 
         try {
@@ -122,12 +124,14 @@ class MedicalDoctorController extends Controller
                 $age = $this->getAge($dob);
                 if ($age >=  18) {
 
+                    $password = Hash::make($request->input('password'));
                     $validatedData = [
                         'first_name' => $request->first_name,
                         'last_name' => $request->last_name,
                         'email' => $request->email,
                         'gender' => ucfirst($request->gender),
                         'dob' => $dob,
+                        'password' => $password,
                         'profile_status' => 1
                     ];
 
