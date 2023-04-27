@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\MedicalDoctor;
+use App\Models\MedicalFacility;
 use Carbon\Carbon;
 
 class MedicalDoctorRepository
@@ -33,7 +34,7 @@ class MedicalDoctorRepository
     {
 
         $today = Carbon::today();
-        $doctors = $this->medicalDoctor->with(['availability' => function ($query) use ($today) {
+        $doctors = $this->medicalDoctor->where('is_verified', 1)->with(['availability' => function ($query) use ($today) {
             $query->where('date', '>=', $today)->orderBy('date', 'asc');
         }]);
 
@@ -54,6 +55,10 @@ class MedicalDoctorRepository
             $doctor['languages'] =  $languages;
             $doctor['service_fee'] = config('app.currency') . '. ' . number_format($doctor->service_fee);
             $doctor['image'] = $doctor->thumbnail();
+
+            if($doctor->primary_facility_id){
+                $doctor['facility'] = MedicalFacility::where('id', $doctor->primary_facility_id)->value('name');
+            }
 
             $doctor->availability->makeHidden(['id', 'created_at', 'updated_at']);
 
