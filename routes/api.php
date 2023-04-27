@@ -113,7 +113,6 @@ Route::group(['prefix' => 'appointments'], function () {
     });
 
     Route::group(['prefix' => 'doctor', 'middleware' => ['auth:doctor']], function () {
-
         Route::get('{doctor_id}/pending', [MedicalAppointmentController::class, 'getDoctorPendingAppointments']);
         Route::get('{doctor_id}/confirmed', [MedicalAppointmentController::class, 'getDoctorConfirmedAppointments']);
         Route::get('{doctor_id}/completed', [MedicalAppointmentController::class, 'getDoctorCompletedAppointments']);
