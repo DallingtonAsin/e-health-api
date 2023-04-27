@@ -9,6 +9,8 @@ use App\Helpers\SharedHelper as Helper;
 use App\Repositories\UserTypeRepository;
 use App\Repositories\MedicalDoctorRepository;
 use App\Services\Transaction\Sms\SmsService;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthenticationController extends Controller
 {
@@ -58,15 +60,17 @@ class AuthenticationController extends Controller
                 $exists = $this->doctorRepository->checkIfPhoneNumberExists($country_code, $phone_number);
 
                 if ($exists) {
-
                     $doctor = $this->doctorRepository->getDetailsByPhoneNumber($country_code, $phone_number);
-
-                    $doctor->update([
-                        'unique_device_id' => $unique_device_id,
-                        'ip_address' => $ip_address,
-                        'current_version' => $current_version,
-                        'fcm_token' => $fcm_token
-                    ]);
+                    if ($doctor->profile_status == 1) {
+                        return Helper::sendFailedHttpResponse("This phone number has been used to create another account. If you own this phone number, please use the login option.");
+                    } else {
+                        $doctor->update([
+                            'unique_device_id' => $unique_device_id,
+                            'ip_address' => $ip_address,
+                            'current_version' => $current_version,
+                            'fcm_token' => $fcm_token
+                        ]);
+                    }
                 } else {
 
                     $user_type_id = $this->userTypeRepository->getDoctorTypeId();
@@ -153,9 +157,11 @@ class AuthenticationController extends Controller
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'country_code' => 'required',
-            'phone_number' => 'required',
-            'otp' => 'required|min:4',
+            'is_phone_number_login' => 'boolean|required',
+            'country_code' => 'sometimes|nullable',
+            'phone_number' => 'sometimes|nullable',
+            'email' => 'sometimes|nullable|email',
+            'password' => 'required',
             'unique_device_id' => 'sometimes|nullable',
             'device_token' => 'sometimes|nullable',
             'ip_address' => 'sometimes|nullable',
@@ -167,10 +173,65 @@ class AuthenticationController extends Controller
                 $message = $validator->errors()->all();
                 return Helper::sendFailedHttpResponse($message);
             } else {
+
+                $isPhoneNumberLogin = $request->input('is_phone_number_login');
+                $password = $request->password;
+                $unique_device_id = $request->unique_device_id;
+                $fcm_token = $request->device_token;
+                $current_version = $request->current_version;
+                $ip_address = $request->ip_address;
+
+                $data = [
+                    'unique_device_id' => $unique_device_id,
+                    'fcm_token' => $fcm_token,
+                    'current_version' => $current_version,
+                    'ip_address' => $ip_address
+                ];
+
+                if ($isPhoneNumberLogin) {
+                    if ($request->filled('country_code') && $request->filled('phone_number')) {
+                        $country_code = $request->country_code;
+                        $phone_number = $request->phone_number;
+                        $doctor = $this->doctorRepository->getDetailsByPhoneNumber($country_code, $phone_number);
+                        if ($doctor && Hash::check($password, $doctor->password)) {
+                            $auth_details = $this->getAccessDetails($doctor, $data);
+                            return Helper::sendOkHttpResponse($auth_details);
+                        } else {
+                            return Helper::sendFailedHttpResponse("Invalid login details");
+                        }
+                    } else {
+                        return Helper::sendFailedHttpResponse("Invalid request: no phone number supplied");
+                    }
+                } else {
+                    if ($request->filled('email')) {
+                        $email = $request->email;
+                        $doctor = $this->doctorRepository->getDetailsByEmail($email);
+                        if ($doctor && Hash::check($password, $doctor->password)) {
+                            $auth_details = $this->getAccessDetails($doctor, $data);
+                            return Helper::sendOkHttpResponse($auth_details);
+                        } else {
+                            return Helper::sendFailedHttpResponse("Invalid login details");
+                        }
+                    } else {
+                        return Helper::sendFailedHttpResponse("Invalid request: no email supplied");
+                    }
+                }
             }
         } catch (\Exception $ex) {
             $message = $ex->getMessage();
             return Helper::sendFailedHttpResponse($message);
+        }
+    }
+
+    private function getAccessDetails($doctor, $data)
+    {
+        try {
+            $doctor_id = $doctor->id;
+            $this->doctorRepository->update($doctor_id, $data);
+            $auth_data = $this->doctorRepository->generateAccessToken($doctor_id);
+            return $auth_data;
+        } catch (\Exception $ex) {
+            throw $ex;
         }
     }
 }

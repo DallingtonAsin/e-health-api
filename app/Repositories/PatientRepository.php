@@ -70,6 +70,11 @@ class PatientRepository
             ->first();
     }
 
+    public function getDetailsByEmail($email)
+    {
+        return $this->patient->where("email", $email)->first();
+    }
+
     public function generateAccessToken($id)
     {
 
