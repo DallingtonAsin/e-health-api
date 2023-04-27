@@ -31,12 +31,13 @@ use App\Http\Controllers\MedicalFacilityController;
 // Development routes
 Route::post('send-sms', [PatientAuthenticationController::class, 'sendSms']);
 
+Route::post('patient/login', [PatientAuthenticationController::class, 'login']);
+Route::post('doctor/login', [DoctorAuthenticationController::class, 'login']);
 
-Route::post('patient/login', [PatientAuthenticationController::class, 'sendVerificationCode']);
-Route::post('doctor/login', [DoctorAuthenticationController::class, 'sendVerificationCode']);
+Route::post('patient/sms/verification-code', [PatientAuthenticationController::class, 'sendVerificationCode']);
+Route::post('doctor/sms/verification-code', [DoctorAuthenticationController::class, 'sendVerificationCode']);
 
 Route::post('send/pending-appointment-emails', [MailController::class, 'sendPendingAppointmentMail']);
-
 
 Route::group(['prefix' => 'patient', 'middleware' => ['auth:patient']], function () {
 

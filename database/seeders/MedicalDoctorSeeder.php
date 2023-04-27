@@ -73,6 +73,7 @@ class MedicalDoctorSeeder extends Seeder
             'password' => Hash::make($password),
             'profile_status' => 1,
             'is_registered' => 1,
+            'is_verified' => 1
         ]);
 
         MedicalDoctor::create([
@@ -96,6 +97,7 @@ class MedicalDoctorSeeder extends Seeder
             'password' => Hash::make($password),
             'profile_status' => 1,
             'is_registered' => 1,
+            'is_verified' => 1
         ]);
 
         MedicalDoctor::create([
@@ -119,7 +121,7 @@ class MedicalDoctorSeeder extends Seeder
             'password' => Hash::make($password),
             'profile_status' => 1,
             'is_registered' => 1,
-
+            'is_verified' => 1
         ]);
 
 
@@ -144,6 +146,7 @@ class MedicalDoctorSeeder extends Seeder
             'password' => Hash::make($password),
             'profile_status' => 1,
             'is_registered' => 1,
+            'is_verified' => 1
 
         ]);
 
@@ -168,6 +171,7 @@ class MedicalDoctorSeeder extends Seeder
             'password' => Hash::make($password),
             'profile_status' => 1,
             'is_registered' => 1,
+            'is_verified' => 1
         ]);
 
         MedicalDoctor::create([
@@ -191,7 +195,7 @@ class MedicalDoctorSeeder extends Seeder
             'password' => Hash::make($password),
             'profile_status' => 1,
             'is_registered' => 1,
-
+            'is_verified' => 1
         ]);
 
         MedicalDoctor::create([
@@ -215,6 +219,7 @@ class MedicalDoctorSeeder extends Seeder
             'password' => Hash::make($password),
             'profile_status' => 1,
             'is_registered' => 1,
+            'is_verified' => 1
         ]);
 
         MedicalDoctor::create([
@@ -237,6 +242,7 @@ class MedicalDoctorSeeder extends Seeder
             'password' => Hash::make($password),
             'profile_status' => 1,
             'is_registered' => 1,
+            'is_verified' => 1
         ]);
 
         MedicalDoctor::create([
@@ -260,6 +266,7 @@ class MedicalDoctorSeeder extends Seeder
             'password' => Hash::make($password),
             'profile_status' => 1,
             'is_registered' => 1,
+            'is_verified' => 1
         ]);
 
 
@@ -284,6 +291,7 @@ class MedicalDoctorSeeder extends Seeder
             'password' => Hash::make($password),
             'profile_status' => 1,
             'is_registered' => 1,
+            'is_verified' => 1
         ]);
 
         MedicalDoctor::create([
@@ -307,6 +315,7 @@ class MedicalDoctorSeeder extends Seeder
             'password' => Hash::make($password),
             'profile_status' => 1,
             'is_registered' => 1,
+            'is_verified' => 1
         ]);
 
         MedicalDoctor::create([
@@ -330,6 +339,7 @@ class MedicalDoctorSeeder extends Seeder
             'password' => Hash::make($password),
             'profile_status' => 1,
             'is_registered' => 1,
+            'is_verified' => 1
         ]);
     }
 }

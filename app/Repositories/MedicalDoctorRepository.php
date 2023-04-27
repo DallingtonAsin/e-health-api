@@ -126,6 +126,11 @@ class MedicalDoctorRepository
             ->first();
     }
 
+    public function getDetailsByEmail($email)
+    {
+        return $this->medicalDoctor->where("email", $email)->first();
+    }
+
     public function generateAccessToken($id)
     {
 
