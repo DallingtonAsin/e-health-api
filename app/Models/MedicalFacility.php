@@ -5,15 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class DoctorAuthentication extends Model
+class MedicalFacility extends Model
 {
     use HasFactory;
 
-    protected $table = 'doctor_preassigned_otps';
+    protected $table = 'medical_facilities';
+
     protected $fillable = [
-        'country_code',
-        'phone_code',
-        'auth_code'
+        'district',
+        'name'
     ];
 
     public $timestamps = true;

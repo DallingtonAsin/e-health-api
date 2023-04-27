@@ -9,6 +9,7 @@ use App\Repositories\DoctorIdentificationRepository;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\SharedHelper as Helper;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 
 class MedicalDoctorController extends Controller
@@ -108,6 +109,7 @@ class MedicalDoctorController extends Controller
             'email' => 'required|email|unique:medical_doctors',
             'gender' => 'required',
             'dob' => 'required|date',
+            'password' => 'required|min:8|confirmed',
         ]);
 
         try {
@@ -122,12 +124,14 @@ class MedicalDoctorController extends Controller
                 $age = $this->getAge($dob);
                 if ($age >=  18) {
 
+                    $password = Hash::make($request->input('password'));
                     $validatedData = [
                         'first_name' => $request->first_name,
                         'last_name' => $request->last_name,
                         'email' => $request->email,
                         'gender' => ucfirst($request->gender),
                         'dob' => $dob,
+                        'password' => $password,
                         'profile_status' => 1
                     ];
 
@@ -160,9 +164,7 @@ class MedicalDoctorController extends Controller
             'experience' => 'required',
             'service_fee' => 'required|numeric',
             'front_image' => 'required',
-            'back_image' => 'required',
-            // 'id_front_extension' => 'required',
-            // 'id_back_extension' => 'required'
+            'back_image' => 'required'
         ]);
 
         try {
@@ -327,9 +329,7 @@ class MedicalDoctorController extends Controller
     public function updateProfilePicture(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'id' => 'required|exists:medical_doctors,id',
-            'image' => 'required',
-            'extension' => 'required'
+            'image' => 'required'
         ]);
 
         try {
@@ -339,34 +339,32 @@ class MedicalDoctorController extends Controller
                 return Helper::sendFailedHttpResponse($message);
             } else {
 
-                $doctor_id = $request->input('id');
-                $file_extension = $request->input('extension');
+                if ($request->hasFile('image')) {
 
-                $exists = $this->doctorRepository->exists($doctor_id);
-                if ($exists) {
+                    $doctor = auth('doctor')->user();
+                    $doctor_id = $doctor->id;
+                    $file = $request->file('image');
+                    $file_extension = $file->getClientOriginalExtension();
 
-                    $doctor = $this->doctorRepository->find($doctor_id);
                     if (!is_null($doctor->image)) {
                         if (Storage::disk('public')->exists($doctor->image)) {
                             Storage::disk('public')->delete($doctor->image);
                         }
                     }
 
-                    $file = $request->file('image');
                     $filename = $doctor_id . '' . time() . '.' . $file_extension;
                     $filePath = $file->storeAs('images/doctors', $filename, 'public');
-
                     $input = ['image' => $filePath];
                     $hasUpdated = $this->doctorRepository->update($doctor_id, $input);
 
                     if ($hasUpdated) {
                         $doctor = $this->doctorRepository->generateAccessToken($doctor_id);
-                        return response(['message' => 'Profile updated successfully', 'user' => $doctor], 200);
+                        return response(['message' => 'Profile photo updated', 'user' => $doctor], 200);
                     } else {
                         return response()->json(['error' => "Technical problem while updating your profile picture"], 400);
                     }
                 } else {
-                    return response()->json(['error' => "System is unable to get your identity"], 400);
+                    return Helper::sendFailedHttpResponse('System is unable to get your profile picture. Please try again!');
                 }
             }
         } catch (\Exception $ex) {
@@ -375,29 +373,23 @@ class MedicalDoctorController extends Controller
     }
 
 
-    public function removeProfilePicture($id)
+    public function removeProfilePicture()
     {
-
         try {
-
-            $exists = $this->doctorRepository->exists($id);
-
-            if ($exists) {
-                $doctor = $this->doctorRepository->find($id);
-                if (!is_null($doctor->image)) {
-                    if (Storage::disk('public')->exists($doctor->image)) {
-                        Storage::disk('public')->delete($doctor->image);
-                    }
+            $doctor = auth('doctor')->user();
+            $id = $doctor->id;
+            if (!is_null($doctor->image)) {
+                if (Storage::disk('public')->exists($doctor->image)) {
+                    Storage::disk('public')->delete($doctor->image);
                 }
-
-                $hasUpdated = $this->doctorRepository->update($id, ['image' => null]);
-                if ($hasUpdated) {
-                    $doctor = $this->doctorRepository->generateAccessToken($id);
-                    return Helper::sendOkHttpResponse(['message' => 'Profile picture has been removed successfully', 'user' => $doctor]);
-                } else {
-                    $message = "Technical error while removing profile picture";
-                    return Helper::sendFailedHttpResponse($message);
-                }
+            }
+            $hasUpdated = $this->doctorRepository->update($id, ['image' => null]);
+            if ($hasUpdated) {
+                $doctor = $this->doctorRepository->generateAccessToken($id);
+                return Helper::sendOkHttpResponse(['message' => 'Profile picture has been removed successfully', 'user' => $doctor]);
+            } else {
+                $message = "Technical error while removing profile picture";
+                return Helper::sendFailedHttpResponse($message);
             }
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);

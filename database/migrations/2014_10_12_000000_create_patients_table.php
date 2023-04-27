@@ -26,6 +26,7 @@ class CreatePatientsTable extends Migration
             $table->string('address')->nullable();
             $table->enum('gender', ['Male', 'Female'])->nullable();
             $table->date('dob')->nullable();
+            $table->string('password')->nullable();
             $table->string('pin')->nullable();
             $table->string('ip_address')->nullable();
             $table->string('current_version')->nullable();

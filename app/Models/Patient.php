@@ -30,6 +30,8 @@ class Patient extends Authenticatable
         'address',
         'gender',
         'dob',
+        'password',
+        'pin',
         'ip_address',
         'current_version',
         'unique_device_id',
