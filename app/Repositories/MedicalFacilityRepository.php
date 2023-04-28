@@ -23,6 +23,11 @@ class MedicalFacilityRepository
         return $this->medicalFacility->find($id);
     }
 
+    public function findByName($name)
+    {
+        return $this->medicalFacility->where('name', $name)->first();
+    }
+
     public function get()
     {
         $medical_facilities = $this->medicalFacility->select(['id as key', 'name as value'])->orderBy('id', 'asc')->get();

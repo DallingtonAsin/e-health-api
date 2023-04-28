@@ -8,6 +8,7 @@ use App\Repositories\MedicalSpecialtyRepository;
 use App\Repositories\DoctorIdentificationRepository;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\SharedHelper as Helper;
+use App\Repositories\MedicalFacilityRepository;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
@@ -15,16 +16,18 @@ use Carbon\Carbon;
 class MedicalDoctorController extends Controller
 {
 
-    protected $doctorRepository, $medicalSpecialtyRepository, $doctorIdentificationRepository;
+    protected $doctorRepository, $medicalSpecialtyRepository, $doctorIdentificationRepository, $medicalFacilityRepository;
 
     public function __construct(
         MedicalDoctorRepository $doctorRepository,
         MedicalSpecialtyRepository $medicalSpecialtyRepository,
-        DoctorIdentificationRepository $doctorIdentificationRepository
+        DoctorIdentificationRepository $doctorIdentificationRepository,
+        MedicalFacilityRepository $medicalFacilityRepository
     ) {
         $this->doctorRepository = $doctorRepository;
         $this->medicalSpecialtyRepository = $medicalSpecialtyRepository;
         $this->doctorIdentificationRepository = $doctorIdentificationRepository;
+        $this->medicalFacilityRepository = $medicalFacilityRepository;
     }
     /**
      * Display a listing of the resource.
@@ -155,13 +158,15 @@ class MedicalDoctorController extends Controller
     {
 
         $validator = Validator::make($request->all(), [
-            'specialty' => 'required|exists:medical_specialties,name',
-            'title' => 'required',
-            'address' => 'required',
-            'qualification' => 'required',
-            'profession' => 'required',
-            'languages' => 'required',
-            'experience' => 'required',
+            'specialty' => 'required|string|exists:medical_specialties,name',
+            'primary_facility' => 'required|string|exists:medical_facilities,name',
+            'other_facilities' => 'sometimes',
+            'other_facilities.*' => 'sometimes|string|exists:medical_facilities,name',
+            'address' => 'required|string',
+            'bio_summary' => 'required|string',
+            'qualification' => 'required|string',
+            'training_institute' => 'required|string',
+            'license_number' => 'required|string',
             'service_fee' => 'required|numeric',
             'front_image' => 'required',
             'back_image' => 'required'
@@ -184,7 +189,6 @@ class MedicalDoctorController extends Controller
 
                     $front_image_extension = $front_image->getClientOriginalExtension();
                     $back_image_extension = $back_image->getClientOriginalExtension();
-
                     $front_image_path = $this->doctorIdentificationRepository->saveIdentificationFrontFile($doctor_id, $front_image, $front_image_extension);
                     $back_image_path = $this->doctorIdentificationRepository->saveIdentificationBackFile($doctor_id, $back_image, $back_image_extension);
 
@@ -194,27 +198,57 @@ class MedicalDoctorController extends Controller
                         'back' => $back_image_path
                     ];
 
-                    $saveDocIdDetails = $this->doctorIdentificationRepository->create($identificationData);
+                    $docs_exist = $this->doctorIdentificationRepository->checkIfDoctorDocsExist($doctor_id);
+                    if ($docs_exist) {
+                        $saveDocIdDetails = $this->doctorIdentificationRepository->updateByDoctorId($doctor_id, $identificationData);
+                    } else {
+                        $saveDocIdDetails = $this->doctorIdentificationRepository->create($identificationData);
+                    }
+
                     if ($saveDocIdDetails) {
 
                         $specialty_name = $request->input('specialty');
-                        $specialty = $this->medicalSpecialtyRepository->getSpecialtyByName($specialty_name);
+                        $primary_facility = $request->input('primary_facility');
+                        $address = $request->input('address');
+                        $bio_summary = $request->input('bio_summary');
+                        $qualification = $request->input('qualification');
+                        $training_institute = $request->input('training_institute');
+                        $license_number = $request->input('license_number');
+                        $service_fee = floatval($request->input('service_fee'));
 
-                        $validatedData = [
-                            'specialty_id' => $specialty->id,
-                            'title' => $request->input('title'),
-                            'address' => $request->input('address'),
-                            'qualification' => $request->input('qualification'),
-                            'profession' => $request->input('profession'),
-                            'languages' => serialize($request->languages),
-                            'experience' => $request->input('experience'),
-                            'service_fee' => floatval($request->input('service_fee')),
+                        $specialty_details = $this->medicalSpecialtyRepository->getSpecialtyByName($specialty_name);
+                        $facility_details = $this->medicalFacilityRepository->findByName($primary_facility);
+
+                        $speciality_id = $specialty_details->id;
+                        $primary_facility_id = $facility_details->id;
+
+                        $profileData = [
+                            'specialty_id' => $speciality_id,
+                            'primary_facility_id' => $primary_facility_id,
+                            'address' => $address,
+                            'bio_summary' => $bio_summary,
+                            'qualification' => $qualification,
+                            'training_institute' => $training_institute,
+                            'umdp_license_id' => $license_number,
+                            'service_fee' => $service_fee,
                             'profile_status' => 1,
                             'is_registered' => 1
                         ];
 
+                        if ($request->has('other_facilities')) {
+                            $other_facilities = [];
+                            $facilitiesArray = json_decode($request->input('other_facilities', true));
+                            if (count($facilitiesArray) > 0) {
+                                $myCollection = collect($facilitiesArray);
+                                $myCollection->map(function ($facility) use (&$other_facilities) {
+                                    $data = $this->medicalFacilityRepository->findByName($facility);
+                                    $other_facilities[] = $data->id;
+                                });
+                                $profileData['other_facilities'] = serialize($other_facilities);
+                            }
+                        }
 
-                        $this->doctorRepository->update($doctor_id, $validatedData);
+                        $this->doctorRepository->update($doctor_id, $profileData);
                         $doctor = $this->doctorRepository->generateAccessToken($doctor_id);
                         return response()->json($doctor, 200);
                     } else {

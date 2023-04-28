@@ -32,7 +32,7 @@ class MedicalDoctor extends Authenticatable
         'primary_facility_id',
         'other_facilities',
         'training_institute',
-        'umdp_lincense_id',
+        'umdp_license_id',
         'bio_summary',
         'service_fee',
         'password',
@@ -56,7 +56,7 @@ class MedicalDoctor extends Authenticatable
      * @var array
      */
     protected $casts = [
-        'languages' => 'array',
+        'other_facilities' => 'array',
     ];
 
 
