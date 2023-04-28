@@ -31,7 +31,7 @@ class CreateMedicalDoctorsTable extends Migration
             $table->unsignedBigInteger('primary_facility_id')->nullable();
             $table->json('other_facilities')->nullable();
             $table->string('training_institute')->nullable();
-            $table->string('umdp_lincense_id')->nullable();
+            $table->string('umdp_license_id')->nullable();
             $table->text('bio_summary')->nullable();
             $table->double('service_fee')->nullable();
             $table->string('password')->nullable();

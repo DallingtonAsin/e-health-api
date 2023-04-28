@@ -36,6 +36,13 @@ class DoctorIdentificationRepository
         return $doctorIdentification;
     }
 
+    public function updateByDoctorId($doctor_id, $doctorIdentificationData)
+    {
+        $doctorIdentification = $this->doctorIdentification->where('doctor_id', $doctor_id);
+        $doctorIdentification->update($doctorIdentificationData);
+        return $doctorIdentification->first();
+    }
+
     public function delete($id)
     {
         $doctorIdentification = $this->doctorIdentification->find($id);
@@ -49,15 +56,21 @@ class DoctorIdentificationRepository
         return $doctorIdentification;
     }
 
+    public function checkIfDoctorDocsExist($doctor_id)
+    {
+        $exists = $this->doctorIdentification->where('doctor_id', $doctor_id)->exists();
+        return $exists;
+    }
+
     public function saveIdentificationFrontFile($doctor_id, $file, $file_extension)
     {
         try {
             $doctor_identification = $this->doctorIdentification->where('doctor_id', $doctor_id);
             if ($doctor_identification->exists()) {
-                $doctor_identification = $doctor_identification->first();
-                if (!is_null($doctor_identification->front)) {
-                    if (Storage::disk('public')->exists($doctor_identification->front)) {
-                        Storage::disk('public')->delete($doctor_identification->front);
+                $identification = $doctor_identification->first();
+                if (!is_null($identification->front)) {
+                    if (Storage::disk('public')->exists($identification->front)) {
+                        Storage::disk('public')->delete($identification->front);
                     }
                 }
             }
@@ -75,10 +88,10 @@ class DoctorIdentificationRepository
         try {
             $doctor_identification = $this->doctorIdentification->where('doctor_id', $doctor_id);
             if ($doctor_identification->exists()) {
-                $doctor_identification = $doctor_identification->first();
-                if (!is_null($doctor_identification->back)) {
-                    if (Storage::disk('public')->exists($doctor_identification->back)) {
-                        Storage::disk('public')->delete($doctor_identification->back);
+                $identification = $doctor_identification->first();
+                if (!is_null($identification->back)) {
+                    if (Storage::disk('public')->exists($identification->back)) {
+                        Storage::disk('public')->delete($identification->back);
                     }
                 }
             }
