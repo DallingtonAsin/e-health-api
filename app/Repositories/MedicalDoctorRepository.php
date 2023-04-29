@@ -8,11 +8,16 @@ use Carbon\Carbon;
 
 class MedicalDoctorRepository
 {
-    protected $medicalDoctor;
+    protected $medicalDoctor, $medicalFacilityRepository, $medicalSpecialtyRepository;
 
-    public function __construct(MedicalDoctor $medicalDoctor)
-    {
+    public function __construct(
+        MedicalDoctor $medicalDoctor,
+        MedicalFacilityRepository $medicalFacilityRepository,
+        MedicalSpecialtyRepository $medicalSpecialtyRepository
+    ) {
         $this->medicalDoctor = $medicalDoctor;
+        $this->medicalFacilityRepository = $medicalFacilityRepository;
+        $this->medicalSpecialtyRepository = $medicalSpecialtyRepository;
     }
 
     public function create($medicalDoctorData)
@@ -56,8 +61,11 @@ class MedicalDoctorRepository
             $doctor['service_fee'] = config('app.currency') . '. ' . number_format($doctor->service_fee);
             $doctor['image'] = $doctor->thumbnail();
 
-            if($doctor->primary_facility_id){
-                $doctor['facility'] = MedicalFacility::where('id', $doctor->primary_facility_id)->value('name');
+            if ($doctor->primary_facility_id) {
+                $medicalFacility = $this->medicalFacilityRepository->find($doctor->primary_facility_id);
+                $medicalSpecialty = $this->medicalSpecialtyRepository->find($doctor->specialty_id);
+                $doctor['facility'] = $medicalFacility->name;
+                $doctor['specialty'] = $medicalSpecialty->name;
             }
 
             $doctor->availability->makeHidden(['id', 'created_at', 'updated_at']);

@@ -17,6 +17,11 @@ class MedicalSpecialtyRepository
         return $this->medicalSpecialty->create($medicalSpecialtyData);
     }
 
+    public function find($id)
+    {
+           return $this->medicalSpecialty->find($id);
+    }
+
     public function get($id = null)
     {
         if($id){
