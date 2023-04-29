@@ -9,7 +9,6 @@ use App\Helpers\SharedHelper as Helper;
 use App\Services\Transaction\Sms\SmsService;
 use App\Repositories\UserTypeRepository;
 use App\Repositories\PatientRepository;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class AuthenticationController extends Controller
@@ -211,28 +210,15 @@ class AuthenticationController extends Controller
 
                 if ($isPhoneNumberLogin) {
                     if ($request->filled('country_code') && $request->filled('phone_number')) {
-                        $country_code = $request->country_code;
-                        $phone_number = $request->phone_number;
-                        $patient = $this->patientRepository->getDetailsByPhoneNumber($country_code, $phone_number);
-                        if ($patient && Hash::check($password, $patient->password)) {
-                            $auth_details = $this->getAccessDetails($patient, $data);
-                            return Helper::sendOkHttpResponse($auth_details);
-                        } else {
-                            return Helper::sendFailedHttpResponse("Invalid login details");
-                        }
+                        $patient = $this->patientRepository->getDetailsByPhoneNumber($request->country_code, $request->phone_number);
+                        return $this->authenticate($password, $data, $patient);
                     } else {
                         return Helper::sendFailedHttpResponse("Invalid request: no phone number supplied");
                     }
                 } else {
                     if ($request->filled('email')) {
-                        $email = $request->email;
-                        $patient = $this->patientRepository->getDetailsByEmail($email);
-                        if ($patient && Hash::check($password, $patient->password)) {
-                            $auth_details = $this->getAccessDetails($patient, $data);
-                            return Helper::sendOkHttpResponse($auth_details);
-                        } else {
-                            return Helper::sendFailedHttpResponse("Invalid login details");
-                        }
+                        $patient = $this->patientRepository->getDetailsByEmail($request->email);
+                        return $this->authenticate($password, $data, $patient);
                     } else {
                         return Helper::sendFailedHttpResponse("Invalid request: no email supplied");
                     }
@@ -244,12 +230,29 @@ class AuthenticationController extends Controller
         }
     }
 
-    private function getAccessDetails($patient, $data)
+    private function authenticate($password, $data, $patient)
     {
         try {
-            $patient_id = $patient->id;
-            $this->patientRepository->update($patient_id, $data);
-            $auth_data = $this->patientRepository->generateAccessToken($patient_id);
+            if ($patient && Hash::check($password, $patient->password)) {
+                if ($patient->is_blocked) {
+                    return Helper::sendFailedHttpResponse("Sorry, your account has been blocked. Please contact support for more information.");
+                } else {
+                    $this->patientRepository->update($patient->id, $data);
+                    $auth_details = $this->getAccessDetails($patient);
+                    return Helper::sendOkHttpResponse($auth_details);
+                }
+            } else {
+                return Helper::sendFailedHttpResponse("Invalid login details");
+            }
+        } catch (\Exception $ex) {
+            throw $ex;
+        }
+    }
+
+    private function getAccessDetails($patient)
+    {
+        try {
+            $auth_data = $this->patientRepository->generateAccessToken($patient->id);
             return $auth_data;
         } catch (\Exception $ex) {
             throw $ex;
