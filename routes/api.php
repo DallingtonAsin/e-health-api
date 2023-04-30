@@ -43,8 +43,8 @@ Route::group(['prefix' => 'patient', 'middleware' => ['auth:patient']], function
 
     Route::post('verify', [PatientAuthenticationController::class, 'verifyOTP']);
     Route::post('register', [PatientController::class, 'register']);
-    Route::post('profile/update', [PatientController::class, 'update']);
-    Route::post('profile-picture/update', [PatientController::class, 'updateProfilePicture']);
+    Route::put('profile/update', [PatientController::class, 'update']);
+    Route::put('profile-picture/update', [PatientController::class, 'updateProfilePicture']);
     Route::delete('profile-picture/delete', [PatientController::class, 'removeProfilePicture']);
 
     Route::get('notifications', [PatientNotificationController::class, 'getNotifications']);
