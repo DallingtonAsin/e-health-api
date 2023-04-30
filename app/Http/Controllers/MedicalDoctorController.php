@@ -44,10 +44,10 @@ class MedicalDoctorController extends Controller
         }
     }
 
-    public function getDoctorsBySpecialty($speciality_id)
+    public function getDoctorsBySpecialty($specialty_id)
     {
         try {
-            $medical_doctors = $this->doctorRepository->get(null, $speciality_id);
+            $medical_doctors = $this->doctorRepository->get(null, $specialty_id);
             return response()->json($medical_doctors, 200);
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
@@ -166,7 +166,7 @@ class MedicalDoctorController extends Controller
             'bio_summary' => 'required|string',
             'qualification' => 'required|string',
             'training_institute' => 'required|string',
-            'license_number' => 'required|string',
+            'umdp_license_id' => 'required|string',
             'service_fee' => 'required|numeric',
             'front_image' => 'required',
             'back_image' => 'required'
@@ -213,23 +213,23 @@ class MedicalDoctorController extends Controller
                         $bio_summary = $request->input('bio_summary');
                         $qualification = $request->input('qualification');
                         $training_institute = $request->input('training_institute');
-                        $license_number = $request->input('license_number');
+                        $umdp_license_id = $request->input('umdp_license_id');
                         $service_fee = floatval($request->input('service_fee'));
 
                         $specialty_details = $this->medicalSpecialtyRepository->getSpecialtyByName($specialty_name);
                         $facility_details = $this->medicalFacilityRepository->findByName($primary_facility);
 
-                        $speciality_id = $specialty_details->id;
+                        $specialty_id = $specialty_details->id;
                         $primary_facility_id = $facility_details->id;
 
                         $profileData = [
-                            'specialty_id' => $speciality_id,
+                            'specialty_id' => $specialty_id,
                             'primary_facility_id' => $primary_facility_id,
                             'address' => $address,
                             'bio_summary' => $bio_summary,
                             'qualification' => $qualification,
                             'training_institute' => $training_institute,
-                            'umdp_license_id' => $license_number,
+                            'umdp_license_id' => $umdp_license_id,
                             'service_fee' => $service_fee,
                             'profile_status' => 1,
                             'is_registered' => 1
@@ -267,20 +267,30 @@ class MedicalDoctorController extends Controller
     public function update(Request $request)
     {
 
+        // $other_facilities =$request->input('other_facilities');
+        // $xxx = serialize($other_facilities);
+        // return response()->json($other_facilities, 400);
+
+        // return response()->json($request->other_facilities, 400);
+        // return response()->json($request->specialty, 400);
+        // return response()->json($request->primary_facility, 400);
+
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|max:55',
             'last_name' => 'required|max:55',
-            'specialty' => 'required|exists:medical_specialties,name',
-            'title' => 'required',
-            'email' => 'required|email|unique:medical_doctors',
             'address' => 'required',
             'gender' => 'required',
-            'qualification' => 'required',
-            'profession' => 'required',
             'dob' => 'required',
-            'languages' => 'required',
-            'experience' => 'required',
-            'service_fee' => 'required|numeric',
+            'email' => 'required|email',
+            'specialty' => 'required|string|exists:medical_specialties,id',
+            'primary_facility' => 'required|string|exists:medical_facilities,id',
+            'other_facilities' => 'sometimes',
+            'other_facilities.*' => 'sometimes|string|exists:medical_facilities,id',
+            'qualification' => 'required',
+            'training_institute' => 'required',
+            'umdp_license_id' => 'required',
+            'bio_summary' => 'required',
+            'service_fee' => 'required|numeric'
         ]);
 
         try {
@@ -293,36 +303,38 @@ class MedicalDoctorController extends Controller
                 $email = $request->email;
                 $doctor = auth('doctor')->user();
                 $doctor_id = $doctor->id;
-                $doctorDetail = $this->doctorRepository->find($doctor_id);
-
-                if ($email != $doctorDetail->email) {
+                if ($email !== $doctor->email) {
                     $emailTaken = $this->doctorRepository->checkIfEmailExists($email);
                     if ($emailTaken) {
                         return response()->json(['error' => 'The email has already been taken.'], 500);
                     }
                 }
 
-                $specialty_name = $request->input('specialty');
-                $specialty = $this->medicalSpecialtyRepository->getSpecialtyByName($specialty_name);
+                $specialty_id = $request->input('specialty');
+                $primary_facility_id = $request->input('primary_facility');
 
-                $validatedData = [
+                $profileData = [
                     'first_name' => $request->first_name,
                     'last_name' => $request->last_name,
-                    'specialty_id' => $specialty->id,
-                    'title' => $request->title,
-                    'email' => $request->email,
                     'address' => $request->address,
                     'gender' => ucfirst($request->gender),
-                    'qualification' => $request->qualification,
-                    'profession' => $request->profession,
                     'dob' => date('Y-m-d', strtotime($request->dob)),
-                    'languages' => serialize($request->languages),
-                    'experience' => $request->experience,
-                    'service_fee' => floatval($request->service_fee),
-                    'profile_status' => 1
+                    'email' =>  $request->email,
+                    'specialty_id' => $specialty_id,
+                    'primary_facility_id' => $primary_facility_id,
+                    'qualification' => $request->qualification,
+                    'training_institute' => $request->training_institute,
+                    'umdp_license_id' => $request->umdp_license_id,
+                    'bio_summary' => $request->bio_summary,
+                    'service_fee' => floatval($request->service_fee)
                 ];
 
-                $this->doctorRepository->update($doctor_id, $validatedData);
+                if ($request->has('other_facilities')) {
+                    $other_facilities = json_decode($request->input('other_facilities', true));
+                    $profileData['other_facilities'] = serialize($other_facilities);
+                }
+
+                $this->doctorRepository->update($doctor_id, $profileData);
                 $doctor = $this->doctorRepository->generateAccessToken($doctor_id);
                 return response(['message' => 'Profile updated successfully', 'user' => $doctor], 200);
             }

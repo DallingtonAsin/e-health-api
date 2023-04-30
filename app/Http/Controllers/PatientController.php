@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\SharedHelper as Helper;
 use Illuminate\Support\Facades\Storage;
-use App\Models\Patient;
 use App\Repositories\PatientRepository;
 use Illuminate\Support\Facades\Hash;
 
@@ -90,10 +89,9 @@ class PatientController extends Controller
                 $email = $request->email;
                 $patient = auth('patient')->user();
                 $patient_id = $patient->id;
-                $patientDetail = Patient::find($patient_id);
 
-                if ($email != $patientDetail->email) {
-                    $emailTaken = Patient::where('email', $email)->exists();
+                if ($email != $patient->email) {
+                    $emailTaken = $this->patientRepository->checkIfEmailIsTaken($email);
                     if ($emailTaken) {
                         return response()->json(['error' => 'The email has already been taken.'], 500);
                     }

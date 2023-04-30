@@ -3,7 +3,6 @@
 namespace App\Repositories;
 
 use App\Models\MedicalDoctor;
-use App\Models\MedicalFacility;
 use Carbon\Carbon;
 
 class MedicalDoctorRepository
@@ -146,6 +145,9 @@ class MedicalDoctorRepository
         $phone_number = $doctor->country_code . '' . $doctor->phone_number;
         $access_token = $doctor->createToken('Doctor' . $phone_number, ['doctor'])->accessToken;
         $doctor->is_patient = $doctor->isPatient();
+        if(!is_null($doctor->other_facilities)){
+            $doctor->other_facilities = unserialize($doctor->other_facilities);
+        }
         $doctor->image = $doctor->thumbnail();
         $doctor->access_token = $access_token;
         return $doctor;

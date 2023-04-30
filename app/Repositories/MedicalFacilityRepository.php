@@ -30,7 +30,7 @@ class MedicalFacilityRepository
 
     public function get()
     {
-        $medical_facilities = $this->medicalFacility->select(['id as key', 'name as value'])->orderBy('id', 'asc')->get();
+        $medical_facilities = $this->medicalFacility->select(['id', 'name'])->orderBy('id', 'asc')->get();
         return $medical_facilities;
     }
 

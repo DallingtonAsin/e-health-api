@@ -75,6 +75,10 @@ class PatientRepository
         return $this->patient->where("email", $email)->first();
     }
 
+    public function checkIfEmailIsTaken($email){
+        return $this->patient->where('email', $email)->exists();
+    }
+
     public function generateAccessToken($id)
     {
 
