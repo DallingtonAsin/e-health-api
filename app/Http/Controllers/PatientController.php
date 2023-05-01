@@ -118,7 +118,8 @@ class PatientController extends Controller
     public function updateProfilePicture(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'image' => 'required'
+            'image' => 'required',
+            'extension' => 'sometimes|nullable'
         ]);
 
         try {
@@ -133,8 +134,8 @@ class PatientController extends Controller
                     $patient = auth('patient')->user();
                     $patient_id = $patient->id;
                     $file = $request->file('image');
-                    $file_extension = $file->getClientOriginalExtension();
-
+                    $file_extension = $request->extension; // $file->getClientOriginalExtension();
+                    
                     if (!is_null($patient->image)) {
                         if (Storage::disk('public')->exists($patient->image)) {
                             Storage::disk('public')->delete($patient->image);

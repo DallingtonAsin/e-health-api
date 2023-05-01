@@ -44,7 +44,7 @@ Route::group(['prefix' => 'patient', 'middleware' => ['auth:patient']], function
     Route::post('verify', [PatientAuthenticationController::class, 'verifyOTP']);
     Route::post('register', [PatientController::class, 'register']);
     Route::put('profile/update', [PatientController::class, 'update']);
-    Route::put('profile-picture/update', [PatientController::class, 'updateProfilePicture']);
+    Route::post('profile-picture/update', [PatientController::class, 'updateProfilePicture']);
     Route::delete('profile-picture/delete', [PatientController::class, 'removeProfilePicture']);
 
     Route::get('notifications', [PatientNotificationController::class, 'getNotifications']);
@@ -61,7 +61,7 @@ Route::group(['prefix' => 'doctor', 'middleware' => ['auth:doctor']], function (
     Route::get('languages', [LanguageController::class, 'getDoctorLanguages']);
     Route::get('specialties', [MedicalSpecialtyController::class, 'getDoctorSpecialties']);
     Route::put('profile/update', [MedicalDoctorController::class, 'update']);
-    Route::put('profile-picture/update', [MedicalDoctorController::class, 'updateProfilePicture']);
+    Route::post('profile-picture/update', [MedicalDoctorController::class, 'updateProfilePicture']);
     Route::delete('profile-picture/delete', [MedicalDoctorController::class, 'removeProfilePicture']);
 
     Route::get('notifications', [DoctorNotificationController::class, 'getNotifications']);

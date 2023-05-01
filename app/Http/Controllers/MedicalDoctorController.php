@@ -267,14 +267,6 @@ class MedicalDoctorController extends Controller
     public function update(Request $request)
     {
 
-        // $other_facilities =$request->input('other_facilities');
-        // $xxx = serialize($other_facilities);
-        // return response()->json($other_facilities, 400);
-
-        // return response()->json($request->other_facilities, 400);
-        // return response()->json($request->specialty, 400);
-        // return response()->json($request->primary_facility, 400);
-
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|max:55',
             'last_name' => 'required|max:55',
@@ -375,7 +367,8 @@ class MedicalDoctorController extends Controller
     public function updateProfilePicture(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'image' => 'required'
+            'image' => 'required',
+            'extension' => 'sometimes|nullable'
         ]);
 
         try {
@@ -390,7 +383,7 @@ class MedicalDoctorController extends Controller
                     $doctor = auth('doctor')->user();
                     $doctor_id = $doctor->id;
                     $file = $request->file('image');
-                    $file_extension = $file->getClientOriginalExtension();
+                    $file_extension =  $request->extension; // $file->getClientOriginalExtension();
 
                     if (!is_null($doctor->image)) {
                         if (Storage::disk('public')->exists($doctor->image)) {
