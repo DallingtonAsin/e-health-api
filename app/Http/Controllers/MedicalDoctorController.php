@@ -250,7 +250,7 @@ class MedicalDoctorController extends Controller
 
                         $this->doctorRepository->update($doctor_id, $profileData);
                         $doctor = $this->doctorRepository->generateAccessToken($doctor_id);
-                        return response()->json($doctor, 200);
+                        return response(['message' => 'Your profile has been submitted for review. You will be notified upon approval.', 'user' => $doctor], 200);
                     } else {
                         return Helper::sendFailedHttpResponse('System is unable to save your identification documents. Please try again later.');
                     }
