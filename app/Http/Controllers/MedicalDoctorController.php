@@ -356,7 +356,7 @@ class MedicalDoctorController extends Controller
                 $verified_doctor = $this->doctorRepository->generateAccessToken($doctor_id);
                 return response()->json($verified_doctor, 200);
             } else {
-                return Helper::sendFailedHttpResponse('Thank you for registering with us. Please wait as your account is awaiting approval.');
+                return Helper::sendFailedHttpResponse('Thank you for registering with us. Your profile is currently under review and you will be notified upon approval.');
             }
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
