@@ -7,6 +7,7 @@ use Laravel\Passport\HasApiTokens;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\DoctorAvailability;
+use App\Models\DoctorIdentificationDocument;
 use App\Models\UserType;
 
 
@@ -74,6 +75,11 @@ class MedicalDoctor extends Authenticatable
     {
         $user_type_name = $this->userType->name;
         return stripos($user_type_name, 'patient') !== false;
+    }
+
+    public function identificationDocument()
+    {
+        return $this->hasOne(DoctorIdentificationDocument::class, 'doctor_id');
     }
 
     // public function getImageAttribute($value)

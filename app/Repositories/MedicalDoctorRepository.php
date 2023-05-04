@@ -141,15 +141,23 @@ class MedicalDoctorRepository
     public function generateAccessToken($id)
     {
 
-        $doctor = $this->medicalDoctor->find($id);
+        $doctor = $this->medicalDoctor->with(['identificationDocument' => function ($query) {
+            $query->select(['doctor_id', 'front', 'back']);
+        }])->find($id);
+
         $phone_number = $doctor->country_code . '' . $doctor->phone_number;
         $access_token = $doctor->createToken('Doctor' . $phone_number, ['doctor'])->accessToken;
         $doctor->is_patient = $doctor->isPatient();
-        if(!is_null($doctor->other_facilities)){
+        if (!is_null($doctor->other_facilities)) {
             $doctor->other_facilities = unserialize($doctor->other_facilities);
+        }
+        if ($doctor->identificationDocument) {
+            $doctor->identificationDocument->front = $doctor->identificationDocument->front_path;
+            $doctor->identificationDocument->back = $doctor->identificationDocument->back_path;
         }
         $doctor->image = $doctor->thumbnail();
         $doctor->access_token = $access_token;
+        unset($doctor->identificationDocument->doctor_id);
         return $doctor;
     }
 }
