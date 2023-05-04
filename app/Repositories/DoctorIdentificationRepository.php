@@ -24,6 +24,11 @@ class DoctorIdentificationRepository
         return $this->doctorIdentification->find($id);
     }
 
+    public function findByDoctorId($doctor_id)
+    {
+        return $this->doctorIdentification->where('doctor_id', $doctor_id)->first();
+    }
+
     public function get()
     {
         return $this->doctorIdentification->all();
@@ -74,7 +79,7 @@ class DoctorIdentificationRepository
                     }
                 }
             }
-            $filename = 'font_'. $doctor_id . '' . time() . '.' . $file_extension;
+            $filename = 'font_' . $doctor_id . '' . time() . '.' . $file_extension;
             $filePath = $file->storeAs('images/doctors/identification', $filename, 'public');
 
             return $filePath;
@@ -95,7 +100,7 @@ class DoctorIdentificationRepository
                     }
                 }
             }
-            $filename = 'back_'.$doctor_id . '' . time() . '.' . $file_extension;
+            $filename = 'back_' . $doctor_id . '' . time() . '.' . $file_extension;
             $filePath = $file->storeAs('images/doctors/identification', $filename, 'public');
 
             return $filePath;

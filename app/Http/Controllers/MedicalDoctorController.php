@@ -282,7 +282,9 @@ class MedicalDoctorController extends Controller
             'training_institute' => 'required',
             'umdp_license_id' => 'required',
             'bio_summary' => 'required',
-            'service_fee' => 'required|numeric'
+            'service_fee' => 'required|numeric',
+            'update_front_id' => 'required',
+            'update_back_id' => 'required'
         ]);
 
         try {
@@ -300,6 +302,35 @@ class MedicalDoctorController extends Controller
                     if ($emailTaken) {
                         return response()->json(['error' => 'The email has already been taken.'], 500);
                     }
+                }
+
+                $update_front_id = $request->input('update_front_id');
+                $update_back_id = $request->input('update_back_id');
+
+                $doctorsDoc = $this->doctorIdentificationRepository->findByDoctorId($doctor_id);
+                $front_image_path = $doctorsDoc->front;
+                $back_image_path = $doctorsDoc->back;
+
+                if ($update_front_id && $request->hasFile('front_image')) {
+                    $front_image = $request->file('front_image');
+                    $front_image_extension = $front_image->getClientOriginalExtension();
+                    $front_image_path = $this->doctorIdentificationRepository->saveIdentificationFrontFile($doctor_id, $front_image, $front_image_extension);
+                    $identificationData = [
+                        'doctor_id' => $doctor_id,
+                        'front' => $front_image_path
+                    ];
+                    $this->doctorIdentificationRepository->updateByDoctorId($doctor_id, $identificationData);
+                }
+
+                if ($update_back_id && $request->hasFile('back_image')) {
+                    $back_image = $request->file('back_image');
+                    $back_image_extension = $back_image->getClientOriginalExtension();
+                    $back_image_path = $this->doctorIdentificationRepository->saveIdentificationBackFile($doctor_id, $back_image, $back_image_extension);
+                    $identificationData = [
+                        'doctor_id' => $doctor_id,
+                        'back' => $back_image_path
+                    ];
+                    $this->doctorIdentificationRepository->updateByDoctorId($doctor_id, $identificationData);
                 }
 
                 $specialty_id = $request->input('specialty');
@@ -367,8 +398,7 @@ class MedicalDoctorController extends Controller
     public function updateProfilePicture(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'image' => 'required',
-            'extension' => 'sometimes|nullable'
+            'image' => 'required'
         ]);
 
         try {
@@ -383,7 +413,7 @@ class MedicalDoctorController extends Controller
                     $doctor = auth('doctor')->user();
                     $doctor_id = $doctor->id;
                     $file = $request->file('image');
-                    $file_extension =  $request->extension; // $file->getClientOriginalExtension();
+                    $file_extension = $file->getClientOriginalExtension();
 
                     if (!is_null($doctor->image)) {
                         if (Storage::disk('public')->exists($doctor->image)) {
