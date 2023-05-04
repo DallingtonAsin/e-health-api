@@ -154,10 +154,10 @@ class MedicalDoctorRepository
         if ($doctor->identificationDocument) {
             $doctor->identificationDocument->front = $doctor->identificationDocument->front_path;
             $doctor->identificationDocument->back = $doctor->identificationDocument->back_path;
+            unset($doctor->identificationDocument->doctor_id);
         }
         $doctor->image = $doctor->thumbnail();
         $doctor->access_token = $access_token;
-        unset($doctor->identificationDocument->doctor_id);
         return $doctor;
     }
 }
