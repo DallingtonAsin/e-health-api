@@ -51,6 +51,9 @@ Route::group(['prefix' => 'patient', 'middleware' => ['auth:patient']], function
     Route::get('notifications/read', [PatientNotificationController::class, 'getReadNotifications']);
     Route::get('notifications/unread', [PatientNotificationController::class, 'getUnReadNotifications']);
     Route::post('notifications/mark-as-read/{id}', [PatientNotificationController::class, 'markAsRead']);
+
+    Route::post('favourite-doctor', [PatientController::class, 'markDoctorAsFavourite']);
+    Route::delete('favourite-doctor', [PatientController::class, 'unmarkDoctorAsFavourite']);
 });
 
 Route::group(['prefix' => 'doctor', 'middleware' => ['auth:doctor']], function () {
@@ -72,8 +75,8 @@ Route::group(['prefix' => 'doctor', 'middleware' => ['auth:doctor']], function (
 
 Route::group(['prefix' => 'medical', 'middleware' => ['auth:patient,doctor', 'patient.or.doctor']], function () {
     Route::get('doctors/specialty/{specialty}', [MedicalDoctorController::class, 'getDoctorsBySpecialty']);
-    Route::resource('specialties', MedicalSpecialtyController::class);
     Route::resource('doctors', MedicalDoctorController::class);
+    Route::resource('specialties', MedicalSpecialtyController::class);
     Route::resource('facilities', MedicalFacilityController::class);
 });
 

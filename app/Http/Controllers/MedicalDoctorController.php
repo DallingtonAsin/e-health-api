@@ -37,7 +37,8 @@ class MedicalDoctorController extends Controller
     public function index()
     {
         try {
-            $medical_doctors = $this->doctorRepository->get();
+            $patient_id = auth('patient')->user()->id;
+            $medical_doctors = $this->doctorRepository->get(null, null, $patient_id);
             return response()->json($medical_doctors, 200);
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
@@ -47,7 +48,8 @@ class MedicalDoctorController extends Controller
     public function getDoctorsBySpecialty($specialty_id)
     {
         try {
-            $medical_doctors = $this->doctorRepository->get(null, $specialty_id);
+            $patient_id = auth('patient')->user()->id;
+            $medical_doctors = $this->doctorRepository->get(null, $specialty_id, $patient_id);
             return response()->json($medical_doctors, 200);
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);

@@ -97,4 +97,9 @@ class MedicalDoctor extends Authenticatable
         }
         return null;
     }
+
+    public function favouriteByPatients()
+    {
+        return $this->belongsToMany(Patient::class, 'patient_favourite_doctors', 'doctor_id', 'patient_id')->withTimestamps();
+    }
 }

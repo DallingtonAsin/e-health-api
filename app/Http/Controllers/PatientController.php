@@ -7,17 +7,19 @@ use Illuminate\Support\Facades\Validator;
 use App\Helpers\SharedHelper as Helper;
 use Illuminate\Support\Facades\Storage;
 use App\Repositories\PatientRepository;
+use App\Repositories\MedicalDoctorRepository;
 use Illuminate\Support\Facades\Hash;
 
 class PatientController extends Controller
 {
 
-    protected $patientRepository;
+    protected $patientRepository, $medicalDoctorRepository;
 
 
-    public function __construct(PatientRepository $patientRepository)
+    public function __construct(PatientRepository $patientRepository, MedicalDoctorRepository $medicalDoctorRepository)
     {
         $this->patientRepository = $patientRepository;
+        $this->medicalDoctorRepository = $medicalDoctorRepository;
     }
 
     // register patient
@@ -181,6 +183,50 @@ class PatientController extends Controller
             } else {
                 $message = "Technical error while removing profile picture";
                 return Helper::sendFailedHttpResponse($message);
+            }
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
+    public function markDoctorAsFavourite(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'doctor_id' => 'required|exists:medical_doctors,id'
+        ]);
+        try {
+            if ($validator->fails()) {
+                $message = $validator->errors()->all();
+                return Helper::sendFailedHttpResponse($message);
+            } else {
+                $doctor_id = $request->input('doctor_id');
+                $patient_id = auth('patient')->user()->id;
+                $doctor = $this->medicalDoctorRepository->find($doctor_id);
+                $patient = $this->patientRepository->find($patient_id);
+                $patient->favouriteDoctors()->syncWithoutDetaching($doctor);
+                return response()->json(['message' => 'Doctor added to favourites.']);
+            }
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
+    public function unmarkDoctorAsFavourite(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'doctor_id' => 'required|exists:medical_doctors,id'
+        ]);
+        try {
+            if ($validator->fails()) {
+                $message = $validator->errors()->all();
+                return Helper::sendFailedHttpResponse($message);
+            } else {
+                $doctor_id = $request->input('doctor_id');
+                $patient_id = auth('patient')->user()->id;
+                $doctor = $this->medicalDoctorRepository->find($doctor_id);
+                $patient = $this->patientRepository->find($patient_id);
+                $patient->favouriteDoctors()->detach($doctor);
+                return response()->json(['message' => 'Doctor removed from favourites.']);
             }
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
