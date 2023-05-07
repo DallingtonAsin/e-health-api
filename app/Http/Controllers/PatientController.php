@@ -211,17 +211,13 @@ class PatientController extends Controller
         }
     }
 
-    public function unmarkDoctorAsFavourite(Request $request)
+    public function unmarkDoctorAsFavourite($doctor_id)
     {
-        $validator = Validator::make($request->all(), [
-            'doctor_id' => 'required|exists:medical_doctors,id'
-        ]);
         try {
-            if ($validator->fails()) {
-                $message = $validator->errors()->all();
-                return Helper::sendFailedHttpResponse($message);
+            $doctorExists = $this->medicalDoctorRepository->exists($doctor_id);
+            if (!$doctorExists) {
+                return Helper::sendFailedHttpResponse("The supplied doctor's id is invalid");
             } else {
-                $doctor_id = $request->input('doctor_id');
                 $patient_id = auth('patient')->user()->id;
                 $doctor = $this->medicalDoctorRepository->find($doctor_id);
                 $patient = $this->patientRepository->find($patient_id);

@@ -122,8 +122,8 @@ class MedicalDoctorRepository
 
     public function exists($id)
     {
-        $medicalDoctor = $this->medicalDoctor->where('id', $id)->exists();
-        return $medicalDoctor;
+        $exists = $this->medicalDoctor->where('id', $id)->exists();
+        return $exists;
     }
 
     public function isValidOTP($doctor_id, $otp)

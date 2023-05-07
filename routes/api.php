@@ -53,7 +53,7 @@ Route::group(['prefix' => 'patient', 'middleware' => ['auth:patient']], function
     Route::post('notifications/mark-as-read/{id}', [PatientNotificationController::class, 'markAsRead']);
 
     Route::post('favourite-doctor', [PatientController::class, 'markDoctorAsFavourite']);
-    Route::delete('favourite-doctor', [PatientController::class, 'unmarkDoctorAsFavourite']);
+    Route::delete('favourite-doctor/{doctor_id}', [PatientController::class, 'unmarkDoctorAsFavourite']);
 });
 
 Route::group(['prefix' => 'doctor', 'middleware' => ['auth:doctor']], function () {
