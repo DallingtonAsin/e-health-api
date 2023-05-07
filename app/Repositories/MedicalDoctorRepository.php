@@ -101,9 +101,12 @@ class MedicalDoctorRepository
             $doctor['schedule'] = $timeSlots;
         }
 
-        
+        $sortedDoctors = collect($doctors)
+                ->sortByDesc('is_favourite')
+                ->values()
+                ->all();
 
-        return $doctors;
+        return $sortedDoctors;
     }
 
     public function update($id, $medicalDoctorData)
