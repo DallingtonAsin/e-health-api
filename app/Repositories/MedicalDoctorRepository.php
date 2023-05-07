@@ -7,16 +7,18 @@ use Carbon\Carbon;
 
 class MedicalDoctorRepository
 {
-    protected $medicalDoctor, $medicalFacilityRepository, $medicalSpecialtyRepository;
+    protected $medicalDoctor, $medicalFacilityRepository, $medicalSpecialtyRepository, $patientRepository;
 
     public function __construct(
         MedicalDoctor $medicalDoctor,
         MedicalFacilityRepository $medicalFacilityRepository,
-        MedicalSpecialtyRepository $medicalSpecialtyRepository
+        MedicalSpecialtyRepository $medicalSpecialtyRepository,
+        PatientRepository $patientRepository
     ) {
         $this->medicalDoctor = $medicalDoctor;
         $this->medicalFacilityRepository = $medicalFacilityRepository;
         $this->medicalSpecialtyRepository = $medicalSpecialtyRepository;
+        $this->patientRepository = $patientRepository;
     }
 
     public function create($medicalDoctorData)
@@ -34,7 +36,7 @@ class MedicalDoctorRepository
         return $this->medicalDoctor->where('email', $email)->exists();
     }
 
-    public function get($id = null, $specialty = null)
+    public function get($id = null, $specialty = null, $patient_id = null)
     {
 
         $today = Carbon::today();
@@ -51,6 +53,14 @@ class MedicalDoctorRepository
 
         $doctors = $doctors->get();
         $doctors->makeHidden(['created_at', 'updated_at']);
+
+        if ($patient_id) {
+            $patient = $this->patientRepository->find($patient_id);
+            $favouriteDoctors = $patient->favouriteDoctors()->get();
+            foreach ($doctors as $doctor) {
+                $doctor->is_favourite = $favouriteDoctors->contains($doctor);
+            }
+        }
 
         foreach ($doctors as $doctor) {
 
@@ -91,6 +101,8 @@ class MedicalDoctorRepository
             $doctor['schedule'] = $timeSlots;
         }
 
+        
+
         return $doctors;
     }
 
@@ -110,8 +122,8 @@ class MedicalDoctorRepository
 
     public function exists($id)
     {
-        $medicalDoctor = $this->medicalDoctor->where('id', $id)->exists();
-        return $medicalDoctor;
+        $exists = $this->medicalDoctor->where('id', $id)->exists();
+        return $exists;
     }
 
     public function isValidOTP($doctor_id, $otp)
