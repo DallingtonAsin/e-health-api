@@ -467,6 +467,26 @@ class MedicalDoctorController extends Controller
         }
     }
 
+    public function updateOnlineStatus()
+    {
+        try {
+            $doctor = auth('doctor')->user();
+            $id = $doctor->id;
+            $newStatus = $doctor->is_online ? 0 : 1;
+
+            $hasUpdated = $this->doctorRepository->update($id, ['is_online' => $newStatus]);
+            if ($hasUpdated) {
+                $doctor = $this->doctorRepository->generateAccessToken($id);
+                return Helper::sendOkHttpResponse(['message' => 'Online status updated successfully', 'user' => $doctor]);
+            } else {
+                $message = "Technical error while updating online status";
+                return Helper::sendFailedHttpResponse($message);
+            }
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
     private function getAge($birthdate)
     {
         try {

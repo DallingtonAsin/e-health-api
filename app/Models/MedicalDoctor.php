@@ -46,6 +46,7 @@ class MedicalDoctor extends Authenticatable
         'profile_status',
         'is_registered',
         'is_verified',
+        'is_online',
         'is_blocked'
     ];
 
