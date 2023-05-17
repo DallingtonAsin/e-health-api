@@ -10,19 +10,22 @@ use App\Repositories\AppointmentTypeRepository;
 use App\Repositories\MeetingTokenRepository;
 use App\Repositories\MedicalHistoryRepository;
 use App\Services\NotificationService;
+use App\Services\PushNotificationService;
 use Carbon\Carbon;
 
 class MedicalAppointmentController extends Controller
 {
 
-    protected $appointmentTypeRepository, $medicalAppointmentRepository, $meetingTokenRepository, $notificationService, $medicalHistoryRepository;
+    protected $appointmentTypeRepository, $medicalAppointmentRepository,
+        $meetingTokenRepository, $notificationService, $medicalHistoryRepository, $pushNotificationService;
 
     public function __construct(
         AppointmentTypeRepository $appointmentTypeRepository,
         MedicalAppointmentRepository $medicalAppointmentRepository,
         MeetingTokenRepository $meetingTokenRepository,
         NotificationService $notificationService,
-        MedicalHistoryRepository $medicalHistoryRepository
+        MedicalHistoryRepository $medicalHistoryRepository,
+        PushNotificationService $pushNotificationService
 
     ) {
         $this->appointmentTypeRepository = $appointmentTypeRepository;
@@ -30,6 +33,7 @@ class MedicalAppointmentController extends Controller
         $this->meetingTokenRepository = $meetingTokenRepository;
         $this->notificationService = $notificationService;
         $this->medicalHistoryRepository = $medicalHistoryRepository;
+        $this->pushNotificationService = $pushNotificationService;
     }
 
     /**
@@ -133,7 +137,6 @@ class MedicalAppointmentController extends Controller
                 $reason = $request->input('reason');
                 $past_medical_history = $request->input('past_medical_history');
                 $current_treatment = $request->input('current_treatment');
-
 
                 $appointment_type = $this->appointmentTypeRepository->getAppointmentTypeByName($appointment_type_name);
                 $appointment_date = Carbon::parse($date . ' ' . $time);
@@ -379,6 +382,22 @@ class MedicalAppointmentController extends Controller
                 } else {
                     return response()->json(['message' => 'Sorry! This appointment has already been marked ' . $appointment->status . '.'], 400);
                 }
+            }
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
+    public function sendTestPushNotification()
+    {
+        try {
+            $doctor = auth('doctor')->user();
+            if ($doctor->fcm_token) {
+                $fcmToken = $doctor->fcm_token;
+                $response = $this->pushNotificationService->sendPushNotification($fcmToken, 'Test', 'How are you?');
+                return response()->json($response, 200);
+            } else {
+                return response()->json(['error' => 'Null device token!'], 500);
             }
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
