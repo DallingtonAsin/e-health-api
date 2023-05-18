@@ -42,7 +42,8 @@ class PushNotificationService
         $messaging = $factory->createMessaging();
 
         $message = CloudMessage::withTarget('token', $fcmToken)
-            ->withNotification(Notification::create($title,  $body));
+            ->withNotification(Notification::create($title,  $body))
+            ->withData(['title' => $title, 'body' => $body]);
 
         $response = $messaging->send($message);
         return $response;

@@ -94,7 +94,7 @@ Route::group(['prefix' => 'doctor', 'middleware' => ['auth:doctor']], function (
     Route::get('{doctor_id}/completed', [MedicalAppointmentController::class, 'getDoctorCompletedAppointments']);
     Route::get('{doctor_id}/cancelled', [MedicalAppointmentController::class, 'getDoctorCancelledAppointments']);
     Route::put('online-status', [MedicalDoctorController::class, 'updateOnlineStatus']);
-    Route::post('test-push-notification', [MedicalAppointmentController::class, 'sendTestPushNotification']);
+    Route::post('test-push-notification', [DoctorNotificationController::class, 'sendTestPushNotification']);
 });
 
 

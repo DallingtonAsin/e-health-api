@@ -72,7 +72,7 @@ class MedicalAppointmentRepository
         $appointments = $this->medicalAppointment->with(['patient' => function ($query) {
             $query->select(['id', 'first_name', 'last_name', 'country_code', 'phone_number', 'email', 'address', 'dob', 'image']);
         }])->with(['doctor' => function ($query) {
-            $query->select(['id', 'first_name', 'last_name', 'specialty_id', 'country_code', 'phone_number', 'email', 'qualification', 'image', 'service_fee']);
+            $query->select(['id', 'first_name', 'last_name', 'specialty_id', 'country_code', 'phone_number', 'email', 'qualification', 'image', 'service_fee', 'fcm_token']);
         }])->with(['appointmentType' => function ($query) {
             $query->select(['id', 'name']);
         }])->with(['meetingAccess' => function ($query) {

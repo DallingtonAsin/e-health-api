@@ -387,20 +387,4 @@ class MedicalAppointmentController extends Controller
             return response()->json(['error' => $ex->getMessage()], 500);
         }
     }
-
-    public function sendTestPushNotification()
-    {
-        try {
-            $doctor = auth('doctor')->user();
-            if ($doctor->fcm_token) {
-                $fcmToken = $doctor->fcm_token;
-                $response = $this->pushNotificationService->sendPushNotification($fcmToken, 'Test', 'How are you?');
-                return response()->json($response, 200);
-            } else {
-                return response()->json(['error' => 'Null device token!'], 500);
-            }
-        } catch (\Exception $ex) {
-            return response()->json(['error' => $ex->getMessage()], 500);
-        }
-    }
 }
