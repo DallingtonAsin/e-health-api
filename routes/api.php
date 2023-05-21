@@ -109,6 +109,7 @@ Route::group(['prefix' => 'appointments'], function () {
 
     Route::middleware(['auth:doctor'])->group(function () {
         Route::put('{appointment_id}/complete', [MedicalAppointmentController::class, 'completeAppointment']);
+        Route::put('confirm', [MedicalAppointmentController::class, 'confirmAppointment']);
     });
 
     Route::group(['prefix' => 'patient', 'middleware' => ['auth:patient']], function () {

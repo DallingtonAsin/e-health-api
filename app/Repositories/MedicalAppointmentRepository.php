@@ -131,6 +131,12 @@ class MedicalAppointmentRepository
             ->update(['status' => 'completed', 'completed_at' => Carbon::now()]);
     }
 
+    public function confirmAppointment($patient_id, $appointment_number)
+    {
+        return $this->medicalAppointment->where('patient_id', $patient_id)->where('appointment_number', $appointment_number)
+            ->update(['status' => 'confirmed', 'confirmed_at' => Carbon::now()]);
+    }
+
     public function cancelAppointment($patient_id, $appointment_number)
     {
         return $this->medicalAppointment->where('patient_id', $patient_id)->where('appointment_number', $appointment_number)

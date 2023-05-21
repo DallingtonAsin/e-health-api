@@ -348,6 +348,44 @@ class MedicalAppointmentController extends Controller
         }
     }
 
+    public function confirmAppointment(Request $request)
+    {
+
+        $validator = Validator::make($request->all(), [
+            'patient_id' => 'required|exists:patients,id',
+            'appointment_number' => 'required|exists:medical_appointments,appointment_number'
+        ]);
+        try {
+            if ($validator->fails()) {
+                $message = $validator->errors()->all();
+                return Helper::sendFailedHttpResponse($message);
+            } else {
+
+                $patient_id = $request->input('patient_id');
+                $appointment_number = $request->input('appointment_number');
+
+                $appointment = $this->medicalAppointmentRepository->findAppointmentByNumber($appointment_number);
+                $status = $appointment->status;
+
+                if (is_null($status) || $status === 'pending') {
+                    $this->medicalAppointmentRepository->confirmAppointment($patient_id, $appointment_number);
+                    $datetime = Carbon::parse($appointment->appointment_date);
+                    $appointment->appointment_date = $datetime->toDateString();
+                    $appointment->appointment_time = date('H:i', strtotime($datetime->toTimeString()));
+
+                    $this->notificationService->sendAppointmentConfirmedMessage($patient_id, $appointment);
+                    $this->notificationService->sendDoctorAppointmentConfirmedMessage($appointment->doctor_id, $appointment);
+
+                    return response()->json(['message' => 'Appointment has been confirmed successfully'], 200);
+                } else {
+                    return response()->json(['message' => 'Sorry! This appointment has already been marked ' . $appointment->status . '.'], 400);
+                }
+            }
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
     public function cancelAppointment(Request $request)
     {
 
@@ -355,9 +393,7 @@ class MedicalAppointmentController extends Controller
             'patient_id' => 'required|exists:patients,id',
             'appointment_number' => 'required|exists:medical_appointments,appointment_number'
         ]);
-
         try {
-
             if ($validator->fails()) {
                 $message = $validator->errors()->all();
                 return Helper::sendFailedHttpResponse($message);
