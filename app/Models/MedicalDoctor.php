@@ -83,6 +83,11 @@ class MedicalDoctor extends Authenticatable
         return $this->hasOne(DoctorIdentificationDocument::class, 'doctor_id');
     }
 
+    public function ratings()
+    {
+        return $this->hasMany(DoctorRating::class, 'doctor_id');
+    }
+
     // public function getImageAttribute($value)
     // {
     //     if ($value) {

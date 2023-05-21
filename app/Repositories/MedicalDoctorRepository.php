@@ -40,7 +40,7 @@ class MedicalDoctorRepository
     {
 
         $today = Carbon::today();
-        $doctors = $this->medicalDoctor->where('is_verified', 1)->with(['availability' => function ($query) use ($today) {
+        $doctors = $this->medicalDoctor->where('is_verified', 1)->withCount('ratings')->with(['availability' => function ($query) use ($today) {
             $query->where('date', '>=', $today)->orderBy('date', 'asc');
         }]);
 
@@ -63,10 +63,16 @@ class MedicalDoctorRepository
         }
 
         foreach ($doctors as $doctor) {
-
             $languages = unserialize($doctor->languages);
             // $languageString = implode(', ', $languages);
             $doctor['languages'] =  $languages;
+            $rating = $doctor->ratings->sum('rating');
+            if ($rating > 0) {
+                $doctor['rating']  = $rating / $doctor->ratings_count;
+            } else {
+                $doctor['rating']  = 0;
+            }
+            unset($doctor->ratings_count);
             $doctor['service_fee'] = config('app.currency') . '. ' . number_format($doctor->service_fee);
             $doctor['image'] = $doctor->thumbnail();
 
@@ -102,9 +108,9 @@ class MedicalDoctorRepository
         }
 
         $sortedDoctors = collect($doctors)
-                ->sortByDesc('is_favourite')
-                ->values()
-                ->all();
+            ->sortByDesc('is_favourite')
+            ->values()
+            ->all();
 
         return $sortedDoctors;
     }
