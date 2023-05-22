@@ -6,6 +6,7 @@ use App\Models\MedicalAppointment;
 use App\Models\AppointmentType;
 use App\Models\MedicalSpecialty;
 use App\Helpers\SharedHelper as Helper;
+use App\Models\MedicalFacility;
 use Carbon\Carbon;
 
 
@@ -72,7 +73,7 @@ class MedicalAppointmentRepository
         $appointments = $this->medicalAppointment->with(['patient' => function ($query) {
             $query->select(['id', 'first_name', 'last_name', 'country_code', 'phone_number', 'email', 'address', 'dob', 'image']);
         }])->with(['doctor' => function ($query) {
-            $query->select(['id', 'first_name', 'last_name', 'specialty_id', 'country_code', 'phone_number', 'email', 'qualification', 'image', 'service_fee']);
+            $query->select(['id', 'first_name', 'last_name', 'specialty_id', 'primary_facility_id', 'country_code', 'phone_number', 'email', 'qualification', 'address', 'image', 'service_fee', 'fcm_token']);
         }])->with(['appointmentType' => function ($query) {
             $query->select(['id', 'name']);
         }])->with(['meetingAccess' => function ($query) {
@@ -108,7 +109,7 @@ class MedicalAppointmentRepository
                         unset($appointment->meetingAccess->appointment_id);
                     }
                 }
-                
+
                 $appointment->is_video = $appointment->isVideo();
                 $appointment->appointment_time =  Carbon::parse($appointment->appointment_date)->format('H:i');
                 $appointment->appointment_date = Carbon::parse($appointment->appointment_date)->toDateString();
@@ -116,6 +117,7 @@ class MedicalAppointmentRepository
                 $appointment->patient->thumbnail = $appointment->patient->thumbnail();
                 $appointment->doctor->thumbnail = $appointment->doctor->thumbnail();
                 $appointment->doctor->specialty = MedicalSpecialty::where('id', $appointment->doctor->specialty_id)->value('name');
+                $appointment->doctor->primary_facility = MedicalFacility::where('id', $appointment->doctor->primary_facility_id)->value('name');
                 $appointment->doctor->service_fee = number_format(floatval($appointment->doctor->service_fee));
                 return $appointment;
             });
@@ -129,6 +131,12 @@ class MedicalAppointmentRepository
     {
         return $this->medicalAppointment->where('patient_id', $patient_id)->where('id', $appointment_id)
             ->update(['status' => 'completed', 'completed_at' => Carbon::now()]);
+    }
+
+    public function confirmAppointment($patient_id, $appointment_number)
+    {
+        return $this->medicalAppointment->where('patient_id', $patient_id)->where('appointment_number', $appointment_number)
+            ->update(['status' => 'confirmed', 'confirmed_at' => Carbon::now()]);
     }
 
     public function cancelAppointment($patient_id, $appointment_number)

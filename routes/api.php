@@ -16,6 +16,7 @@ use App\Http\Controllers\MedicalHistoryController;
 use App\Http\Controllers\Auth\Patient\AuthenticationController as PatientAuthenticationController;
 use App\Http\Controllers\Auth\Doctor\AuthenticationController as DoctorAuthenticationController;
 use App\Http\Controllers\MedicalFacilityController;
+use App\Http\Controllers\DoctorRatingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,6 +47,8 @@ Route::group(['prefix' => 'patient', 'middleware' => ['auth:patient']], function
     Route::put('profile/update', [PatientController::class, 'update']);
     Route::post('profile-picture/update', [PatientController::class, 'updateProfilePicture']);
     Route::delete('profile-picture/delete', [PatientController::class, 'removeProfilePicture']);
+    Route::post('rate-doctor', [DoctorRatingController::class, 'postRating']);
+
 
     Route::get('notifications', [PatientNotificationController::class, 'getNotifications']);
     Route::get('notifications/read', [PatientNotificationController::class, 'getReadNotifications']);
@@ -93,6 +96,8 @@ Route::group(['prefix' => 'doctor', 'middleware' => ['auth:doctor']], function (
     Route::get('{doctor_id}/confirmed', [MedicalAppointmentController::class, 'getDoctorConfirmedAppointments']);
     Route::get('{doctor_id}/completed', [MedicalAppointmentController::class, 'getDoctorCompletedAppointments']);
     Route::get('{doctor_id}/cancelled', [MedicalAppointmentController::class, 'getDoctorCancelledAppointments']);
+    Route::put('online-status', [MedicalDoctorController::class, 'updateOnlineStatus']);
+    Route::post('test-push-notification', [DoctorNotificationController::class, 'sendTestPushNotification']);
 });
 
 
@@ -107,6 +112,7 @@ Route::group(['prefix' => 'appointments'], function () {
 
     Route::middleware(['auth:doctor'])->group(function () {
         Route::put('{appointment_id}/complete', [MedicalAppointmentController::class, 'completeAppointment']);
+        Route::put('confirm', [MedicalAppointmentController::class, 'confirmAppointment']);
     });
 
     Route::group(['prefix' => 'patient', 'middleware' => ['auth:patient']], function () {

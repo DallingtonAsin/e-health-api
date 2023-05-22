@@ -46,6 +46,7 @@ class MedicalDoctor extends Authenticatable
         'profile_status',
         'is_registered',
         'is_verified',
+        'is_online',
         'is_blocked'
     ];
 
@@ -80,6 +81,11 @@ class MedicalDoctor extends Authenticatable
     public function identificationDocument()
     {
         return $this->hasOne(DoctorIdentificationDocument::class, 'doctor_id');
+    }
+
+    public function ratings()
+    {
+        return $this->hasMany(DoctorRating::class, 'doctor_id');
     }
 
     // public function getImageAttribute($value)
