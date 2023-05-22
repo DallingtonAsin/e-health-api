@@ -67,6 +67,4 @@ class DrugRepository
         return $drug;
     }
 
-
-
 }

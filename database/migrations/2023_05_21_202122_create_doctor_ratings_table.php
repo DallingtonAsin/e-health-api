@@ -15,8 +15,8 @@ class CreateDoctorRatingsTable extends Migration
     {
         Schema::create('doctor_ratings', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('patient_id');
             $table->unsignedBigInteger('doctor_id');
+            $table->unsignedBigInteger('patient_id');
             $table->integer('rating');
             $table->text('comment')->nullable();
             $table->timestamps();

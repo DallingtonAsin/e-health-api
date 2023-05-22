@@ -16,6 +16,7 @@ use App\Http\Controllers\MedicalHistoryController;
 use App\Http\Controllers\Auth\Patient\AuthenticationController as PatientAuthenticationController;
 use App\Http\Controllers\Auth\Doctor\AuthenticationController as DoctorAuthenticationController;
 use App\Http\Controllers\MedicalFacilityController;
+use App\Http\Controllers\DoctorRatingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,6 +47,8 @@ Route::group(['prefix' => 'patient', 'middleware' => ['auth:patient']], function
     Route::put('profile/update', [PatientController::class, 'update']);
     Route::post('profile-picture/update', [PatientController::class, 'updateProfilePicture']);
     Route::delete('profile-picture/delete', [PatientController::class, 'removeProfilePicture']);
+    Route::post('rate-doctor', [DoctorRatingController::class, 'postRating']);
+
 
     Route::get('notifications', [PatientNotificationController::class, 'getNotifications']);
     Route::get('notifications/read', [PatientNotificationController::class, 'getReadNotifications']);

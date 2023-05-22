@@ -12,8 +12,8 @@ class DoctorRating extends Model
     protected $table = 'doctor_ratings';
 
     protected $fillable = [
-        'patient_id',
         'doctor_id',
+        'patient_id',
         'rating',
         'comment'
 

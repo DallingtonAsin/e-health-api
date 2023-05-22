@@ -22,8 +22,8 @@ class DoctorRatingTableSeeder extends Seeder
 
             $rating = [
                 [
-                    'patient_id' => Patient::inRandomOrder()->first()->id,
                     'doctor_id' => $doctor->id,
+                    'patient_id' => Patient::inRandomOrder()->first()->id,
                     'rating' => random_int(1, 5),
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now()
