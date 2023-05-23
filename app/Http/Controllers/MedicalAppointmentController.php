@@ -49,7 +49,7 @@ class MedicalAppointmentController extends Controller
     public function getPatientAppointments($patient_id, $status = null)
     {
         try {
-            return $this->medicalAppointmentRepository->getMedicalAppointments($patient_id, $status, null);
+            return $this->medicalAppointmentRepository->getMedicalAppointments(null, $patient_id, $status, null);
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
@@ -58,7 +58,7 @@ class MedicalAppointmentController extends Controller
     public function getPatientPendingAppointments($patient_id)
     {
         try {
-            return $this->medicalAppointmentRepository->getMedicalAppointments($patient_id, 'pending', null);
+            return $this->medicalAppointmentRepository->getMedicalAppointments(null, $patient_id, 'pending', null);
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
@@ -67,7 +67,7 @@ class MedicalAppointmentController extends Controller
     public function getPatientConfirmedAppointments($patient_id)
     {
         try {
-            return $this->medicalAppointmentRepository->getMedicalAppointments($patient_id, 'confirmed', null);
+            return $this->medicalAppointmentRepository->getMedicalAppointments(null, $patient_id, 'confirmed', null);
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
@@ -76,7 +76,7 @@ class MedicalAppointmentController extends Controller
     public function getPatientCompletedAppointments($patient_id)
     {
         try {
-            return $this->medicalAppointmentRepository->getMedicalAppointments($patient_id, 'completed', null);
+            return $this->medicalAppointmentRepository->getMedicalAppointments(null, $patient_id, 'completed', null);
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
@@ -85,7 +85,7 @@ class MedicalAppointmentController extends Controller
     public function getPatientCancelledAppointments($patient_id)
     {
         try {
-            return $this->medicalAppointmentRepository->getMedicalAppointments($patient_id, 'cancelled', null);
+            return $this->medicalAppointmentRepository->getMedicalAppointments(null, $patient_id, 'cancelled', null);
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
@@ -180,7 +180,7 @@ class MedicalAppointmentController extends Controller
                         $meeting_details = [
                             'appointment_id' => $data->id,
                             'app_id' => config('app.AGORA_APP_ID'),
-                            'channel' => 'MeetingRoomStream',
+                            'channel' => config('app.AGORA_CHANNEL_NAME'),
                             'token' => $meeting_token
                         ];
                         $this->meetingTokenRepository->create($meeting_details);
@@ -249,7 +249,7 @@ class MedicalAppointmentController extends Controller
     public function getDoctorPendingAppointments($doctor_id)
     {
         try {
-            return $this->medicalAppointmentRepository->getMedicalAppointments(null, 'pending', $doctor_id);
+            return $this->medicalAppointmentRepository->getMedicalAppointments(null, null, 'pending', $doctor_id);
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
@@ -258,7 +258,7 @@ class MedicalAppointmentController extends Controller
     public function getDoctorConfirmedAppointments($doctor_id)
     {
         try {
-            return $this->medicalAppointmentRepository->getMedicalAppointments(null, 'confirmed', $doctor_id);
+            return $this->medicalAppointmentRepository->getMedicalAppointments(null, null, 'confirmed', $doctor_id);
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
@@ -267,7 +267,7 @@ class MedicalAppointmentController extends Controller
     public function getDoctorCompletedAppointments($doctor_id)
     {
         try {
-            return $this->medicalAppointmentRepository->getMedicalAppointments(null, 'completed', $doctor_id);
+            return $this->medicalAppointmentRepository->getMedicalAppointments(null, null, 'completed', $doctor_id);
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
@@ -276,7 +276,7 @@ class MedicalAppointmentController extends Controller
     public function getDoctorCancelledAppointments($doctor_id)
     {
         try {
-            return $this->medicalAppointmentRepository->getMedicalAppointments(null, 'cancelled', $doctor_id);
+            return $this->medicalAppointmentRepository->getMedicalAppointments(null, null, 'cancelled', $doctor_id);
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
@@ -286,7 +286,7 @@ class MedicalAppointmentController extends Controller
     public function getAppointmentMeetingDetails($appointment_id)
     {
         try {
-            $meeting = $this->meetingTokenRepository->getMeetingDetails($appointment_id);
+            $meeting = $this->medicalAppointmentRepository->getMedicalAppointments($appointment_id);
             return $meeting[0];
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);

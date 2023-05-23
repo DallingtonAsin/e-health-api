@@ -54,4 +54,6 @@ class MedicalAppointment extends Model
         return $this->hasOne(MedicalHistory::class, 'appointment_id');
     }
 
+
+
 }

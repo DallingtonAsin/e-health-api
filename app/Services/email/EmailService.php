@@ -27,7 +27,7 @@ class EmailService
     public function sendPendingAppointmentMail()
     {
         try {
-            $appointments = $this->medicalAppointmentRepository->getMedicalAppointments(null, 'pending', null, 0);
+            $appointments = $this->medicalAppointmentRepository->getMedicalAppointments(null, null, 'pending', null, 0);
             foreach ($appointments as $appointment) {
 
                 $appointment_date = $appointment->appointment_date;

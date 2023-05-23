@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 namespace App\Repositories;
 
 use App\Models\MeetingToken;
@@ -19,12 +20,17 @@ class MeetingTokenRepository
         return $this->meetingToken->create($meetingTokenData);
     }
 
-    public function get($id = null)
+    public function find($id)
     {
-        if($id){
-           return $this->meetingToken->find($id);
-        }
-        return $this->meetingToken->select(['appointment_id', 'app_id', 'channel', 'token'])->get();
+        return $this->meetingToken->find($id);
+    }
+
+    public function get()
+    {
+        $meeting_details = $this->meetingToken->select(['appointment_id', 'app_id', 'channel', 'token'])
+            ->with('medicalAppointment')
+            ->get();
+        return $meeting_details;
     }
 
     public function update($id, $meetingTokenData)
@@ -35,8 +41,12 @@ class MeetingTokenRepository
     }
 
 
-    public function getMeetingDetails($appointment_id){
-        return $this->meetingToken->where('appointment_id', $appointment_id)->select('app_id as appId', 'channel', 'token')->get();
+    public function getMeetingDetails($appointment_id)
+    {
+        return $this->meetingToken->where('appointment_id', $appointment_id)->with(['appointment' => function ($query) {
+            $query->select(['id', 'patient_id', 'doctor_id', 'appointment_number', 'appointment_date']);
+        }])->select('app_id as appId', 'channel', 'token')
+            ->get();
     }
 
     public function delete($id)
@@ -46,24 +56,24 @@ class MeetingTokenRepository
         return $meetingToken;
     }
 
-    public function generateMeetingToken($patient, $appointment_number, $is_video){
+    public function generateMeetingToken($patient, $appointment_number, $is_video)
+    {
 
         $appID = config('app.AGORA_APP_ID');
         $appCertificate = config('app.AGORA_APP_CERTIFICATE');
         $token = config('app.AGORA_TEMP_TOKEN');
 
         $channelName = $appointment_number;
-        $user = $patient->first_name . " ". $patient->last_name;
+        $user = $patient->first_name . " " . $patient->last_name;
         $role = RtcTokenBuilder::RoleAttendee;
         $expireTimeInSeconds = 86400;
         $currentTimestamp = now()->getTimestamp();
         $privilegeExpiredTs = $currentTimestamp + $expireTimeInSeconds;
 
-        if(is_null($token)){
+        if (is_null($token)) {
             $token = RtcTokenBuilder::buildTokenWithUserAccount($appID, $appCertificate, $channelName, $user, $role, $privilegeExpiredTs);
         }
-        
+
         return $token;
     }
-
 }
