@@ -180,7 +180,7 @@ class MedicalAppointmentController extends Controller
                         $meeting_details = [
                             'appointment_id' => $data->id,
                             'app_id' => config('app.AGORA_APP_ID'),
-                            'channel' => 'MeetingRoomStream',
+                            'channel' => config('app.AGORA_CHANNEL_NAME'),
                             'token' => $meeting_token
                         ];
                         $this->meetingTokenRepository->create($meeting_details);
