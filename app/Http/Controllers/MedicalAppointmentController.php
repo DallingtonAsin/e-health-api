@@ -405,7 +405,7 @@ class MedicalAppointmentController extends Controller
                 $appointment = $this->medicalAppointmentRepository->findAppointmentByNumber($appointment_number);
                 $status = $appointment->status;
 
-                if (is_null($status) || $status === 'pending') {
+                if (is_null($status) || $status === 'pending' || $status === 'confirmed') {
                     $this->medicalAppointmentRepository->cancelAppointment($patient_id, $appointment_number);
                     $datetime = Carbon::parse($appointment->appointment_date);
                     $appointment->appointment_date = $datetime->toDateString();
