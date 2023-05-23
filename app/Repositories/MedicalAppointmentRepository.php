@@ -142,7 +142,7 @@ class MedicalAppointmentRepository
     public function cancelAppointment($patient_id, $appointment_number)
     {
         return $this->medicalAppointment->where('patient_id', $patient_id)->where('appointment_number', $appointment_number)
-            ->update(['status' => 'cancelled', 'cancelled_at' => Carbon::now()]);
+            ->update(['status' => 'cancelled', 'cancelled_at' => Carbon::now(), 'confirmed_at' => null]);
     }
 
     public function findAppointmentByNumber($appointment_number)
