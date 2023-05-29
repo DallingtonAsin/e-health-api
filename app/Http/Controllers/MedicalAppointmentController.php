@@ -209,7 +209,8 @@ class MedicalAppointmentController extends Controller
     public function show($id)
     {
         try {
-            return $this->medicalAppointmentRepository->getMedicalAppointments($id, null, null, null);
+            $notification = $this->medicalAppointmentRepository->getMedicalAppointments($id, null, null, null);
+            return $notification[0];
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }

@@ -4,7 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Patient;
 use App\Models\MedicalDoctor;
-
+use Illuminate\Support\Str;
 
 class NotificationRepository
 {
@@ -140,6 +140,7 @@ class NotificationRepository
 
             $data = $notification->data;
             $data['title'] = $title;
+            $notification->is_appointment = Str::contains($title, 'Appointment');
             $notification->data = $data;
 
             $notification->read  = $is_read;
