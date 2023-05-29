@@ -132,11 +132,19 @@ class NotificationRepository
         }
     }
 
-    private function modifyNotifications($notifications){
+    private function modifyNotifications($notifications)
+    {
         $notifications = $notifications->map(function ($notification) {
-             $notification->read = !is_null($notification->read_at) ? true : false;
-             return $notification;
-        }); 
+            $is_read = !is_null($notification->read_at) ? true : false;
+            $title = !is_null($notification->data['title']) && $notification->data['title'] == 'New Appointment' && $is_read ? 'Appointment' : $notification->data['title'];
+
+            $data = $notification->data;
+            $data['title'] = $title;
+            $notification->data = $data;
+
+            $notification->read  = $is_read;
+            return $notification;
+        });
         return $notifications;
     }
 }

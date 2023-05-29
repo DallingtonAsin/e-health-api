@@ -9,12 +9,13 @@ class AppointmentConfirmedNotification extends Notification
 {
     use Queueable;
 
-    protected $appointment, $message;
+    protected $appointment, $message, $title;
 
     public function __construct($appointment, $message = null)
     {
         $this->appointment = $appointment;
         $this->message = $message;
+        $this->title = 'Confirmed Appointment';
     }
 
     public function via($notifiable)
@@ -30,6 +31,7 @@ class AppointmentConfirmedNotification extends Notification
         }
 
         return [
+            'title' => $this->title,
             'appointment_id' => $this->appointment->id,
             'appointment_number' => $this->appointment->appointment_number,
             'message' => $message
