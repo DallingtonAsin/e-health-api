@@ -11,11 +11,11 @@ use App\Repositories\DoctorAvailabilityRepository;
 class DoctorScheduleController extends Controller
 {
 
-     protected $doctorAvailabilityRepository;
-     public function __construct(DoctorAvailabilityRepository $doctorAvailabilityRepository)
-     {
+    protected $doctorAvailabilityRepository;
+    public function __construct(DoctorAvailabilityRepository $doctorAvailabilityRepository)
+    {
         $this->doctorAvailabilityRepository = $doctorAvailabilityRepository;
-     }
+    }
 
     /**
      * Display a listing of the resource.
@@ -48,7 +48,8 @@ class DoctorScheduleController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'doctor_id' => 'required|exists:medical_doctors,id',
-            'date' => 'required|date',
+            'dates' => ['required', 'array'],
+            'dates.*' => ['date_format:Y-m-d'],
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time'
         ]);
@@ -61,32 +62,31 @@ class DoctorScheduleController extends Controller
             } else {
 
                 $doctor_id = $request->input('doctor_id');
-                $date = $request->input('date');
+                $dates = $request->input('dates');
                 $start_time = $request->input('start_time');
                 $end_time = $request->input('end_time');
 
-                $date = date('Y-m-d', strtotime($date));
                 $start_time = date('H:i', strtotime($start_time));
                 $end_time = date('H:i', strtotime($end_time));
 
-                $exists = $this->doctorAvailabilityRepository->checkIfDoctorScheduleExists($doctor_id, $date, $start_time, $end_time);
-
-                if ($exists) {
-                    return response(['error' => 'You have already added this to your calendar'], 400);
-                } else {
-
-                    $data = [
+                $appointmentDates = collect($dates)->map(function ($date) use ($doctor_id, $start_time, $end_time) {
+                    return [
                         'doctor_id' => $doctor_id,
                         'date' => $date,
                         'start_time' => $start_time,
                         'end_time' => $end_time
                     ];
+                });
 
-                    $data = $this->doctorAvailabilityRepository->create($data);
-                    $data->makeHidden(['id', 'created_at', 'updated_at']);
+                $appointmentDates->each(function ($data) {
+                    $criteria = [
+                        'doctor_id' => $data['doctor_id'],
+                        'date' => $data['date']
+                    ];
+                    $data = $this->doctorAvailabilityRepository->updateOrCreateSchedule($criteria, $data);
+                });
 
-                    return response()->json(['message' => 'Your schedule has been added successfully'], 200);
-                }
+                return response()->json(['message' => 'Your schedule has been added successfully'], 200);
             }
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -186,6 +186,4 @@ class DoctorScheduleController extends Controller
     {
         //
     }
-
-    
 }
