@@ -18,6 +18,11 @@ class DoctorAvailabilityRepository
         return $this->availability->create($availabilityData);
     }
 
+    public function updateOrCreateSchedule($criteria, $scheduleData)
+    {
+        return $this->availability->updateOrCreate($criteria, $scheduleData);
+    }
+
     public function get($id = null, $doctor_id)
     {
 
@@ -25,9 +30,9 @@ class DoctorAvailabilityRepository
             return $this->availability->find($id);
         }
 
-        if($doctor_id){
+        if ($doctor_id) {
             return $this->availability->where('doctor_id', $doctor_id)
-                                      ->select(['id', 'doctor_id', 'date', 'start_time', 'end_time'])->orderBy('date', 'desc')->get();
+                ->select(['id', 'doctor_id', 'date', 'start_time', 'end_time'])->orderBy('date', 'desc')->get();
         }
 
         return $this->availability->select(['id', 'doctor_id', 'date', 'start_time', 'end_time'])->orderBy('date', 'desc')->get();
