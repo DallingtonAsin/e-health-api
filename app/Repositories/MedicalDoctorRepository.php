@@ -67,11 +67,7 @@ class MedicalDoctorRepository
             // $languageString = implode(', ', $languages);
             $doctor['languages'] =  $languages;
             $rating = $doctor->ratings->sum('rating');
-            if ($rating > 0) {
-                $doctor['rating']  = $rating / $doctor->ratings_count;
-            } else {
-                $doctor['rating']  = 0;
-            }
+            $doctor['rating']  = $rating > 0 ? $rating / $doctor->ratings_count : 0;
             unset($doctor->ratings_count);
             $doctor['service_fee'] = config('app.currency') . '. ' . number_format($doctor->service_fee);
             $doctor['image'] = $doctor->thumbnail();
@@ -162,7 +158,7 @@ class MedicalDoctorRepository
     public function generateAccessToken($id)
     {
 
-        $doctor = $this->medicalDoctor->with(['identificationDocument' => function ($query) {
+        $doctor = $this->medicalDoctor->withCount('ratings')->with(['identificationDocument' => function ($query) {
             $query->select(['doctor_id', 'front', 'back']);
         }])->find($id);
 
@@ -177,6 +173,10 @@ class MedicalDoctorRepository
             $doctor->identificationDocument->back = $doctor->identificationDocument->back_path;
             unset($doctor->identificationDocument->doctor_id);
         }
+        $rating = $doctor->ratings->sum('rating');
+        $doctor->rating  = $rating > 0 ? $rating / $doctor->ratings_count : 0;
+        unset($doctor->ratings_count);
+        unset($doctor->ratings);
         $doctor->image = $doctor->thumbnail();
         $doctor->access_token = $access_token;
         return $doctor;
