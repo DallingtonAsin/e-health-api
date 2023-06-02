@@ -25,6 +25,11 @@ class MedicalAppointmentRepository
         return $this->medicalAppointment->create($medicalAppointmentData);
     }
 
+    public function find($id)
+    {
+        return $this->medicalAppointment->findOrFail($id);
+    }
+
     public function get($id = null, $status = null)
     {
         if ($id) {
@@ -158,7 +163,13 @@ class MedicalAppointmentRepository
     {
         $endTime = $appointmentDateTime->copy()->addMinutes(30);
         $isConflict = $this->medicalAppointment->where('doctor_id', $doctor_id)->whereBetween('appointment_date', [$appointmentDateTime, $endTime])->exists();
-        // Log::info('Logged info' . json_encode(["appointmentDateTime" => $appointmentDateTime, "endTime" => $endTime, 'isConflict' => $isConflict]));
         return $isConflict;
+    }
+
+    public function isAppointmentExpired($appointment_id)
+    {
+        $appointment = $this->find($appointment_id);
+        $appointmentDateTime = Carbon::parse($appointment->appointment_date);
+        return $appointmentDateTime->isPast();
     }
 }
