@@ -441,13 +441,13 @@ class MedicalAppointmentController extends Controller
             if ($exists) {
                 $isExpired = $this->medicalAppointmentRepository->isAppointmentExpired($appointmentId);
                 if ($isExpired) {
-                    return response()->json(['message' => 'This appointment has already expired.'], 422);
+                    return response()->json(['message' => 'This appointment has already expired'], 422);
                 } else {
                     $appointment = $this->medicalAppointmentRepository->get($appointmentId);
                     return response()->json($appointment, 200);
                 }
             } else {
-                return response()->json(['message' => 'Invalid request.'], 400);
+                return response()->json(['message' => 'Invalid request'], 400);
             }
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
