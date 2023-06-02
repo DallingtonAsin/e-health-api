@@ -82,6 +82,7 @@ Route::group(['prefix' => 'medical', 'middleware' => ['auth:patient,doctor', 'pa
     Route::resource('specialties', MedicalSpecialtyController::class);
     Route::resource('facilities', MedicalFacilityController::class);
     Route::get('appointments/{id}', [MedicalAppointmentController::class, 'show']);
+    Route::get('appointments/{id}/status', [MedicalAppointmentController::class, 'checkAppointmentStatus']);
 });
 
 

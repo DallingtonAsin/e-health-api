@@ -7,8 +7,8 @@ use App\Models\AppointmentType;
 use App\Models\MedicalSpecialty;
 use App\Helpers\SharedHelper as Helper;
 use App\Models\MedicalFacility;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
-
 
 class MedicalAppointmentRepository
 {
@@ -23,6 +23,11 @@ class MedicalAppointmentRepository
     public function create($medicalAppointmentData)
     {
         return $this->medicalAppointment->create($medicalAppointmentData);
+    }
+
+    public function find($id)
+    {
+        return $this->medicalAppointment->findOrFail($id);
     }
 
     public function get($id = null, $status = null)
@@ -108,6 +113,10 @@ class MedicalAppointmentRepository
             ->map(function ($appointment) {
                 $is_online = $appointment->isOnline();
                 $appointment->is_online = $appointment->isOnline();
+                $is_expired = $this->isAppointmentExpired($appointment->id);
+                $appointment->is_expired = $is_expired;
+                $appointment->status = $is_expired ? 'Expired' : $appointment->status;
+
                 if ($is_online) {
                     if (!empty($appointment->meetingAccess->appointment_id)) {
                         unset($appointment->meetingAccess->appointment_id);
@@ -152,5 +161,22 @@ class MedicalAppointmentRepository
     public function findAppointmentByNumber($appointment_number)
     {
         return $this->medicalAppointment->where('appointment_number', $appointment_number)->first();
+    }
+
+    public function isAppointmentConflict($doctor_id, $appointmentDateTime)
+    {
+        $endTime = $appointmentDateTime->copy()->addMinutes(30);
+        $isConflict = $this->medicalAppointment->where('doctor_id', $doctor_id)->whereBetween('appointment_date', [$appointmentDateTime, $endTime])->exists();
+        return $isConflict;
+    }
+
+    public function isAppointmentExpired($appointment_id)
+    {
+        $appointment = $this->find($appointment_id);
+        $appointmentTime = Carbon::parse($appointment->appointment_date);
+        $currentDateTime = Carbon::now();
+        $endTime = $appointmentTime->copy()->addMinutes(30);
+        $isExpired = $currentDateTime->isAfter($endTime);
+        return $isExpired;
     }
 }
