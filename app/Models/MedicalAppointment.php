@@ -17,7 +17,8 @@ class MedicalAppointment extends Model
     protected $table = 'medical_appointments';
 
     protected $fillable = [
-        'patient_id', 'doctor_id', 'appointment_number', 'appointment_type_id', 'appointment_date', 'reason', 'notes', 'is_doctor_notified', 'alert_status'
+        'patient_id', 'doctor_id', 'appointment_number', 'appointment_type_id', 'appointment_date', 'reason', 'notes',
+        'status', 'confirmed_at', 'is_doctor_notified', 'alert_status'
     ];
 
     public function patient()
@@ -30,16 +31,19 @@ class MedicalAppointment extends Model
         return $this->belongsTo(MedicalDoctor::class);
     }
 
-    public function appointmentType(){
+    public function appointmentType()
+    {
         return $this->belongsTo(AppointmentType::class, 'appointment_type_id');
     }
 
-    public function isOnline(){
+    public function isOnline()
+    {
         $appointment_type_name = $this->appointmentType->name;
         return stripos($appointment_type_name, 'audio') !== false || stripos($appointment_type_name, 'video') !== false;
     }
 
-    public function isVideo(){
+    public function isVideo()
+    {
         $appointment_type_name = $this->appointmentType->name;
         return stripos($appointment_type_name, 'video') !== false;
     }
@@ -53,7 +57,4 @@ class MedicalAppointment extends Model
     {
         return $this->hasOne(MedicalHistory::class, 'appointment_id');
     }
-
-
-
 }

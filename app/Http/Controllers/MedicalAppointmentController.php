@@ -9,6 +9,7 @@ use App\Repositories\MedicalAppointmentRepository;
 use App\Repositories\AppointmentTypeRepository;
 use App\Repositories\MeetingTokenRepository;
 use App\Repositories\MedicalHistoryRepository;
+use App\Repositories\MedicalDoctorRepository;
 use App\Services\NotificationService;
 use App\Services\PushNotificationService;
 use Carbon\Carbon;
@@ -16,12 +17,13 @@ use Carbon\Carbon;
 class MedicalAppointmentController extends Controller
 {
 
-    protected $appointmentTypeRepository, $medicalAppointmentRepository,
+    protected $appointmentTypeRepository, $medicalAppointmentRepository, $doctorRepository,
         $meetingTokenRepository, $notificationService, $medicalHistoryRepository, $pushNotificationService;
 
     public function __construct(
         AppointmentTypeRepository $appointmentTypeRepository,
         MedicalAppointmentRepository $medicalAppointmentRepository,
+        MedicalDoctorRepository $doctorRepository,
         MeetingTokenRepository $meetingTokenRepository,
         NotificationService $notificationService,
         MedicalHistoryRepository $medicalHistoryRepository,
@@ -30,6 +32,7 @@ class MedicalAppointmentController extends Controller
     ) {
         $this->appointmentTypeRepository = $appointmentTypeRepository;
         $this->medicalAppointmentRepository = $medicalAppointmentRepository;
+        $this->doctorRepository = $doctorRepository;
         $this->meetingTokenRepository = $meetingTokenRepository;
         $this->notificationService = $notificationService;
         $this->medicalHistoryRepository = $medicalHistoryRepository;
@@ -144,14 +147,18 @@ class MedicalAppointmentController extends Controller
                 $exists = $this->medicalAppointmentRepository->checkIfAppointmentExists($patient_id, $doctor_id, $appointment_type_id, $appointment_date);
 
                 $isConflict = $this->medicalAppointmentRepository->isAppointmentConflict($doctor_id, $appointment_date);
-                if ($isConflict) {
-                    return response()->json(['message' => 'Another appointment is already booked at the selected time. Please choose a different time.'], 400);
+                if($appointment_date->isPast()){
+                    return response()->json(['message' => 'The selected appointment time has already passed. Please choose a different time slot.'], 400);
+                }
+                else if ($isConflict) {
+                    return response()->json(['message' => 'Another appointment is already booked at the selected time. Please choose a different time slot.'], 400);
                 } else {
                     if ($exists) {
-                        return response(['error' => 'You have already booked an appointment with such details'], 400);
+                        return response(['error' => 'You have already booked an appointment with such details.'], 400);
                     } else {
 
                         $appointment_number = $this->medicalAppointmentRepository->generateAppointmentNumber();
+                        $doctor = $this->doctorRepository->find($doctor_id);
 
                         $data = [
                             'patient_id' => $patient_id,
@@ -162,6 +169,10 @@ class MedicalAppointmentController extends Controller
                             'reason' => $reason,
                         ];
 
+                        if ($doctor->auto_approve) {
+                            $data['status'] = 'confirmed';
+                            $data['confirmed_at'] = Carbon::now();
+                        }
                         $data = $this->medicalAppointmentRepository->create($data);
                         $data->makeHidden(['created_at', 'updated_at']);
 
@@ -195,6 +206,11 @@ class MedicalAppointmentController extends Controller
                         $data->appointment_time = date('H:i', strtotime($datetime->toTimeString()));
                         $this->notificationService->sendAppointmentBookedMessage($patient_id, $data);
                         $this->notificationService->sendDoctorNewAppointmentMessage($appointment->doctor_id, $data);
+
+                        if ($doctor->auto_approve) {
+                            $this->notificationService->sendAppointmentConfirmedMessage($patient_id, $data);
+                            $this->notificationService->sendDoctorAppointmentConfirmedMessage($appointment->doctor_id, $data);
+                        }
 
                         return response()->json($data, 200);
                     }
@@ -373,19 +389,11 @@ class MedicalAppointmentController extends Controller
 
                 $patient_id = $request->input('patient_id');
                 $appointment_number = $request->input('appointment_number');
-
                 $appointment = $this->medicalAppointmentRepository->findAppointmentByNumber($appointment_number);
                 $status = $appointment->status;
 
                 if (is_null($status) || $status === 'pending') {
-                    $this->medicalAppointmentRepository->confirmAppointment($patient_id, $appointment_number);
-                    $datetime = Carbon::parse($appointment->appointment_date);
-                    $appointment->appointment_date = $datetime->toDateString();
-                    $appointment->appointment_time = date('H:i', strtotime($datetime->toTimeString()));
-
-                    $this->notificationService->sendAppointmentConfirmedMessage($patient_id, $appointment);
-                    $this->notificationService->sendDoctorAppointmentConfirmedMessage($appointment->doctor_id, $appointment);
-
+                    $this->markAppointmentConfirmed($appointment, $appointment_number, $patient_id);
                     return response()->json(['message' => 'Appointment has been confirmed successfully'], 200);
                 } else {
                     return response()->json(['message' => 'Sorry! This appointment has already been marked ' . $appointment->status . '.'], 400);
@@ -393,6 +401,21 @@ class MedicalAppointmentController extends Controller
             }
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
+    private function markAppointmentConfirmed($appointment, $appointment_number, $patient_id)
+    {
+        try {
+            $this->medicalAppointmentRepository->confirmAppointment($patient_id, $appointment_number);
+            $datetime = Carbon::parse($appointment->appointment_date);
+            $appointment->appointment_date = $datetime->toDateString();
+            $appointment->appointment_time = date('H:i', strtotime($datetime->toTimeString()));
+
+            $this->notificationService->sendAppointmentConfirmedMessage($patient_id, $appointment);
+            $this->notificationService->sendDoctorAppointmentConfirmedMessage($appointment->doctor_id, $appointment);
+        } catch (\Exception $ex) {
+            throw $ex;
         }
     }
 

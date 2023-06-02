@@ -179,4 +179,9 @@ class MedicalAppointmentRepository
         $isExpired = $currentDateTime->isAfter($endTime);
         return $isExpired;
     }
+
+    public function isSelectedAppointmentTimeInPast($appointmentTime)
+    {
+        return $appointmentTime->isPast();
+    }
 }
