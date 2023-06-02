@@ -139,60 +139,65 @@ class MedicalAppointmentController extends Controller
                 $current_treatment = $request->input('current_treatment');
 
                 $appointment_type = $this->appointmentTypeRepository->getAppointmentTypeByName($appointment_type_name);
-                $appointment_date = Carbon::parse($date . ' ' . $time);
+                $appointment_date =  Carbon::createFromFormat('Y-m-d H:i', $date . ' ' . $time);
                 $appointment_type_id = $appointment_type->id;
                 $exists = $this->medicalAppointmentRepository->checkIfAppointmentExists($patient_id, $doctor_id, $appointment_type_id, $appointment_date);
 
-                if ($exists) {
-                    return response(['error' => 'You have already booked an appointment with such details'], 400);
+                $isConflict = $this->medicalAppointmentRepository->isAppointmentConflict($doctor_id, $appointment_date);
+                if ($isConflict) {
+                    return response()->json(['message' => 'Another appointment is already booked at the selected time. Please choose a different time.'], 400);
                 } else {
+                    if ($exists) {
+                        return response(['error' => 'You have already booked an appointment with such details'], 400);
+                    } else {
 
-                    $appointment_number = $this->medicalAppointmentRepository->generateAppointmentNumber();
+                        $appointment_number = $this->medicalAppointmentRepository->generateAppointmentNumber();
 
-                    $data = [
-                        'patient_id' => $patient_id,
-                        'doctor_id' => $doctor_id,
-                        'appointment_number' => $appointment_number,
-                        'appointment_type_id' => $appointment_type->id,
-                        'appointment_date' => $appointment_date,
-                        'reason' => $reason,
-                    ];
-
-                    $data = $this->medicalAppointmentRepository->create($data);
-                    $data->makeHidden(['created_at', 'updated_at']);
-
-                    $medical_history_data = [
-                        'patient_id' => $patient_id,
-                        'appointment_id' => $data->id,
-                        'past_medical_history' => $past_medical_history,
-                        'current_treatment' => $current_treatment
-                    ];
-
-                    $this->medicalHistoryRepository->create($medical_history_data);
-
-                    $appointment = $this->medicalAppointmentRepository->get($data->id);
-                    $is_online = $appointment->isOnline();
-                    $patient = $appointment->patient;
-
-                    if ($is_online) {
-                        $is_video = $appointment->isVideo();
-                        $meeting_token = $this->meetingTokenRepository->generateMeetingToken($patient, $appointment_number, $is_video);
-                        $meeting_details = [
-                            'appointment_id' => $data->id,
-                            'app_id' => config('app.AGORA_APP_ID'),
-                            'channel' => config('app.AGORA_CHANNEL_NAME'),
-                            'token' => $meeting_token
+                        $data = [
+                            'patient_id' => $patient_id,
+                            'doctor_id' => $doctor_id,
+                            'appointment_number' => $appointment_number,
+                            'appointment_type_id' => $appointment_type->id,
+                            'appointment_date' => $appointment_date,
+                            'reason' => $reason,
                         ];
-                        $this->meetingTokenRepository->create($meeting_details);
+
+                        $data = $this->medicalAppointmentRepository->create($data);
+                        $data->makeHidden(['created_at', 'updated_at']);
+
+                        $medical_history_data = [
+                            'patient_id' => $patient_id,
+                            'appointment_id' => $data->id,
+                            'past_medical_history' => $past_medical_history,
+                            'current_treatment' => $current_treatment
+                        ];
+
+                        $this->medicalHistoryRepository->create($medical_history_data);
+
+                        $appointment = $this->medicalAppointmentRepository->get($data->id);
+                        $is_online = $appointment->isOnline();
+                        $patient = $appointment->patient;
+
+                        if ($is_online) {
+                            $is_video = $appointment->isVideo();
+                            $meeting_token = $this->meetingTokenRepository->generateMeetingToken($patient, $appointment_number, $is_video);
+                            $meeting_details = [
+                                'appointment_id' => $data->id,
+                                'app_id' => config('app.AGORA_APP_ID'),
+                                'channel' => config('app.AGORA_CHANNEL_NAME'),
+                                'token' => $meeting_token
+                            ];
+                            $this->meetingTokenRepository->create($meeting_details);
+                        }
+
+                        $datetime = Carbon::parse($data->appointment_date);
+                        $data->appointment_date = $datetime->toDateString();
+                        $data->appointment_time = date('H:i', strtotime($datetime->toTimeString()));
+                        $this->notificationService->sendAppointmentBookedMessage($patient_id, $data);
+                        $this->notificationService->sendDoctorNewAppointmentMessage($appointment->doctor_id, $data);
+
+                        return response()->json($data, 200);
                     }
-
-                    $datetime = Carbon::parse($data->appointment_date);
-                    $data->appointment_date = $datetime->toDateString();
-                    $data->appointment_time = date('H:i', strtotime($datetime->toTimeString()));
-                    $this->notificationService->sendAppointmentBookedMessage($patient_id, $data);
-                    $this->notificationService->sendDoctorNewAppointmentMessage($appointment->doctor_id, $data);
-
-                    return response()->json($data, 200);
                 }
             }
         } catch (\Exception $e) {

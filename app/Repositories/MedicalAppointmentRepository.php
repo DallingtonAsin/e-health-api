@@ -7,8 +7,8 @@ use App\Models\AppointmentType;
 use App\Models\MedicalSpecialty;
 use App\Helpers\SharedHelper as Helper;
 use App\Models\MedicalFacility;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
-
 
 class MedicalAppointmentRepository
 {
@@ -152,5 +152,13 @@ class MedicalAppointmentRepository
     public function findAppointmentByNumber($appointment_number)
     {
         return $this->medicalAppointment->where('appointment_number', $appointment_number)->first();
+    }
+
+    public function isAppointmentConflict($doctor_id, $appointmentDateTime)
+    {
+        $endTime = $appointmentDateTime->copy()->addMinutes(30);
+        $isConflict = $this->medicalAppointment->where('doctor_id', $doctor_id)->whereBetween('appointment_date', [$appointmentDateTime, $endTime])->exists();
+        // Log::info('Logged info' . json_encode(["appointmentDateTime" => $appointmentDateTime, "endTime" => $endTime, 'isConflict' => $isConflict]));
+        return $isConflict;
     }
 }
