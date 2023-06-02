@@ -173,7 +173,10 @@ class MedicalAppointmentRepository
     public function isAppointmentExpired($appointment_id)
     {
         $appointment = $this->find($appointment_id);
-        $appointmentDateTime = Carbon::parse($appointment->appointment_date);
-        return $appointmentDateTime->isPast();
+        $appointmentTime = Carbon::parse($appointment->appointment_date);
+        $currentDateTime = Carbon::now();
+        $endTime = $appointmentTime->copy()->addMinutes(30);
+        $isExpired = $currentDateTime->isAfter($endTime);
+        return $isExpired;
     }
 }
