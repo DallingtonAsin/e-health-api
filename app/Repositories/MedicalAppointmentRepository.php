@@ -113,6 +113,7 @@ class MedicalAppointmentRepository
             ->map(function ($appointment) {
                 $is_online = $appointment->isOnline();
                 $appointment->is_online = $appointment->isOnline();
+                $appointment->is_expired = $this->isAppointmentExpired($appointment->id);
                 if ($is_online) {
                     if (!empty($appointment->meetingAccess->appointment_id)) {
                         unset($appointment->meetingAccess->appointment_id);
