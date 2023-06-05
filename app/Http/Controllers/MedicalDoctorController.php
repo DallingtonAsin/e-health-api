@@ -507,6 +507,17 @@ class MedicalDoctorController extends Controller
         }
     }
 
+    public function getDoctorsByOnlineStatus($is_online)
+    {
+        try {
+            $is_online = $is_online === "null" ? null : $is_online;
+            $doctors = $this->doctorRepository->get(null, null, null, $is_online);
+            return Helper::sendOkHttpResponse($doctors);
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
     private function getAge($birthdate)
     {
         try {
