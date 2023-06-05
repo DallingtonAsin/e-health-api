@@ -36,7 +36,7 @@ class MedicalDoctorRepository
         return $this->medicalDoctor->where('email', $email)->exists();
     }
 
-    public function get($id = null, $specialty = null, $patient_id = null)
+    public function get($id = null, $specialty = null, $patient_id = null, $is_online = null)
     {
 
         $today = Carbon::today();
@@ -49,6 +49,10 @@ class MedicalDoctorRepository
         }
         if ($specialty) {
             $doctors = $doctors->where('specialty_id', '=', $specialty);
+        }
+
+        if (!is_null($is_online)) {
+            $doctors = $doctors->where('is_online', '=', $is_online);
         }
 
         $doctors = $doctors->get();

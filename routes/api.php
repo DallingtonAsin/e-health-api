@@ -83,8 +83,8 @@ Route::group(['prefix' => 'medical', 'middleware' => ['auth:patient,doctor', 'pa
     Route::resource('facilities', MedicalFacilityController::class);
     Route::get('appointments/{id}', [MedicalAppointmentController::class, 'show']);
     Route::get('appointments/{id}/status', [MedicalAppointmentController::class, 'checkAppointmentStatus']);
+    Route::get('doctors/status/{is_online}', [MedicalDoctorController::class, 'getDoctorsByOnlineStatus']);
 });
-
 
 Route::middleware(['auth:patient,doctor', 'patient.or.doctor'])->group(function () {
     Route::resource('drugs', DrugController::class);
