@@ -17,6 +17,7 @@ use App\Http\Controllers\Auth\Patient\AuthenticationController as PatientAuthent
 use App\Http\Controllers\Auth\Doctor\AuthenticationController as DoctorAuthenticationController;
 use App\Http\Controllers\MedicalFacilityController;
 use App\Http\Controllers\DoctorRatingController;
+use App\Http\Controllers\CallController;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,7 +49,7 @@ Route::group(['prefix' => 'patient', 'middleware' => ['auth:patient']], function
     Route::post('profile-picture/update', [PatientController::class, 'updateProfilePicture']);
     Route::delete('profile-picture/delete', [PatientController::class, 'removeProfilePicture']);
     Route::post('rate-doctor', [DoctorRatingController::class, 'postRating']);
-
+    Route::post('calls', [CallController::class, 'recordPatientDuration']);
 
     Route::get('notifications', [PatientNotificationController::class, 'getNotifications']);
     Route::get('notifications/read', [PatientNotificationController::class, 'getReadNotifications']);
@@ -69,6 +70,7 @@ Route::group(['prefix' => 'doctor', 'middleware' => ['auth:doctor']], function (
     Route::put('profile/update', [MedicalDoctorController::class, 'update']);
     Route::post('profile-picture/update', [MedicalDoctorController::class, 'updateProfilePicture']);
     Route::delete('profile-picture/delete', [MedicalDoctorController::class, 'removeProfilePicture']);
+    Route::post('calls', [CallController::class, 'recordDoctorDuration']);
 
     Route::get('notifications', [DoctorNotificationController::class, 'getNotifications']);
     Route::get('notifications/read', [DoctorNotificationController::class, 'getReadNotifications']);
