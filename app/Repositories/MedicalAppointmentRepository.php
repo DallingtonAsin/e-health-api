@@ -7,7 +7,6 @@ use App\Models\AppointmentType;
 use App\Models\MedicalSpecialty;
 use App\Helpers\SharedHelper as Helper;
 use App\Models\MedicalFacility;
-use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class MedicalAppointmentRepository
@@ -127,6 +126,7 @@ class MedicalAppointmentRepository
                 $appointment->appointment_time =  Carbon::parse($appointment->appointment_date)->format('H:i');
                 $appointment->appointment_date = Carbon::parse($appointment->appointment_date)->toDateString();
                 $appointment->status = ucfirst($appointment->status);
+                $appointment->patient->age = Helper::calculateAge($appointment->patient->dob). ' years';
                 $appointment->patient->thumbnail = $appointment->patient->thumbnail();
                 $appointment->doctor->thumbnail = $appointment->doctor->thumbnail();
                 $appointment->doctor->specialty = MedicalSpecialty::where('id', $appointment->doctor->specialty_id)->value('name');

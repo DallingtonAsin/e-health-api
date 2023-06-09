@@ -58,7 +58,7 @@ class AuthenticationController extends Controller
                 if ($exists) {
                     $patient = $this->patientRepository->getDetailsByPhoneNumber($country_code, $phone_number);
                     if ($patient->profile_status == 1) {
-                        return Helper::sendFailedHttpResponse("This phone number has been used to create another account. If you own this phone number, please use the login option.");
+                        return Helper::sendFailedHttpResponse("This phone number has already been used to create another account. Please try again with a different number.");
                     } else {
                         $patient->update([
                             'unique_device_id' => $unique_device_id,

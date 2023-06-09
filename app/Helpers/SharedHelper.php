@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\Patient;
 use App\Helpers\Globals as Globals;
 use Haruncpi\LaravelIdGenerator\IdGenerator;
-
+use Carbon\Carbon;
 
 class SharedHelper
 {
@@ -71,6 +71,14 @@ class SharedHelper
       } catch (\Exception $ex) {
         throw $ex;
       }
+    }
+
+    public static function calculateAge($dateOfBirth)
+    {
+        $currentDate = Carbon::now();
+        $birthdate = Carbon::parse($dateOfBirth);
+        $age = $birthdate->diffInYears($currentDate);
+        return $age;
     }
 
 }

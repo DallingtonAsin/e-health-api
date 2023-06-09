@@ -14,7 +14,7 @@ class AddAutoApproveToMedicalDoctors extends Migration
     public function up()
     {
         Schema::table('medical_doctors', function (Blueprint $table) {
-            $table->boolean('auto_approve')->default(false)->after('is_online');
+            $table->boolean('auto_approve')->default(true)->after('is_online');
         });
     }
 
