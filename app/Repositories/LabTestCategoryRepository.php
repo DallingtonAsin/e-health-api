@@ -1,0 +1,52 @@
+<?php
+
+namespace App\Repositories;
+
+use App\Models\LabTestCategory;
+
+class LabTestCategoryRepository
+{
+    protected $labTestCategory;
+
+    public function __construct(LabTestCategory $labTestCategory)
+    {
+        $this->labTestCategory = $labTestCategory;
+    }
+
+    public function create($labTestCategoryData)
+    {
+        return $this->labTestCategory->create($labTestCategoryData);
+    }
+
+    public function find($id = null)
+    {
+        return $this->labTestCategory->find($id);
+    }
+
+    public function get()
+    {
+        $LabTestCategories = $this->labTestCategory->select(['id', 'name'])->orderBy('id', 'asc');
+        $LabTestCategories = $LabTestCategories->get();
+        return $LabTestCategories;
+    }
+
+    public function update($id, $labTestCategoryData)
+    {
+        $labTestCategory = $this->labTestCategory->find($id);
+        $labTestCategory->update($labTestCategoryData);
+        return $labTestCategory;
+    }
+
+    public function delete($id)
+    {
+        $labTestCategory = $this->labTestCategory->find($id);
+        $labTestCategory->delete();
+        return $labTestCategory;
+    }
+
+    public function exists($id)
+    {
+        $labTestCategory = $this->labTestCategory->where('id', $id)->exists();
+        return $labTestCategory;
+    }
+}

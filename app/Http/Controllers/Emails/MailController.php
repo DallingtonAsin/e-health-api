@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Emails;
 
+use App\Http\Controllers\Controller;
 use App\Services\email\EmailService;
 
 class MailController extends Controller

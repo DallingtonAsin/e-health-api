@@ -1,17 +1,18 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Medical;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Repositories\DrugRepository;
+use App\Repositories\MedicalHistoryRepository;
 
-class DrugController extends Controller
+class MedicalHistoryController extends Controller
 {
 
-    protected $drugRepository;
-    public function __construct(DrugRepository $drugRepository)
+    protected $medicalHistoryRepository;
+    public function __construct(MedicalHistoryRepository $medicalHistoryRepository)
     {
-        $this->drugRepository = $drugRepository;
+        $this->medicalHistoryRepository = $medicalHistoryRepository;
     }
     /**
      * Display a listing of the resource.
@@ -20,11 +21,16 @@ class DrugController extends Controller
      */
     public function index()
     {
+        //
+    }
+
+    public function getPatientMedicalHistory($patient_id)
+    {
         try {
-            return $this->drugRepository->get();
-          } catch (\Exception $ex) {
+            return $this->medicalHistoryRepository->get($patient_id);
+        } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
-          }
+        }
     }
 
     /**

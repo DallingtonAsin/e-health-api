@@ -1,20 +1,19 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Medical;
 
+use App\Http\Controllers\Controller;
+use App\Repositories\MedicalFacilityRepository;
 use Illuminate\Http\Request;
-use App\Repositories\AppointmentTypeRepository;
 
-
-class AppointmentTypeController extends Controller
+class MedicalFacilityController extends Controller
 {
 
-    protected $appointmentTypeRepository;
+    protected $medicalFacilityRepository;
 
-
-    public function __construct(AppointmentTypeRepository $appointmentTypeRepository)
+    public function __construct(MedicalFacilityRepository $medicalFacilityRepository)
     {
-        $this->appointmentTypeRepository = $appointmentTypeRepository;
+        $this->medicalFacilityRepository = $medicalFacilityRepository;
     }
     /**
      * Display a listing of the resource.
@@ -23,10 +22,9 @@ class AppointmentTypeController extends Controller
      */
     public function index()
     {
-        try{
-            $data = $this->appointmentTypeRepository->get();
-            return response($data, 200);
-        }catch(\Exception $ex){
+        try {
+            return $this->medicalFacilityRepository->get();
+        } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
     }

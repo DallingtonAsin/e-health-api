@@ -1,23 +1,25 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\MailController;
-use App\Http\Controllers\DrugController;
-use App\Http\Controllers\PatientController;
-use App\Http\Controllers\LanguageController;
-use App\Http\Controllers\MedicalSpecialtyController;
-use App\Http\Controllers\MedicalDoctorController;
-use App\Http\Controllers\PatientNotificationController;
-use App\Http\Controllers\DoctorNotificationController;
-use App\Http\Controllers\AppointmentTypeController;
-use App\Http\Controllers\DoctorScheduleController;
-use App\Http\Controllers\MedicalAppointmentController;
-use App\Http\Controllers\MedicalHistoryController;
+use App\Http\Controllers\Patients\PatientController;
+use App\Http\Controllers\Patients\PatientNotificationController;
+use App\Http\Controllers\Doctors\MedicalDoctorController;
+use App\Http\Controllers\Doctors\DoctorNotificationController;
+use App\Http\Controllers\Doctors\DoctorScheduleController;
+use App\Http\Controllers\Doctors\DoctorRatingController;
+use App\Http\Controllers\Appointments\AppointmentTypeController;
+use App\Http\Controllers\Appointments\MedicalAppointmentController;
+use App\Http\Controllers\Medical\DrugController;
+use App\Http\Controllers\Medical\MedicalSpecialtyController;
+use App\Http\Controllers\Medical\MedicalHistoryController;
+use App\Http\Controllers\Medical\MedicalFacilityController;
+use App\Http\Controllers\Emails\MailController;
+use App\Http\Controllers\Languages\LanguageController;
+use App\Http\Controllers\Calls\CallController;
 use App\Http\Controllers\Auth\Patient\AuthenticationController as PatientAuthenticationController;
 use App\Http\Controllers\Auth\Doctor\AuthenticationController as DoctorAuthenticationController;
-use App\Http\Controllers\MedicalFacilityController;
-use App\Http\Controllers\DoctorRatingController;
-use App\Http\Controllers\CallController;
+use App\Http\Controllers\LabTests\LabTestCategoryController;
+use App\Http\Controllers\IcdCodes\IcdCodeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -76,6 +78,11 @@ Route::group(['prefix' => 'doctor', 'middleware' => ['auth:doctor']], function (
     Route::get('notifications/read', [DoctorNotificationController::class, 'getReadNotifications']);
     Route::get('notifications/unread', [DoctorNotificationController::class, 'getUnReadNotifications']);
     Route::post('notifications/mark-as-read/{id}', [DoctorNotificationController::class, 'markAsRead']);
+});
+
+Route::middleware(['auth:doctor'])->group(function () {
+    Route::resource('lab-test-categories', LabTestCategoryController::class);
+    Route::resource('icd-10-codes', IcdCodeController::class);
 });
 
 Route::group(['prefix' => 'medical', 'middleware' => ['auth:patient,doctor', 'patient.or.doctor']], function () {
