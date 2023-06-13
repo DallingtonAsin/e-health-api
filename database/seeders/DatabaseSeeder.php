@@ -23,7 +23,9 @@ class DatabaseSeeder extends Seeder
             DoctorAvailabilitySeeder::class,
             DrugCategorySeeder::class,
             DrugSeeder::class,
-            DoctorRatingTableSeeder::class,
+            DoctorRatingSeeder::class,
+            Icd10CodeSeeder::class,
+            LabTestCategorySeeder::class
         ]);
     }
 }

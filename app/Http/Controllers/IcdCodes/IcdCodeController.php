@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\IcdCodes;
 
-use App\Repositories\MedicalFacilityRepository;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Repositories\Icd10CodeRepository;
 
-class MedicalFacilityController extends Controller
+class IcdCodeController extends Controller
 {
+    protected $icd10CodeRepository;
 
-    protected $medicalFacilityRepository;
-
-    public function __construct(MedicalFacilityRepository $medicalFacilityRepository)
+    public function __construct(Icd10CodeRepository $icd10CodeRepository)
     {
-        $this->medicalFacilityRepository = $medicalFacilityRepository;
+        $this->icd10CodeRepository = $icd10CodeRepository;
     }
     /**
      * Display a listing of the resource.
@@ -22,7 +22,7 @@ class MedicalFacilityController extends Controller
     public function index()
     {
         try {
-            return $this->medicalFacilityRepository->get();
+            return $this->icd10CodeRepository->get();
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }

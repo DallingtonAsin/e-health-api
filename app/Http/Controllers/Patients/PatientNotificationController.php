@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Patients;
 
+use App\Http\Controllers\Controller;
 use App\Repositories\NotificationRepository;
 
 class PatientNotificationController extends Controller

@@ -1,19 +1,18 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Medical;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Repositories\MedicalSpecialtyRepository;
+use App\Repositories\DrugRepository;
 
-class MedicalSpecialtyController extends Controller
+class DrugController extends Controller
 {
 
-    protected $medicalSpecialtyRepository;
-
-
-    public function __construct(MedicalSpecialtyRepository $medicalSpecialtyRepository)
+    protected $drugRepository;
+    public function __construct(DrugRepository $drugRepository)
     {
-        $this->medicalSpecialtyRepository = $medicalSpecialtyRepository;
+        $this->drugRepository = $drugRepository;
     }
     /**
      * Display a listing of the resource.
@@ -23,30 +22,10 @@ class MedicalSpecialtyController extends Controller
     public function index()
     {
         try {
-            $data = $this->medicalSpecialtyRepository->get();
-            return response($data, 200);
-        } catch (\Exception $ex) {
+            return $this->drugRepository->get();
+          } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
-        }
-    }
-
-    public function getDoctorSpecialties()
-    {
-        try {
-
-            $specialties = $this->medicalSpecialtyRepository->get();
-
-            foreach ($specialties as $specialty) {
-                $specialty->key =  $specialty->id;
-                $specialty->value =  $specialty->name;
-                unset($specialty->id);
-                unset($specialty->name);
-            }
-
-            return $specialties;
-        } catch (\Exception $ex) {
-            return response()->json(['error' => $ex->getMessage()], 500);
-        }
+          }
     }
 
     /**
