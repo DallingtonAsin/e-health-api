@@ -25,17 +25,17 @@ class Icd10CodeRepository
 
     public function get($id = null)
     {
-        $icd10Codes = $this->icd10Code->select(['id', 'code', 'description']);
+        $icd10Codes = $this->icd10Code->select(['id', 'category_code', 'abbreviated_description']);
         if ($id) {
             $icd10Codes->where('id', $id);
         }
         $icd10Codes->orderBy('id', 'asc');
-        $icd10Codes = $icd10Codes->get();
+        $icd10Codes = $icd10Codes->limit(200)->get();
 
         $icd10Codes->map(function ($icd10Code) {
-            $icd10Code->name = $icd10Code->code . ' ' . $icd10Code->description;
-            unset($icd10Code->code);
-            unset($icd10Code->description);
+            $icd10Code->name = trim($icd10Code->category_code) . ' ' . trim($icd10Code->abbreviated_description);
+            unset($icd10Code->category_code);
+            unset($icd10Code->abbreviated_description);
         });
 
         return $icd10Codes;

@@ -25,9 +25,8 @@ class LabTestCategoryRepository
 
     public function get()
     {
-        $LabTestCategories = $this->labTestCategory->select(['id', 'name'])->orderBy('id', 'asc');
-        $LabTestCategories = $LabTestCategories->get();
-        return $LabTestCategories;
+        $labTestCategories = $this->labTestCategory->select(['id', 'name'])->orderBy('id', 'asc');
+        return $labTestCategories->get();
     }
 
     public function update($id, $labTestCategoryData)

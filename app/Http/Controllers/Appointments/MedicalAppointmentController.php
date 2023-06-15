@@ -11,6 +11,10 @@ use App\Repositories\AppointmentTypeRepository;
 use App\Repositories\MeetingTokenRepository;
 use App\Repositories\MedicalHistoryRepository;
 use App\Repositories\MedicalDoctorRepository;
+use App\Repositories\AfterCall\PatientMedicalHistoryRepository;
+use App\Repositories\AfterCall\MedicalFindingRepository;
+use App\Repositories\AfterCall\DiagnosisRepository;
+use App\Repositories\AfterCall\TreatmentPlanRepository;
 use App\Services\NotificationService;
 use App\Services\PushNotificationService;
 use Carbon\Carbon;
@@ -18,8 +22,9 @@ use Carbon\Carbon;
 class MedicalAppointmentController extends Controller
 {
 
-    protected $appointmentTypeRepository, $medicalAppointmentRepository, $doctorRepository,
-        $meetingTokenRepository, $notificationService, $medicalHistoryRepository, $pushNotificationService;
+    protected $appointmentTypeRepository, $medicalAppointmentRepository, $doctorRepository;
+    protected $patientMedicalHistoryRepository, $medicalFindingRepository,  $diagnosisRepository, $treatmentPlanRepository;
+    protected $meetingTokenRepository, $notificationService, $medicalHistoryRepository, $pushNotificationService;
 
     public function __construct(
         AppointmentTypeRepository $appointmentTypeRepository,
@@ -28,8 +33,12 @@ class MedicalAppointmentController extends Controller
         MeetingTokenRepository $meetingTokenRepository,
         NotificationService $notificationService,
         MedicalHistoryRepository $medicalHistoryRepository,
-        PushNotificationService $pushNotificationService
+        PushNotificationService $pushNotificationService,
 
+        PatientMedicalHistoryRepository $patientMedicalHistoryRepository,
+        MedicalFindingRepository $medicalFindingRepository,
+        DiagnosisRepository $diagnosisRepository,
+        TreatmentPlanRepository $treatmentPlanRepository
     ) {
         $this->appointmentTypeRepository = $appointmentTypeRepository;
         $this->medicalAppointmentRepository = $medicalAppointmentRepository;
@@ -38,6 +47,10 @@ class MedicalAppointmentController extends Controller
         $this->notificationService = $notificationService;
         $this->medicalHistoryRepository = $medicalHistoryRepository;
         $this->pushNotificationService = $pushNotificationService;
+        $this->patientMedicalHistoryRepository = $patientMedicalHistoryRepository;
+        $this->medicalFindingRepository = $medicalFindingRepository;
+        $this->diagnosisRepository = $diagnosisRepository;
+        $this->treatmentPlanRepository = $treatmentPlanRepository;
     }
 
     /**
@@ -148,10 +161,9 @@ class MedicalAppointmentController extends Controller
                 $exists = $this->medicalAppointmentRepository->checkIfAppointmentExists($patient_id, $doctor_id, $appointment_type_id, $appointment_date);
 
                 $isConflict = $this->medicalAppointmentRepository->isAppointmentConflict($doctor_id, $appointment_date);
-                if($appointment_date->isPast()){
+                if ($appointment_date->isPast()) {
                     return response()->json(['message' => 'The selected appointment time has already passed. Please choose a different time slot.'], 400);
-                }
-                else if ($isConflict) {
+                } else if ($isConflict) {
                     return response()->json(['message' => 'Another appointment is already booked at the selected time. Please choose a different time slot.'], 400);
                 } else {
                     if ($exists) {
@@ -320,18 +332,21 @@ class MedicalAppointmentController extends Controller
         }
     }
 
-
-
     public function completeAppointment(Request $request, $appointment_id)
     {
 
         $validator = Validator::make($request->all(), [
-            'patient_id' => 'required|exists:patients,id',
-            'illness' => 'required',
+            'appointment_id' => 'required|exists:medical_appointments,id',
+            'medical_history' => 'required',
+            'drug_allergies' => 'required',
+            'labtest_category_id' => 'required|exists:labtest_categories,id',
+            'finding' => 'required',
+            'icd_code_id' => 'required|exists:icd_10_codes,id',
+            'comments' => 'required',
             'diagnosis_date' => 'required|date',
-            'treatment' => 'required',
+            'prescriptions' => 'required',
+            'treatment_plan' => 'required'
         ]);
-
 
         try {
 
@@ -340,35 +355,52 @@ class MedicalAppointmentController extends Controller
                 return Helper::sendFailedHttpResponse($message);
             } else {
 
-                $patient_id = $request->input('patient_id');
-                $illness = $request->input('illness');
-                $diagnosis_date = $request->input('diagnosis_date');
-                $treatment = $request->input('treatment');
+                $criteria = [
+                    'appointment_id' => $request->appointment_id
+                ];
 
-                $data = [
-                    'illness' => $illness,
-                    'diagnosis_date' => $diagnosis_date,
-                    'treatment' => $treatment
+                $meidcalHistoryData = [
+                    'appointment_id' => $request->appointment_id,
+                    'medical_history' => $request->medical_history,
+                    'drug_allergies' => $request->drug_allergies
+                ];
+
+                $medicalFindingsData = [
+                    'appointment_id' => $request->appointment_id,
+                    'labtest_category_id' => $request->labtest_category_id,
+                    'finding' => $request->finding
+                ];
+
+                $diagnosisData = [
+                    'appointment_id' => $request->appointment_id,
+                    'icd_code_id' => $request->icd_code_id,
+                    'comments' => $request->comments,
+                    'diagnosis_date' => Carbon::createFromFormat('Y-m-d', $request->diagnosis_date),
+                ];
+
+                $treatmentPlanData = [
+                    'appointment_id' => $request->appointment_id,
+                    'prescriptions' => $request->prescriptions,
+                    'treatment_plan' => $request->treatment_plan
                 ];
 
                 $appointment = $this->medicalAppointmentRepository->get($appointment_id);
-                $status = $appointment->status;
+                $patient_id = $appointment->patient_id;
 
-                if (is_null($status) || $status === 'pending') {
-                    $this->medicalAppointmentRepository->completeAppointment($patient_id, $appointment_id);
-                    $this->medicalHistoryRepository->updateMedicalHistory($patient_id, $appointment_id, $data);
+                $this->patientMedicalHistoryRepository->createOrUpdate($criteria, $meidcalHistoryData);
+                $this->medicalFindingRepository->createOrUpdate($criteria, $medicalFindingsData);
+                $this->diagnosisRepository->createOrUpdate($criteria, $diagnosisData);
+                $this->treatmentPlanRepository->createOrUpdate($criteria, $treatmentPlanData);
+                $this->medicalAppointmentRepository->completeAppointment($patient_id, $appointment_id);
 
-                    $datetime = Carbon::parse($appointment->appointment_date);
-                    $appointment->appointment_date = $datetime->toDateString();
-                    $appointment->appointment_time = date('H:i', strtotime($datetime->toTimeString()));
+                $datetime = Carbon::parse($appointment->appointment_date);
+                $appointment->appointment_date = $datetime->toDateString();
+                $appointment->appointment_time = date('H:i', strtotime($datetime->toTimeString()));
 
-                    $this->notificationService->sendAppointmentCompletedMessage($appointment, true);
-                    $this->notificationService->sendAppointmentCompletedMessage($appointment, false);
+                $this->notificationService->sendAppointmentCompletedMessage($appointment, true);
+                $this->notificationService->sendAppointmentCompletedMessage($appointment, false);
 
-                    return response()->json(['message' => 'Appointment has been completed successfully'], 200);
-                } else {
-                    return response()->json(['message' => 'Sorry! This appointment has already been marked ' . $appointment->status . '.'], 400);
-                }
+                return response()->json(['message' => 'Appointment has been completed successfully'], 200);
             }
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);

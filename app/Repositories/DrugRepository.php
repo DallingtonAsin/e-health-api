@@ -27,24 +27,29 @@ class DrugRepository
     {
 
         $drugs = $this->drug->with(['category' => function ($query) {
-                   $query->select(['id', 'name']);
+            $query->select(['id', 'name']);
         }]);
-      
 
-       if($id){
-             $drugs->where('id', $id);
-       }
+
+        if ($id) {
+            $drugs->where('id', $id);
+        }
 
         $drugs->orderBy('id', 'asc');
         $drugs = $drugs->get();
-  
-        $drugs->map(function($drug){
-            $drug->formatted_price = 'UGX. '.number_format($drug->price);
+
+        $drugs->map(function ($drug) {
+            $drug->formatted_price = 'UGX. ' . number_format($drug->price);
             $drug->in_stock = $drug->isInStock();
             $drug->status = ucfirst(strtolower($drug->status));
         });
 
         return $drugs;
+    }
+
+    public function getPrescriptionDrugs()
+    {
+        return $this->drug->select(['id', 'name'])->get();
     }
 
     public function update($id, $drugData)
@@ -66,5 +71,4 @@ class DrugRepository
         $drug = $this->drug->where('id', $id)->exists();
         return $drug;
     }
-
 }

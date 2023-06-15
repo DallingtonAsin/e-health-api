@@ -18,7 +18,8 @@ use App\Http\Controllers\Languages\LanguageController;
 use App\Http\Controllers\Calls\CallController;
 use App\Http\Controllers\Auth\Patient\AuthenticationController as PatientAuthenticationController;
 use App\Http\Controllers\Auth\Doctor\AuthenticationController as DoctorAuthenticationController;
-use App\Http\Controllers\LabTests\LabTestCategoryController;
+use App\Http\Controllers\Lab\LabTestCategoryController;
+use App\Http\Controllers\Lab\ImageTestCategoryController;
 use App\Http\Controllers\IcdCodes\IcdCodeController;
 
 /*
@@ -81,7 +82,8 @@ Route::group(['prefix' => 'doctor', 'middleware' => ['auth:doctor']], function (
 });
 
 Route::middleware(['auth:doctor'])->group(function () {
-    Route::resource('lab-test-categories', LabTestCategoryController::class);
+    Route::resource('labtest-categories', LabTestCategoryController::class);
+    Route::resource('imagetest-categories', ImageTestCategoryController::class);
     Route::resource('icd-10-codes', IcdCodeController::class);
 });
 
@@ -99,6 +101,7 @@ Route::middleware(['auth:patient,doctor', 'patient.or.doctor'])->group(function 
     Route::resource('drugs', DrugController::class);
     Route::get('appointments/meeting/{appointment_id}', [MedicalAppointmentController::class, 'getAppointmentMeetingDetails']);
     Route::get('medical-history/patient/{patient_id}', [MedicalHistoryController::class, 'getPatientMedicalHistory']);
+    Route::get('prescription-drugs', [DrugController::class, 'getPrescriptionDrugs']);
 });
 
 Route::group(['prefix' => 'doctor', 'middleware' => ['auth:doctor']], function () {
