@@ -27,7 +27,8 @@ class DatabaseSeeder extends Seeder
             IcdCodeCategorySeeder::class,
             Icd10CodeSeeder::class,
             ImageTestCategorySeeder::class,
-            LabTestCategorySeeder::class
+            LabTestCategorySeeder::class,
+            MedicalAdministrationRouteSeeder::class,
         ]);
     }
 }

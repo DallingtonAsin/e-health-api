@@ -21,6 +21,7 @@ use App\Http\Controllers\Auth\Doctor\AuthenticationController as DoctorAuthentic
 use App\Http\Controllers\Lab\LabTestCategoryController;
 use App\Http\Controllers\Lab\ImageTestCategoryController;
 use App\Http\Controllers\IcdCodes\IcdCodeController;
+use App\Http\Controllers\Medical\AdministrationRouteController;
 
 /*
 |--------------------------------------------------------------------------
@@ -85,12 +86,14 @@ Route::middleware(['auth:doctor'])->group(function () {
     Route::resource('labtest-categories', LabTestCategoryController::class);
     Route::resource('imagetest-categories', ImageTestCategoryController::class);
     Route::resource('icd-10-codes', IcdCodeController::class);
+
 });
 
 Route::group(['prefix' => 'medical', 'middleware' => ['auth:patient,doctor', 'patient.or.doctor']], function () {
     Route::get('doctors/specialty/{specialty}', [MedicalDoctorController::class, 'getDoctorsBySpecialty']);
     Route::resource('doctors', MedicalDoctorController::class);
     Route::resource('specialties', MedicalSpecialtyController::class);
+    Route::resource('administration-routes', AdministrationRouteController::class);
     Route::resource('facilities', MedicalFacilityController::class);
     Route::get('appointments/{id}', [MedicalAppointmentController::class, 'show']);
     Route::get('appointments/{id}/status', [MedicalAppointmentController::class, 'checkAppointmentStatus']);
