@@ -22,6 +22,7 @@ use App\Http\Controllers\Lab\LabTestCategoryController;
 use App\Http\Controllers\Lab\ImageTestCategoryController;
 use App\Http\Controllers\IcdCodes\IcdCodeController;
 use App\Http\Controllers\Medical\AdministrationRouteController;
+use App\Http\Controllers\Company\CompanyInfoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -102,6 +103,7 @@ Route::group(['prefix' => 'medical', 'middleware' => ['auth:patient,doctor', 'pa
 
 Route::middleware(['auth:patient,doctor', 'patient.or.doctor'])->group(function () {
     Route::resource('drugs', DrugController::class);
+    Route::resource('company-information', CompanyInfoController::class);
     Route::get('appointments/meeting/{appointment_id}', [MedicalAppointmentController::class, 'getAppointmentMeetingDetails']);
     Route::get('medical-history/patient/{patient_id}', [MedicalHistoryController::class, 'getPatientMedicalHistory']);
     Route::get('prescription-drugs', [DrugController::class, 'getPrescriptionDrugs']);
