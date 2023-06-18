@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateLabTestCategoriesTable extends Migration
+class CreateMedicalAdministrationRoutesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateLabTestCategoriesTable extends Migration
      */
     public function up()
     {
-        Schema::create('lab_test_categories', function (Blueprint $table) {
+        Schema::create('medical_administration_routes', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->timestamps();
@@ -27,6 +27,6 @@ class CreateLabTestCategoriesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('lab_test_categories');
+        Schema::dropIfExists('medical_administration_routes');
     }
 }

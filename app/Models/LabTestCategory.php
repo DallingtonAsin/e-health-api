@@ -9,10 +9,16 @@ class LabTestCategory extends Model
 {
     use HasFactory;
 
-    protected $table = 'lab_test_categories';
+    protected $table = 'labtest_categories';
 
     protected $fillable = [
-        'name'
+        'code',
+        'name',
+        'report_name',
+        'category',
+        'low_range',
+        'high_range',
+        'units'
     ];
 
     public $timestamps = true;

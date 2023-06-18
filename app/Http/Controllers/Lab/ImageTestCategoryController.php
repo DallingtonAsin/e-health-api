@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Http\Controllers\Medical;
+namespace App\Http\Controllers\Lab;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Repositories\DrugRepository;
+use App\Repositories\ImageTestCategoryRepository;
 
-class DrugController extends Controller
+class ImageTestCategoryController extends Controller
 {
+    protected $imageTestCategoryRepository;
 
-    protected $drugRepository;
-    public function __construct(DrugRepository $drugRepository)
+    public function __construct(ImageTestCategoryRepository $imageTestCategoryRepository)
     {
-        $this->drugRepository = $drugRepository;
+        $this->imageTestCategoryRepository = $imageTestCategoryRepository;
     }
     /**
      * Display a listing of the resource.
@@ -22,16 +22,7 @@ class DrugController extends Controller
     public function index()
     {
         try {
-            return $this->drugRepository->get();
-        } catch (\Exception $ex) {
-            return response()->json(['error' => $ex->getMessage()], 500);
-        }
-    }
-
-    public function getPrescriptionDrugs()
-    {
-        try {
-            return $this->drugRepository->getPrescriptionDrugs();
+            return $this->imageTestCategoryRepository->get();
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }

@@ -3,10 +3,10 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\LabTestCategory;
 use Illuminate\Support\Facades\DB;
+use App\Models\IcdCodeCategory;
 
-class LabTestCategorySeeder extends Seeder
+class IcdCodeCategorySeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -16,14 +16,14 @@ class LabTestCategorySeeder extends Seeder
     public function run()
     {
         try {
-            $filePath = storage_path('app/mysql-dumps/labtest_categories.sql');
+            $filePath = storage_path('app/mysql-dumps/icd10_categories.sql');
             $sql = file_get_contents($filePath);
             DB::unprepared($sql);
-            LabTestCategory::query()->update([
+            IcdCodeCategory::query()->update([
                 'created_at' => now(),
                 'updated_at' => now()
             ]);
-            $this->command->info('Lab test categories seeded successfully.');
+            $this->command->info('icd-10 code categories seeded successfully.');
         } catch (\PDOException $ex) {
             $this->command->info('Exception message: ' . $ex->getMessage());
         }

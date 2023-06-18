@@ -5,18 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ICDCode extends Model
+class MedicalAdministrationRoute extends Model
 {
     use HasFactory;
 
-    protected $table = 'icd10_codes';
+    protected $table = 'medical_administration_routes';
 
     protected $fillable = [
-        'category_code',
-        'diagnosis_code',
-        'abbreviated_description',
-        'full_description'
+        'name',
     ];
 
     public $timestamps = true;
+    
 }

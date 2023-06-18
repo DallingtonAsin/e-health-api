@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateIcd10CodesTable extends Migration
+class CreateImageTestCategoriesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,11 @@ class CreateIcd10CodesTable extends Migration
      */
     public function up()
     {
-        Schema::create('icd_10_codes', function (Blueprint $table) {
+        Schema::create('image_test_categories', function (Blueprint $table) {
             $table->id();
             $table->string('code');
-            $table->string('description');
+            $table->string('name');
+            $table->string('category')->nullable();
             $table->timestamps();
         });
     }
@@ -28,6 +29,6 @@ class CreateIcd10CodesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('icd_10_codes');
+        Schema::dropIfExists('image_test_categories');
     }
 }

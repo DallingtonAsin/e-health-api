@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
+use App\Models\ImageTestCategory;
 use Illuminate\Database\Seeder;
-use App\Models\LabTestCategory;
 use Illuminate\Support\Facades\DB;
 
-class LabTestCategorySeeder extends Seeder
+class ImageTestCategorySeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -16,14 +16,14 @@ class LabTestCategorySeeder extends Seeder
     public function run()
     {
         try {
-            $filePath = storage_path('app/mysql-dumps/labtest_categories.sql');
+            $filePath = storage_path('app/mysql-dumps/image_test_categories.sql');
             $sql = file_get_contents($filePath);
             DB::unprepared($sql);
-            LabTestCategory::query()->update([
+            ImageTestCategory::query()->update([
                 'created_at' => now(),
                 'updated_at' => now()
             ]);
-            $this->command->info('Lab test categories seeded successfully.');
+            $this->command->info('Image test categories seeded successfully.');
         } catch (\PDOException $ex) {
             $this->command->info('Exception message: ' . $ex->getMessage());
         }

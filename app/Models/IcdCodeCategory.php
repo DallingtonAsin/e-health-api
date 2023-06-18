@@ -5,17 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ICDCode extends Model
+class IcdCodeCategory extends Model
 {
     use HasFactory;
 
-    protected $table = 'icd10_codes';
+    protected $table = 'icd10_categories';
 
     protected $fillable = [
-        'category_code',
-        'diagnosis_code',
-        'abbreviated_description',
-        'full_description'
+        'code',
+        'title'
     ];
 
     public $timestamps = true;
