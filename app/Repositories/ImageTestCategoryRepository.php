@@ -25,10 +25,10 @@ class ImageTestCategoryRepository
 
     public function get()
     {
-        $imageTestCategories = $this->imageTestCategory->select(['id', 'name'])->orderBy('id', 'asc');
+        $imageTestCategories = $this->imageTestCategory->select(['id as key', 'name as value'])->orderBy('id', 'asc');
         $imageTestCategories = $imageTestCategories->get();
         $imageTestCategories->map(function ($category) {
-            $category->name = trim($category->name);
+            $category->value = trim($category->value);
         });
         return $imageTestCategories;
     }
