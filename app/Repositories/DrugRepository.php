@@ -49,7 +49,7 @@ class DrugRepository
 
     public function getPrescriptionDrugs()
     {
-        return $this->drug->select(['id', 'name'])->get();
+        return $this->drug->select(['id as key', 'name as value'])->get();
     }
 
     public function update($id, $drugData)

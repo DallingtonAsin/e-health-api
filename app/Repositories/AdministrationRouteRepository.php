@@ -25,7 +25,7 @@ class AdministrationRouteRepository
 
     public function get()
     {
-        $labTestCategories = $this->administrationRoute->select(['id', 'name'])->orderBy('id', 'asc');
+        $labTestCategories = $this->administrationRoute->select(['id as key', 'name as value'])->orderBy('id', 'asc');
         return $labTestCategories->get();
     }
 
