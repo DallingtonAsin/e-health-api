@@ -6,16 +6,16 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Helpers\SharedHelper as Helper;
 use Illuminate\Support\Facades\Validator;
-use App\Repositories\AfterCall\PatientMedicalHistoryRepository;
+use App\Repositories\AfterCall\MedicalHistoryRepository;
 
-class PatientMedicalHistoryController extends Controller
+class MedicalHistoryController extends Controller
 {
 
-    protected $patientMedicalHistoryRepository;
+    protected $medicalHistoryRepository;
 
-    public function __construct(PatientMedicalHistoryRepository $patientMedicalHistoryRepository)
+    public function __construct(MedicalHistoryRepository $medicalHistoryRepository)
     {
-        $this->patientMedicalHistoryRepository = $patientMedicalHistoryRepository;
+        $this->medicalHistoryRepository = $medicalHistoryRepository;
     }
     /**
      * Display a listing of the resource.
@@ -25,7 +25,7 @@ class PatientMedicalHistoryController extends Controller
     public function index()
     {
         try {
-            return $this->patientMedicalHistoryRepository->get();
+            return $this->medicalHistoryRepository->get();
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
@@ -70,7 +70,7 @@ class PatientMedicalHistoryController extends Controller
                     'drug_allergies' => $request->drug_allergies
                 ];
 
-                $result = $this->patientMedicalHistoryRepository->createOrUpdate($criteria, $validatedData);
+                $result = $this->medicalHistoryRepository->createOrUpdate($criteria, $validatedData);
                 return response()->json(['message' => 'Patient medical history inserted successfully', 'data' => $result], 200);
             }
         } catch (\Exception $e) {

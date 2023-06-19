@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateMedicalHistoryTable extends Migration
+class CreatePatientMedicalHistoryTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateMedicalHistoryTable extends Migration
      */
     public function up()
     {
-        Schema::create('medical_history', function (Blueprint $table) {
+        Schema::create('patient_medical_history', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('patient_id');
             $table->unsignedBigInteger('appointment_id');
@@ -36,6 +36,6 @@ class CreateMedicalHistoryTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('medical_history');
+        Schema::dropIfExists('patient_medical_history');
     }
 }

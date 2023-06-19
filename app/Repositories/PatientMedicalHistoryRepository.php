@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories\AfterCall;
+namespace App\Repositories;
 
 use App\Models\PatientMedicalHistory;
 
@@ -18,20 +18,18 @@ class PatientMedicalHistoryRepository
         return $this->patientMedicalHistory->create($patientMedicalHistoryData);
     }
 
-    public function createOrUpdate($criteria, $data)
-    {
-        return $this->patientMedicalHistory->createOrUpdate($criteria, $data);
-    }
-
-    public function find($id = null)
+    public function find($id)
     {
         return $this->patientMedicalHistory->find($id);
     }
 
-    public function get()
+    public function get($patient_id = null)
     {
-        $patientMedicalHistories = $this->patientMedicalHistory->select(['id', 'appointment_id', 'medical_history', 'drug_allergies'])->orderBy('id', 'asc');
-        return $patientMedicalHistories->get();
+        $history = $this->patientMedicalHistory->whereNotNull('diagnosis_date')->select(['id', 'patient_id', 'appointment_id', 'past_medical_history', 'current_treatment', 'illness', 'diagnosis_date', 'treatment'])->get();
+        if ($patient_id) {
+            $history = $this->patientMedicalHistory->where('patient_id', $patient_id)->whereNotNull('diagnosis_date')->select(['id', 'patient_id', 'appointment_id', 'past_medical_history', 'current_treatment', 'illness', 'diagnosis_date', 'treatment'])->get();
+        }
+        return $history;
     }
 
     public function update($id, $patientMedicalHistoryData)
@@ -52,5 +50,11 @@ class PatientMedicalHistoryRepository
     {
         $patientMedicalHistory = $this->patientMedicalHistory->where('id', $id)->exists();
         return $patientMedicalHistory;
+    }
+
+    public function updateMedicalHistory($patient_id, $appointment_id, $patientMedicalHistoryData)
+    {
+        $patientMedicalHistory = $this->patientMedicalHistory->where('patient_id', $patient_id)->where('appointment_id', $appointment_id)->first();
+        return $patientMedicalHistory->update($patientMedicalHistoryData);
     }
 }

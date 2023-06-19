@@ -5,9 +5,9 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\MedicalDoctor;
 use App\Models\MedicalFacility;
+use App\Models\UserType;
 use Faker\Generator;
 use Illuminate\Container\Container;
-use App\Models\UserType;
 use Illuminate\Support\Facades\Hash;
 
 

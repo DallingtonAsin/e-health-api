@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateDiagnosesTable extends Migration
+class CreateLabTestsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,16 +13,15 @@ class CreateDiagnosesTable extends Migration
      */
     public function up()
     {
-        Schema::create('diagnoses', function (Blueprint $table) {
+        Schema::create('lab_tests', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('appointment_id');
-            $table->unsignedBigInteger('icd_code_id');
-            $table->text('comments');
-            $table->text('diagnosis_date');
+            $table->unsignedBigInteger('labtest_category_id');
+            $table->text('findings');
             $table->timestamps();
-        
+
             $table->foreign('appointment_id')->references('id')->on('medical_appointments')->onDelete('cascade');
-            $table->foreign('icd_code_id')->references('id')->on('icd10_codes')->onDelete('cascade');
+            $table->foreign('labtest_category_id')->references('id')->on('labtest_categories')->onDelete('cascade');
         });
     }
 
@@ -33,6 +32,6 @@ class CreateDiagnosesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('diagnoses');
+        Schema::dropIfExists('lab_tests');
     }
 }

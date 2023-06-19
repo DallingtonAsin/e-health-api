@@ -5,13 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class MedicalHistory extends Model
+class ImageTest extends Model
 {
     use HasFactory;
 
-    protected $table = 'medical_histories';
 
-    protected $fillable = ['appointment_id', 'presenting_complaint', 'past_medical_history', 'drug_allergies', 'findings'];
+    protected $table = 'image_tests';
+
+    protected $fillable = ['appointment_id', 'imagetest_category_id', 'findings'];
 
     public $timestamps = true;
 

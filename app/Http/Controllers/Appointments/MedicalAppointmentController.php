@@ -9,12 +9,12 @@ use Illuminate\Support\Facades\Validator;
 use App\Repositories\MedicalAppointmentRepository;
 use App\Repositories\AppointmentTypeRepository;
 use App\Repositories\MeetingTokenRepository;
-use App\Repositories\MedicalHistoryRepository;
 use App\Repositories\MedicalDoctorRepository;
-use App\Repositories\AfterCall\PatientMedicalHistoryRepository;
 use App\Repositories\AfterCall\MedicalFindingRepository;
 use App\Repositories\AfterCall\DiagnosisRepository;
 use App\Repositories\AfterCall\TreatmentPlanRepository;
+use App\Repositories\AfterCall\MedicalHistoryRepository;
+use App\Repositories\PatientMedicalHistoryRepository;
 use App\Services\NotificationService;
 use App\Services\PushNotificationService;
 use Carbon\Carbon;
@@ -337,15 +337,42 @@ class MedicalAppointmentController extends Controller
 
         $validator = Validator::make($request->all(), [
             'appointment_id' => 'required|exists:medical_appointments,id',
-            'medical_history' => 'required',
-            'drug_allergies' => 'required',
-            'labtest_category_id' => 'required|exists:labtest_categories,id',
-            'finding' => 'required',
-            'icd_code_id' => 'required|exists:icd_10_codes,id',
-            'comments' => 'required',
-            'diagnosis_date' => 'required|date',
-            'prescriptions' => 'required',
-            'treatment_plan' => 'required'
+            'isDraft' => 'required',
+            'historyData.presenting_complaint' => 'required',
+            'historyData.past_medical_history' => 'required',
+            'historyData.drug_allergies' => 'required',
+            'historyData.findings' => 'required',
+
+            'labTestData' => 'sometimes|required|array',
+            'labTestData.labTests' => [
+                'nullable',
+                'array',
+                function ($attribute, $value, $fail) {
+                    if (!empty($value) && !is_array($value)) {
+                        $fail('The labTests must be an array.');
+                    }
+                },
+            ],
+            'Labtest.labTests.*.name' => 'required|string',
+            'Labtest.labTests.*.findings' => 'required|string',
+            'labTestData.imageTests' => 'nullable|array',
+            'labTestData.otherTests' => 'nullable|string',
+            'labTestData.otherTestFindings' => 'nullable|string',
+
+            'diagnosisData' => 'nullable|array',
+            'diagnosisData.icd10Codes.*' => 'required|string',
+            'diagnosisData.icd10Codes' => 'sometimes|required|array',
+            'diagnosisData.comments' => 'sometimes|required|string',
+
+            'treatmentData' => 'nullable|array',
+            'treatmentData.drugs' => 'sometimes|required|array',
+            'treatmentData.drugs.*.name' => 'required|string',
+            'treatmentData.drugs.*.dosage' => 'required|string',
+            'treatmentData.drugs.*.duration' => 'required|integer',
+            'treatmentData.drugs.*.instructions' => 'required|string',
+            'treatmentData.drugs.*.quantity' => 'required|integer',
+            'treatmentData.drugs.*.route_of_admin' => 'required|string',
+            'treatmentData.treatmentPlan' => 'sometimes|required|string',
         ]);
 
         try {
@@ -355,15 +382,112 @@ class MedicalAppointmentController extends Controller
                 return Helper::sendFailedHttpResponse($message);
             } else {
 
+                $appointment_id = $request->appointment_id;
+                $isDraft = $request->isDraft;
+
                 $criteria = [
-                    'appointment_id' => $request->appointment_id
+                    'appointment_id' => $appointment_id
                 ];
 
-                $meidcalHistoryData = [
-                    'appointment_id' => $request->appointment_id,
-                    'medical_history' => $request->medical_history,
-                    'drug_allergies' => $request->drug_allergies
+                // Process history data
+                $historyData = $request->input('historyData');
+                $presenting_complaint = $historyData['presenting_complaint'];
+                $past_medical_history = $historyData['past_medical_history'];
+                $drug_allergies = $historyData['drug_allergies'];
+                $findings = $historyData['findings'];
+                $medicalHistoryData = [
+                    'appointment_id' => $appointment_id,
+                    'presenting_complaint' => $presenting_complaint,
+                    'past_medical_history' => $past_medical_history,
+                    'drug_allergies' => $drug_allergies,
+                    'findings' => $findings
                 ];
+                $this->medicalHistoryRepository->createOrUpdate($criteria, $medicalHistoryData);
+
+
+                // Process Labtest data
+                if (isset($validatedData['labTestData'])) {
+                    $labTestData = $validatedData['labTestData'];
+                    $otherTests = $labTestData['otherTests'];
+                    $otherTestFindings = $labTestData['otherTestFindings'];
+
+                    // Perform necessary operations with the validated Labtest data
+                    if (!empty($labTestData['labTests'])) {
+                        $labTests = $labTestData['labTests'];
+                        $processedLabTests = collect($labTests)->map(function ($labTest) {
+                            return [
+                                'name' => $labTest['name'],
+                                'findings' => $labTest['findings'],
+                            ];
+                        });
+                    }
+
+                    // Perform necessary operations with the validated imagetest data
+                    if (!empty($labTestData['imageTests'])) {
+                        $imageTests = $labTestData['imageTests'];
+                        $processedImageTests = collect($imageTests)->map(function ($imageTest) {
+                            return [
+                                'name' => $imageTest['name'],
+                                'findings' => $imageTest['findings'],
+                            ];
+                        });
+                    }
+
+                    // Perform necessary operations with the validated othertests data
+                    if (!empty($otherTests) && !empty($otherTestFindings)) {
+                        $otherTests = [
+                            'tests' => $otherTests,
+                            'findings' => $otherTestFindings,
+                        ];
+                    }
+                }
+
+                // Diagnosis data
+                if (isset($validatedData['diagnosisData'])) {
+                    $diagnosisData = $validatedData['diagnosisData'];
+                    $icd10Codes = $diagnosisData['icd10Codes'];
+                    $diagnosis_comments = $diagnosisData['comments'];
+
+                    if (!empty($icd10Codes)) {
+                        // Insert each icd10Code into the database
+                        foreach ($icd10Codes as $code) {
+                        }
+                    }
+                }
+
+                // Treatment data
+                if (isset($validatedData['treatmentData'])) {
+                    $treatmentData = $validatedData['treatmentData'];
+                    $drugs = $treatmentData['drugs'];
+                    $treatmentPlan = $treatmentData['treatmentPlan'];
+
+                    if (!empty($drugs)) {
+
+                        foreach ($drugs as $drug) {
+                            $name = $drug['name'];
+                            $dosage = $drug['dosage'];
+                            $duration = $drug['duration'];
+                            $instructions = $drug['instructions'];
+                            $quantity = $drug['quantity'];
+                            $routeOfAdmin = $drug['route_of_admin'];
+
+                            // Perform necessary operations with each drug
+
+                        }
+                    }
+                }
+
+                // Diagnosis data
+                $diagnosisData = $request->input('diagnosisData');
+                $comments = $diagnosisData['comments'];
+                $icd10Codes = $diagnosisData['icd10Codes'];
+
+                // Treatment data
+                $treatmentData = $request->input('treatmentData');
+                $drugs = $treatmentData['drugs'];
+                $treatmentPlan = $treatmentData['treatmentPlan'];
+
+
 
                 $medicalFindingsData = [
                     'appointment_id' => $request->appointment_id,
@@ -387,7 +511,6 @@ class MedicalAppointmentController extends Controller
                 $appointment = $this->medicalAppointmentRepository->get($appointment_id);
                 $patient_id = $appointment->patient_id;
 
-                $this->patientMedicalHistoryRepository->createOrUpdate($criteria, $meidcalHistoryData);
                 $this->medicalFindingRepository->createOrUpdate($criteria, $medicalFindingsData);
                 $this->diagnosisRepository->createOrUpdate($criteria, $diagnosisData);
                 $this->treatmentPlanRepository->createOrUpdate($criteria, $treatmentPlanData);
