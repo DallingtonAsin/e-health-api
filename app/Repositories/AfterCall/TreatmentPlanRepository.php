@@ -23,14 +23,14 @@ class TreatmentPlanRepository
         return $this->treatmentPlan->createOrUpdate($criteria, $data);
     }
 
-    public function find($id = null)
+    public function find($id )
     {
         return $this->treatmentPlan->find($id);
     }
 
     public function get()
     {
-        $treatmentPlans = $this->treatmentPlan->select(['id', 'appointment_id', 'prescriptions', 'treatment_plan'])->orderBy('id', 'asc');
+        $treatmentPlans = $this->treatmentPlan->select(['id', 'appointment_id', 'treatment_plan'])->orderBy('id', 'asc');
         return $treatmentPlans->get();
     }
 

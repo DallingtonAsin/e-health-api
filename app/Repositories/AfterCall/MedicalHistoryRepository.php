@@ -23,7 +23,7 @@ class MedicalHistoryRepository
         return $this->medicalHistory->createOrUpdate($criteria, $data);
     }
 
-    public function find($id = null)
+    public function find($id )
     {
         return $this->medicalHistory->find($id);
     }

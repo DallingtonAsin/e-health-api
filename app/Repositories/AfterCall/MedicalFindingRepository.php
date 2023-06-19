@@ -23,7 +23,7 @@ class MedicalFindingRepository
         return $this->medicalFinding->createOrUpdate($criteria, $data);
     }
 
-    public function find($id = null)
+    public function find($id )
     {
         return $this->medicalFinding->find($id);
     }

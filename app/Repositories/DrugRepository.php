@@ -18,9 +18,14 @@ class DrugRepository
         return $this->drug->create($drugData);
     }
 
-    public function find($id = null)
+    public function find($id)
     {
         return $this->drug->find($id);
+    }
+
+    public function findDrugByName($name)
+    {
+        return $this->drug->where('name', $name)->first();
     }
 
     public function get($id = null)

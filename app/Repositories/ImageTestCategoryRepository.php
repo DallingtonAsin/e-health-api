@@ -18,9 +18,14 @@ class ImageTestCategoryRepository
         return $this->imageTestCategory->create($imageTestCategoryData);
     }
 
-    public function find($id = null)
+    public function find($id)
     {
         return $this->imageTestCategory->find($id);
+    }
+
+    public function findImageTestCategoryByName($name)
+    {
+        return $this->imageTestCategory->where('name', $name)->first();
     }
 
     public function get()
