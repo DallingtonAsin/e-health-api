@@ -193,12 +193,63 @@ class MedicalAppointmentRepository
         }])->with(['otherTests' => function ($query) {
             $query->select(['appointment_id', 'tests', 'findings']);
         }])->with(['diagnosis' => function ($query) {
-            $query->select(['appointment_id', 'icd_code_id', 'comments']);
-        }])->with(['prescription' => function ($query) {
+            $query->select(['appointment_id', 'icd_code_id']);
+        }])->with(['diagnosisComments' => function ($query) {
+            $query->select(['appointment_id', 'comments']);
+        }])->with(['prescriptions' => function ($query) {
             $query->select(['appointment_id', 'drug_id', 'dosage', 'admin_route_id', 'duration', 'quantity', 'instructions']);
         }])->with(['treatmentPlan' => function ($query) {
             $query->select(['appointment_id', 'treatment_plan']);
-        }])->get();
+        }])->first();
+
+        $labTests = $appointment->labTests;
+        if (!empty($labTests)) {
+            foreach ($labTests as $labTest) {
+                $labTest->name = $labTest->labTestCategory->name;
+                unset($labTest->appointment_id);
+                unset($labTest->labtest_category_id);
+                unset($labTest->labTestCategory);
+            }
+        }
+
+        $imageTests = $appointment->imageTests;
+        if (!empty($imageTests)) {
+            foreach ($imageTests as $imageTest) {
+                $imageTest->name = $imageTest->imageTestCategory->name;
+                unset($imageTest->appointment_id);
+                unset($imageTest->imagetest_category_id);
+                unset($imageTest->imageTestCategory);
+            }
+        }
+
+
+        $diagnoses = $appointment->diagnosis;
+        $diagnosisIcdCodes = [];
+        if (!empty($diagnoses)) {
+            foreach ($diagnoses as $diagnosis) {
+                $diagnosis_name = trim($diagnosis->Icd10Code->category_code). ' '.trim($diagnosis->Icd10Code->abbreviated_description);
+                unset($diagnosis->appointment_id);
+                unset($diagnosis->icd_code_id);
+                unset($diagnosis->Icd10Code);
+                array_push($diagnosisIcdCodes, $diagnosis_name);
+            }
+        }
+        $appointment->diagnosisIcdCodes = $diagnosisIcdCodes;
+        unset($appointment->diagnosis);
+
+        $prescriptions = $appointment->prescriptions;
+        if (!empty($prescriptions)) {
+            foreach ($prescriptions as $prescription) {
+                $prescription->name = $prescription->drug->name;
+                $prescription->route_of_admin = $prescription->adminRoute->name;
+                unset($prescription->appointment_id);
+                unset($prescription->drug_id);
+                unset($prescription->admin_route_id);
+                unset($prescription->drug);
+                unset($prescription->adminRoute);
+            }
+        }
+
         return $appointment;
     }
 }

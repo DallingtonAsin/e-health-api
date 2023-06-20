@@ -78,7 +78,12 @@ class MedicalAppointment extends Model
         return $this->hasMany(Diagnosis::class, 'appointment_id');
     }
 
-    public function prescription()
+    public function diagnosisComments()
+    {
+        return $this->hasOne(DiagnosisComment::class, 'appointment_id');
+    }
+
+    public function prescriptions()
     {
         return $this->hasMany(Prescription::class, 'appointment_id');
     }

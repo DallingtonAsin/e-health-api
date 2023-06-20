@@ -19,4 +19,9 @@ class LabTest extends Model
     {
         return $this->belongsTo(MedicalAppointment::class, 'appointment_id');
     }
+
+    public function labTestCategory()
+    {
+        return $this->belongsTo(LabTestCategory::class, 'labtest_category_id');
+    }
 }

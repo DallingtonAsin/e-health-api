@@ -24,6 +24,7 @@ use App\Repositories\AfterCall\Tests\LabTestRepository;
 use App\Repositories\AfterCall\Tests\ImageTestRepository;
 use App\Repositories\AfterCall\Tests\OtherTestRepository;
 use App\Repositories\AfterCall\DiagnosisRepository;
+use App\Repositories\AfterCall\DiagnosisCommentsRepository;
 use App\Repositories\AfterCall\PrescriptionRepository;
 use App\Repositories\AfterCall\TreatmentPlanRepository;
 
@@ -38,7 +39,7 @@ class MedicalAppointmentController extends Controller
     protected $patientMedicalHistoryRepository, $medicalFindingRepository;
     protected $labTestCategoryRepository, $imageTestCategoryRepository, $icd10CodeRepository;
 
-    protected $medicalHistoryRepository, $labTestRepository, $imageTestRepository, $otherTestRepository, $diagnosisRepository;
+    protected $medicalHistoryRepository, $labTestRepository, $imageTestRepository, $otherTestRepository, $diagnosisRepository, $diagnosisCommentsRepository;
     protected $drugRepository, $adminRouteRepository, $prescriptionRepository, $treatmentPlanRepository;
     protected $meetingTokenRepository, $notificationService, $pushNotificationService;
 
@@ -64,6 +65,7 @@ class MedicalAppointmentController extends Controller
         PatientMedicalHistoryRepository $patientMedicalHistoryRepository,
         MedicalFindingRepository $medicalFindingRepository,
         DiagnosisRepository $diagnosisRepository,
+        DiagnosisCommentsRepository $diagnosisCommentsRepository,
         PrescriptionRepository $prescriptionRepository,
         TreatmentPlanRepository $treatmentPlanRepository
     ) {
@@ -87,6 +89,7 @@ class MedicalAppointmentController extends Controller
         $this->imageTestRepository = $imageTestRepository;
         $this->otherTestRepository = $otherTestRepository;
         $this->diagnosisRepository = $diagnosisRepository;
+        $this->diagnosisCommentsRepository = $diagnosisCommentsRepository;
         $this->prescriptionRepository = $prescriptionRepository;
         $this->treatmentPlanRepository = $treatmentPlanRepository;
     }
@@ -497,7 +500,7 @@ class MedicalAppointmentController extends Controller
                                 $imageTestCatId = $imageTestCat->id;
                                 $imageTestCriteria = [
                                     'appointment_id' => $appointment_id,
-                                    'imagetest_category_id' => $labTestCategoryId
+                                    'imagetest_category_id' => $imageTestCatId
                                 ];
                                 $imageTestObj = [
                                     'appointment_id' => $appointment_id,
@@ -543,11 +546,18 @@ class MedicalAppointmentController extends Controller
                                 $diagnosisData = [
                                     'appointment_id' => $appointment_id,
                                     'icd_code_id' => $icd10CodeId,
-                                    'comments' => $diagnosis_comments,
                                     'diagnosis_date' => Carbon::now(),
                                 ];
                                 $this->diagnosisRepository->updateOrCreate($diagnosisCriteria, $diagnosisData);
                             }
+                        }
+
+                        if (!empty($diagnosis_comments)) {
+                            $diagnosisCommentData = [
+                                'appointment_id' => $appointment_id,
+                                'comments' => $diagnosis_comments
+                            ];
+                            $this->diagnosisCommentsRepository->updateOrCreate($criteria, $diagnosisCommentData);
                         }
                     }
 

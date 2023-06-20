@@ -9,7 +9,6 @@ class ImageTest extends Model
 {
     use HasFactory;
 
-
     protected $table = 'image_tests';
 
     protected $fillable = ['appointment_id', 'imagetest_category_id', 'findings'];
@@ -19,5 +18,10 @@ class ImageTest extends Model
     public function appointment()
     {
         return $this->belongsTo(MedicalAppointment::class, 'appointment_id');
+    }
+
+    public function imageTestCategory()
+    {
+        return $this->belongsTo(ImageTestCategory::class, 'imagetest_category_id');
     }
 }
