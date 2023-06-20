@@ -477,21 +477,27 @@ class MedicalAppointmentController extends Controller
                     }
 
                     // Perform necessary operations with the validated imagetest data
-                    // if (!empty($labTestData['imageTests'])) {
-                    //     $imageTests = $labTestData['imageTests'];
-                    //     collect($imageTests)->map(function ($imageTest) use ($appointment_id, $criteria) {
-                    //         // dd($imageTest['name']);
-                    //         $labTestCat = $this->labTestCategoryRepository->findLabTestCategoryByName(trim($imageTest['name']));
-                    //         dd($labTestCat);
+                    if (!empty($labTestData['imageTests'])) {
+                        $imageTests = $labTestData['imageTests'];
+                        foreach ($imageTests as $imageTest) {
+                            // dd($imageTest['name']);
+                            $imageTestCat = $this->labTestCategoryRepository->findLabTestCategoryByName($imageTest['name']);
+                            $imageTestCatId = $imageTestCat->id;
+                            // dd($imageTestCatId);
 
-                    //         $imageTestObj = [
-                    //             'appointment_id' => $appointment_id,
-                    //             'imagetest_category_id' => $labTestCat->id,
-                    //             'findings' => $imageTest['findings'],
-                    //         ];
-                    //         $this->imageTestRepository->updateOrCreate($criteria, $imageTestObj);
-                    //     });
-                    // }
+                            $imageTestCriteria = [
+                                'appointment_id' => $appointment_id,
+                                'labtest_category_id' => $labTestCategoryId
+                            ];
+
+                            $imageTestObj = [
+                                'appointment_id' => $appointment_id,
+                                'imagetest_category_id' => $imageTestCatId,
+                                'findings' => $imageTest['findings'],
+                            ];
+                            $this->imageTestRepository->updateOrCreate($imageTestCriteria, $imageTestObj);
+                        }
+                    }
 
                     // Perform necessary operations with the validated othertests data
                     if (!empty($otherTests) && !empty($otherTestFindings)) {
