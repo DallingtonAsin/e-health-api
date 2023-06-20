@@ -25,7 +25,7 @@ class ImageTestCategoryRepository
 
     public function findImageTestCategoryByName($name)
     {
-        return $this->imageTestCategory->where('name', $name)->first();
+        return $this->imageTestCategory->where('name', 'LIKE', '%' . $name . '%')->first();
     }
 
     public function get()

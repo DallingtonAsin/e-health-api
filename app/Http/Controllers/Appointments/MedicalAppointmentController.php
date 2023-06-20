@@ -396,16 +396,27 @@ class MedicalAppointmentController extends Controller
                     }
                 },
             ],
-            'Labtest.labTests.*.name' => 'required|string',
-            'Labtest.labTests.*.findings' => 'required|string',
-            'labTestData.imageTests' => 'nullable|array',
+            'labTestData.labTests.*.name' => 'required|string',
+            'labTestData.labTests.*.findings' => 'required|string',
+            'labTestData.imageTests' => [
+                'nullable',
+                'array',
+                function ($attribute, $value, $fail) {
+                    if (!empty($value) && !is_array($value)) {
+                        $fail('The imageTests must be an array.');
+                    }
+                },
+            ],
+            'labTestData.imageTests.*.name' => 'required|string',
+            'labTestData.imageTests.*.findings' => 'required|string',
+
             'labTestData.otherTests' => 'nullable|string',
             'labTestData.otherTestFindings' => 'nullable|string',
 
             'diagnosisData' => 'nullable|array',
             'diagnosisData.icd10Codes.*' => 'required|string',
             'diagnosisData.icd10Codes' => 'sometimes|required|array',
-            'diagnosisData.comments' => 'sometimes|required|string',
+            'diagnosisData.comments' => 'required|string',
 
             'treatmentData' => 'nullable|array',
             'treatmentData.drugs' => 'sometimes|required|array',
@@ -415,7 +426,7 @@ class MedicalAppointmentController extends Controller
             'treatmentData.drugs.*.instructions' => 'required|string',
             'treatmentData.drugs.*.quantity' => 'required|integer',
             'treatmentData.drugs.*.route_of_admin' => 'required|string',
-            'treatmentData.treatmentPlan' => 'sometimes|required|string',
+            'treatmentData.treatmentPlan' => 'required|string',
         ]);
 
         try {
@@ -459,7 +470,6 @@ class MedicalAppointmentController extends Controller
                     // Perform necessary operations with the validated Labtest data
                     if (!empty($labTestData['labTests'])) {
                         $labTests = $labTestData['labTests'];
-
                         foreach ($labTests as $labTest) {
                             $labTestName = $labTest['name'];
                             $labTestCategoryId = $this->labTestCategoryRepository->findLabTestCategoryByName($labTestName)->id;
@@ -480,16 +490,12 @@ class MedicalAppointmentController extends Controller
                     if (!empty($labTestData['imageTests'])) {
                         $imageTests = $labTestData['imageTests'];
                         foreach ($imageTests as $imageTest) {
-                            // dd($imageTest['name']);
-                            $imageTestCat = $this->labTestCategoryRepository->findLabTestCategoryByName($imageTest['name']);
+                            $imageTestCat = $this->imageTestCategoryRepository->findImageTestCategoryByName($imageTest['name']);
                             $imageTestCatId = $imageTestCat->id;
-                            // dd($imageTestCatId);
-
                             $imageTestCriteria = [
                                 'appointment_id' => $appointment_id,
-                                'labtest_category_id' => $labTestCategoryId
+                                'imagetest_category_id' => $labTestCategoryId
                             ];
-
                             $imageTestObj = [
                                 'appointment_id' => $appointment_id,
                                 'imagetest_category_id' => $imageTestCatId,
