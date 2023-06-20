@@ -79,7 +79,7 @@ class MedicalAppointmentRepository
             $query->select(['id', 'name']);
         }])->with(['meetingAccess' => function ($query) {
             $query->select(['appointment_id', 'app_id as appId', 'channel', 'token']);
-        }])->with(['medicalHistory' => function ($query) {
+        }])->with(['patientMedicalHistory' => function ($query) {
             $query->select(['id', 'patient_id', 'appointment_id', 'past_medical_history', 'current_treatment', 'illness', 'diagnosis_date', 'treatment']);
         }]);
 
@@ -123,7 +123,7 @@ class MedicalAppointmentRepository
                 $appointment->appointment_time =  Carbon::parse($appointment->appointment_date)->format('H:i');
                 $appointment->appointment_date = Carbon::parse($appointment->appointment_date)->toDateString();
                 $appointment->status = ucfirst($appointment->status);
-                $appointment->patient->age = Helper::calculateAge($appointment->patient->dob). ' years';
+                $appointment->patient->age = Helper::calculateAge($appointment->patient->dob) . ' years';
                 $appointment->patient->thumbnail = $appointment->patient->thumbnail();
                 $appointment->doctor->thumbnail = $appointment->doctor->thumbnail();
                 $appointment->doctor->specialty = MedicalSpecialty::where('id', $appointment->doctor->specialty_id)->value('name');
@@ -180,5 +180,25 @@ class MedicalAppointmentRepository
     public function isSelectedAppointmentTimeInPast($appointmentTime)
     {
         return $appointmentTime->isPast();
+    }
+
+    public function getPostConsulationData($appointment_id)
+    {
+        $appointment = $this->medicalAppointment->select(['id', 'appointment_number'])->where('id', $appointment_id)->with(['medicalHistory' => function ($query) {
+            $query->select(['appointment_id', 'presenting_complaint', 'past_medical_history', 'drug_allergies', 'findings']);
+        }])->with(['labTests' => function ($query) {
+            $query->select(['appointment_id', 'labtest_category_id', 'findings']);
+        }])->with(['imageTests' => function ($query) {
+            $query->select(['appointment_id', 'imagetest_category_id', 'findings']);
+        }])->with(['otherTests' => function ($query) {
+            $query->select(['appointment_id', 'tests', 'findings']);
+        }])->with(['diagnosis' => function ($query) {
+            $query->select(['appointment_id', 'icd_code_id', 'comments']);
+        }])->with(['prescription' => function ($query) {
+            $query->select(['appointment_id', 'drug_id', 'dosage', 'admin_route_id', 'duration', 'quantity', 'instructions']);
+        }])->with(['treatmentPlan' => function ($query) {
+            $query->select(['appointment_id', 'treatment_plan']);
+        }])->get();
+        return $appointment;
     }
 }

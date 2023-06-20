@@ -173,8 +173,7 @@ class MedicalAppointmentController extends Controller
             'appointment_time' => 'required',
             'reason' => 'sometimes|nullable',
             'past_medical_history' => 'sometimes|nullable',
-            'current_treatment' => 'sometimes|nullable',
-
+            'current_treatment' => 'sometimes|nullable'
         ]);
 
         try {
@@ -241,7 +240,7 @@ class MedicalAppointmentController extends Controller
 
                         $this->patientMedicalHistoryRepository->updateOrCreate($criteria, $medical_history_data);
 
-                        $appointment = $this->medicalAppointmentRepository->get($data->id);
+                        $appointment = $this->medicalAppointmentRepository->find($data->id);
                         $is_online = $appointment->isOnline();
                         $patient = $appointment->patient;
 
@@ -379,7 +378,7 @@ class MedicalAppointmentController extends Controller
     {
 
         $validator = Validator::make($request->all(), [
-            'appointment_id' => 'required|exists:medical_appointments,id',
+            'appointmentId' => 'required|exists:medical_appointments,id',
             'isDraft' => 'required|boolean',
             'historyData.presenting_complaint' => 'required',
             'historyData.past_medical_history' => 'required',
@@ -415,11 +414,11 @@ class MedicalAppointmentController extends Controller
 
             'diagnosisData' => 'nullable|array',
             'diagnosisData.icd10Codes.*' => 'required|string',
-            'diagnosisData.icd10Codes' => 'sometimes|required|array',
+            'diagnosisData.icd10Codes' => 'sometimes|nullable|array',
             'diagnosisData.comments' => 'required|string',
 
             'treatmentData' => 'nullable|array',
-            'treatmentData.drugs' => 'sometimes|required|array',
+            'treatmentData.drugs' => 'sometimes|nullable|array',
             'treatmentData.drugs.*.name' => 'required|string',
             'treatmentData.drugs.*.dosage' => 'required|string',
             'treatmentData.drugs.*.duration' => 'required|integer',
@@ -441,7 +440,7 @@ class MedicalAppointmentController extends Controller
 
                 if ($appointment->is_draft) {
 
-                    $appointment_id = $request->appointment_id;
+                    $appointment_id = $request->appointmentId;
                     $isDraft = $request->isDraft;
                     $criteria = [
                         'appointment_id' => $appointment_id
@@ -717,6 +716,16 @@ class MedicalAppointmentController extends Controller
             } else {
                 return response()->json(['message' => 'Invalid request'], 400);
             }
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
+    public function getAppointmentConsultationData($appointment_id)
+    {
+        try {
+            $data = $this->medicalAppointmentRepository->getPostConsulationData($appointment_id);
+            return response()->json($data, 200);
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
