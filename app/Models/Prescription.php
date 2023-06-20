@@ -5,13 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class MedicalHistory extends Model
+class Prescription extends Model
 {
     use HasFactory;
 
-    protected $table = 'medical_histories';
+    protected $table = 'prescriptions';
 
-    protected $fillable = ['appointment_id', 'presenting_complaint', 'past_medical_history', 'drug_allergies', 'findings'];
+    protected $fillable = [
+        'appointment_id', 'drug_id', 'dosage', 'admin_route_id', 'duration', 'quantity', 'instructions'
+    ];
 
     public $timestamps = true;
 

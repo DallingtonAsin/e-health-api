@@ -18,9 +18,15 @@ class LabTestCategoryRepository
         return $this->labTestCategory->create($labTestCategoryData);
     }
 
-    public function find($id = null)
+    public function find($id )
     {
         return $this->labTestCategory->find($id);
+    }
+
+    public function findLabTestCategoryByName($name)
+    {
+        $labTestCat = $this->labTestCategory->where('name', 'LIKE', '%' . $name . '%')->first();
+        return $labTestCat;
     }
 
     public function get()

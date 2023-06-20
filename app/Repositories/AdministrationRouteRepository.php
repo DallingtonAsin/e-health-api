@@ -18,9 +18,14 @@ class AdministrationRouteRepository
         return $this->administrationRoute->create($data);
     }
 
-    public function find($id = null)
+    public function find($id)
     {
         return $this->administrationRoute->find($id);
+    }
+
+    public function findRouteByName($name)
+    {
+        return $this->administrationRoute->where('name', $name)->first();
     }
 
     public function get()

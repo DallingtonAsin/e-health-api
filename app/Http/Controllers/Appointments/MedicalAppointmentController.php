@@ -9,12 +9,24 @@ use Illuminate\Support\Facades\Validator;
 use App\Repositories\MedicalAppointmentRepository;
 use App\Repositories\AppointmentTypeRepository;
 use App\Repositories\MeetingTokenRepository;
-use App\Repositories\MedicalHistoryRepository;
 use App\Repositories\MedicalDoctorRepository;
-use App\Repositories\AfterCall\PatientMedicalHistoryRepository;
+use App\Repositories\PatientMedicalHistoryRepository;
 use App\Repositories\AfterCall\MedicalFindingRepository;
+
+use App\Repositories\LabTestCategoryRepository;
+use App\Repositories\ImageTestCategoryRepository;
+use App\Repositories\Icd10CodeRepository;
+use App\Repositories\DrugRepository;
+use App\Repositories\AdministrationRouteRepository;
+
+use App\Repositories\AfterCall\MedicalHistoryRepository;
+use App\Repositories\AfterCall\Tests\LabTestRepository;
+use App\Repositories\AfterCall\Tests\ImageTestRepository;
+use App\Repositories\AfterCall\Tests\OtherTestRepository;
 use App\Repositories\AfterCall\DiagnosisRepository;
+use App\Repositories\AfterCall\PrescriptionRepository;
 use App\Repositories\AfterCall\TreatmentPlanRepository;
+
 use App\Services\NotificationService;
 use App\Services\PushNotificationService;
 use Carbon\Carbon;
@@ -23,8 +35,12 @@ class MedicalAppointmentController extends Controller
 {
 
     protected $appointmentTypeRepository, $medicalAppointmentRepository, $doctorRepository;
-    protected $patientMedicalHistoryRepository, $medicalFindingRepository,  $diagnosisRepository, $treatmentPlanRepository;
-    protected $meetingTokenRepository, $notificationService, $medicalHistoryRepository, $pushNotificationService;
+    protected $patientMedicalHistoryRepository, $medicalFindingRepository;
+    protected $labTestCategoryRepository, $imageTestCategoryRepository, $icd10CodeRepository;
+
+    protected $medicalHistoryRepository, $labTestRepository, $imageTestRepository, $otherTestRepository, $diagnosisRepository;
+    protected $drugRepository, $adminRouteRepository, $prescriptionRepository, $treatmentPlanRepository;
+    protected $meetingTokenRepository, $notificationService, $pushNotificationService;
 
     public function __construct(
         AppointmentTypeRepository $appointmentTypeRepository,
@@ -35,9 +51,20 @@ class MedicalAppointmentController extends Controller
         MedicalHistoryRepository $medicalHistoryRepository,
         PushNotificationService $pushNotificationService,
 
+        LabTestCategoryRepository $labTestCategoryRepository,
+        ImageTestCategoryRepository $imageTestCategoryRepository,
+        Icd10CodeRepository $icd10CodeRepository,
+        DrugRepository $drugRepository,
+        AdministrationRouteRepository $adminRouteRepository,
+
+        LabTestRepository $labTestRepository,
+        ImageTestRepository $imageTestRepository,
+        OtherTestRepository $otherTestRepository,
+
         PatientMedicalHistoryRepository $patientMedicalHistoryRepository,
         MedicalFindingRepository $medicalFindingRepository,
         DiagnosisRepository $diagnosisRepository,
+        PrescriptionRepository $prescriptionRepository,
         TreatmentPlanRepository $treatmentPlanRepository
     ) {
         $this->appointmentTypeRepository = $appointmentTypeRepository;
@@ -45,11 +72,22 @@ class MedicalAppointmentController extends Controller
         $this->doctorRepository = $doctorRepository;
         $this->meetingTokenRepository = $meetingTokenRepository;
         $this->notificationService = $notificationService;
-        $this->medicalHistoryRepository = $medicalHistoryRepository;
         $this->pushNotificationService = $pushNotificationService;
         $this->patientMedicalHistoryRepository = $patientMedicalHistoryRepository;
         $this->medicalFindingRepository = $medicalFindingRepository;
+
+        $this->labTestCategoryRepository = $labTestCategoryRepository;
+        $this->imageTestCategoryRepository = $imageTestCategoryRepository;
+        $this->icd10CodeRepository = $icd10CodeRepository;
+        $this->drugRepository = $drugRepository;
+        $this->adminRouteRepository = $adminRouteRepository;
+
+        $this->medicalHistoryRepository = $medicalHistoryRepository;
+        $this->labTestRepository = $labTestRepository;
+        $this->imageTestRepository = $imageTestRepository;
+        $this->otherTestRepository = $otherTestRepository;
         $this->diagnosisRepository = $diagnosisRepository;
+        $this->prescriptionRepository = $prescriptionRepository;
         $this->treatmentPlanRepository = $treatmentPlanRepository;
     }
 
@@ -66,7 +104,7 @@ class MedicalAppointmentController extends Controller
     public function getPatientAppointments($patient_id, $status = null)
     {
         try {
-            return $this->medicalAppointmentRepository->getMedicalAppointments(null, $patient_id, $status, null);
+            return $this->medicalAppointmentRepository->get(null, $patient_id, $status, null);
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
@@ -75,7 +113,7 @@ class MedicalAppointmentController extends Controller
     public function getPatientPendingAppointments($patient_id)
     {
         try {
-            return $this->medicalAppointmentRepository->getMedicalAppointments(null, $patient_id, 'pending', null);
+            return $this->medicalAppointmentRepository->get(null, $patient_id, 'pending', null);
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
@@ -84,7 +122,7 @@ class MedicalAppointmentController extends Controller
     public function getPatientConfirmedAppointments($patient_id)
     {
         try {
-            return $this->medicalAppointmentRepository->getMedicalAppointments(null, $patient_id, 'confirmed', null);
+            return $this->medicalAppointmentRepository->get(null, $patient_id, 'confirmed', null);
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
@@ -93,7 +131,7 @@ class MedicalAppointmentController extends Controller
     public function getPatientCompletedAppointments($patient_id)
     {
         try {
-            return $this->medicalAppointmentRepository->getMedicalAppointments(null, $patient_id, 'completed', null);
+            return $this->medicalAppointmentRepository->get(null, $patient_id, 'completed', null);
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
@@ -102,7 +140,7 @@ class MedicalAppointmentController extends Controller
     public function getPatientCancelledAppointments($patient_id)
     {
         try {
-            return $this->medicalAppointmentRepository->getMedicalAppointments(null, $patient_id, 'cancelled', null);
+            return $this->medicalAppointmentRepository->get(null, $patient_id, 'cancelled', null);
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
@@ -189,6 +227,11 @@ class MedicalAppointmentController extends Controller
                         $data = $this->medicalAppointmentRepository->create($data);
                         $data->makeHidden(['created_at', 'updated_at']);
 
+                        $criteria = [
+                            'patient_id' => $patient_id,
+                            'appointment_id' => $data->id,
+                        ];
+
                         $medical_history_data = [
                             'patient_id' => $patient_id,
                             'appointment_id' => $data->id,
@@ -196,7 +239,7 @@ class MedicalAppointmentController extends Controller
                             'current_treatment' => $current_treatment
                         ];
 
-                        $this->medicalHistoryRepository->create($medical_history_data);
+                        $this->patientMedicalHistoryRepository->updateOrCreate($criteria, $medical_history_data);
 
                         $appointment = $this->medicalAppointmentRepository->get($data->id);
                         $is_online = $appointment->isOnline();
@@ -243,7 +286,7 @@ class MedicalAppointmentController extends Controller
     public function show($id)
     {
         try {
-            $notification = $this->medicalAppointmentRepository->getMedicalAppointments($id, null, null, null);
+            $notification = $this->medicalAppointmentRepository->get($id, null, null, null);
             return $notification[0];
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
@@ -288,7 +331,7 @@ class MedicalAppointmentController extends Controller
     public function getDoctorPendingAppointments($doctor_id)
     {
         try {
-            return $this->medicalAppointmentRepository->getMedicalAppointments(null, null, 'pending', $doctor_id);
+            return $this->medicalAppointmentRepository->get(null, null, 'pending', $doctor_id);
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
@@ -297,7 +340,7 @@ class MedicalAppointmentController extends Controller
     public function getDoctorConfirmedAppointments($doctor_id)
     {
         try {
-            return $this->medicalAppointmentRepository->getMedicalAppointments(null, null, 'confirmed', $doctor_id);
+            return $this->medicalAppointmentRepository->get(null, null, 'confirmed', $doctor_id);
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
@@ -306,7 +349,7 @@ class MedicalAppointmentController extends Controller
     public function getDoctorCompletedAppointments($doctor_id)
     {
         try {
-            return $this->medicalAppointmentRepository->getMedicalAppointments(null, null, 'completed', $doctor_id);
+            return $this->medicalAppointmentRepository->get(null, null, 'completed', $doctor_id);
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
@@ -315,7 +358,7 @@ class MedicalAppointmentController extends Controller
     public function getDoctorCancelledAppointments($doctor_id)
     {
         try {
-            return $this->medicalAppointmentRepository->getMedicalAppointments(null, null, 'cancelled', $doctor_id);
+            return $this->medicalAppointmentRepository->get(null, null, 'cancelled', $doctor_id);
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
@@ -325,7 +368,7 @@ class MedicalAppointmentController extends Controller
     public function getAppointmentMeetingDetails($appointment_id)
     {
         try {
-            $meeting = $this->medicalAppointmentRepository->getMedicalAppointments($appointment_id);
+            $meeting = $this->medicalAppointmentRepository->get($appointment_id);
             return $meeting[0];
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
@@ -337,15 +380,53 @@ class MedicalAppointmentController extends Controller
 
         $validator = Validator::make($request->all(), [
             'appointment_id' => 'required|exists:medical_appointments,id',
-            'medical_history' => 'required',
-            'drug_allergies' => 'required',
-            'labtest_category_id' => 'required|exists:labtest_categories,id',
-            'finding' => 'required',
-            'icd_code_id' => 'required|exists:icd_10_codes,id',
-            'comments' => 'required',
-            'diagnosis_date' => 'required|date',
-            'prescriptions' => 'required',
-            'treatment_plan' => 'required'
+            'isDraft' => 'required|boolean',
+            'historyData.presenting_complaint' => 'required',
+            'historyData.past_medical_history' => 'required',
+            'historyData.drug_allergies' => 'required',
+            'historyData.findings' => 'required',
+
+            'labTestData' => 'sometimes|required|array',
+            'labTestData.labTests' => [
+                'nullable',
+                'array',
+                function ($attribute, $value, $fail) {
+                    if (!empty($value) && !is_array($value)) {
+                        $fail('The labTests must be an array.');
+                    }
+                },
+            ],
+            'labTestData.labTests.*.name' => 'required|string',
+            'labTestData.labTests.*.findings' => 'required|string',
+            'labTestData.imageTests' => [
+                'nullable',
+                'array',
+                function ($attribute, $value, $fail) {
+                    if (!empty($value) && !is_array($value)) {
+                        $fail('The imageTests must be an array.');
+                    }
+                },
+            ],
+            'labTestData.imageTests.*.name' => 'required|string',
+            'labTestData.imageTests.*.findings' => 'required|string',
+
+            'labTestData.otherTests' => 'nullable|string',
+            'labTestData.otherTestFindings' => 'nullable|string',
+
+            'diagnosisData' => 'nullable|array',
+            'diagnosisData.icd10Codes.*' => 'required|string',
+            'diagnosisData.icd10Codes' => 'sometimes|required|array',
+            'diagnosisData.comments' => 'required|string',
+
+            'treatmentData' => 'nullable|array',
+            'treatmentData.drugs' => 'sometimes|required|array',
+            'treatmentData.drugs.*.name' => 'required|string',
+            'treatmentData.drugs.*.dosage' => 'required|string',
+            'treatmentData.drugs.*.duration' => 'required|integer',
+            'treatmentData.drugs.*.instructions' => 'required|string',
+            'treatmentData.drugs.*.quantity' => 'required|integer',
+            'treatmentData.drugs.*.route_of_admin' => 'required|string',
+            'treatmentData.treatmentPlan' => 'required|string'
         ]);
 
         try {
@@ -355,52 +436,183 @@ class MedicalAppointmentController extends Controller
                 return Helper::sendFailedHttpResponse($message);
             } else {
 
-                $criteria = [
-                    'appointment_id' => $request->appointment_id
-                ];
+                $appointmentData = $this->medicalAppointmentRepository->get($appointment_id);
+                $appointment = $appointmentData[0];
 
-                $meidcalHistoryData = [
-                    'appointment_id' => $request->appointment_id,
-                    'medical_history' => $request->medical_history,
-                    'drug_allergies' => $request->drug_allergies
-                ];
+                if ($appointment->is_draft) {
 
-                $medicalFindingsData = [
-                    'appointment_id' => $request->appointment_id,
-                    'labtest_category_id' => $request->labtest_category_id,
-                    'finding' => $request->finding
-                ];
+                    $appointment_id = $request->appointment_id;
+                    $isDraft = $request->isDraft;
+                    $criteria = [
+                        'appointment_id' => $appointment_id
+                    ];
 
-                $diagnosisData = [
-                    'appointment_id' => $request->appointment_id,
-                    'icd_code_id' => $request->icd_code_id,
-                    'comments' => $request->comments,
-                    'diagnosis_date' => Carbon::createFromFormat('Y-m-d', $request->diagnosis_date),
-                ];
+                    // Process history data
+                    $historyData = $request->input('historyData');
+                    $presenting_complaint = $historyData['presenting_complaint'];
+                    $past_medical_history = $historyData['past_medical_history'];
+                    $drug_allergies = $historyData['drug_allergies'];
+                    $findings = $historyData['findings'];
 
-                $treatmentPlanData = [
-                    'appointment_id' => $request->appointment_id,
-                    'prescriptions' => $request->prescriptions,
-                    'treatment_plan' => $request->treatment_plan
-                ];
+                    $medicalHistoryData = [
+                        'appointment_id' => $appointment_id,
+                        'presenting_complaint' => $presenting_complaint,
+                        'past_medical_history' => $past_medical_history,
+                        'drug_allergies' => $drug_allergies,
+                        'findings' => $findings
+                    ];
+                    $this->medicalHistoryRepository->updateOrCreate($criteria, $medicalHistoryData);
 
-                $appointment = $this->medicalAppointmentRepository->get($appointment_id);
-                $patient_id = $appointment->patient_id;
 
-                $this->patientMedicalHistoryRepository->createOrUpdate($criteria, $meidcalHistoryData);
-                $this->medicalFindingRepository->createOrUpdate($criteria, $medicalFindingsData);
-                $this->diagnosisRepository->createOrUpdate($criteria, $diagnosisData);
-                $this->treatmentPlanRepository->createOrUpdate($criteria, $treatmentPlanData);
-                $this->medicalAppointmentRepository->completeAppointment($patient_id, $appointment_id);
+                    // Process Labtest data
+                    $labTestData = $request->input('labTestData');
 
-                $datetime = Carbon::parse($appointment->appointment_date);
-                $appointment->appointment_date = $datetime->toDateString();
-                $appointment->appointment_time = date('H:i', strtotime($datetime->toTimeString()));
+                    if (isset($labTestData)) {
+                        $otherTests = $labTestData['otherTests'];
+                        $otherTestFindings = $labTestData['otherTestFindings'];
 
-                $this->notificationService->sendAppointmentCompletedMessage($appointment, true);
-                $this->notificationService->sendAppointmentCompletedMessage($appointment, false);
+                        // Perform necessary operations with the validated Labtest data
+                        if (!empty($labTestData['labTests'])) {
+                            $labTests = $labTestData['labTests'];
+                            foreach ($labTests as $labTest) {
+                                $labTestName = $labTest['name'];
+                                $labTestCategoryId = $this->labTestCategoryRepository->findLabTestCategoryByName($labTestName)->id;
+                                $labCriteria = [
+                                    'appointment_id' => $appointment_id,
+                                    'labtest_category_id' => $labTestCategoryId
+                                ];
+                                $labTestObj =  [
+                                    'appointment_id' => $appointment_id,
+                                    'labtest_category_id' => $labTestCategoryId,
+                                    'findings' => $labTest['findings'],
+                                ];
+                                $this->labTestRepository->updateOrCreate($labCriteria, $labTestObj);
+                            }
+                        }
 
-                return response()->json(['message' => 'Appointment has been completed successfully'], 200);
+                        // Perform necessary operations with the validated imagetest data
+                        if (!empty($labTestData['imageTests'])) {
+                            $imageTests = $labTestData['imageTests'];
+                            foreach ($imageTests as $imageTest) {
+                                $imageTestCat = $this->imageTestCategoryRepository->findImageTestCategoryByName($imageTest['name']);
+                                $imageTestCatId = $imageTestCat->id;
+                                $imageTestCriteria = [
+                                    'appointment_id' => $appointment_id,
+                                    'imagetest_category_id' => $labTestCategoryId
+                                ];
+                                $imageTestObj = [
+                                    'appointment_id' => $appointment_id,
+                                    'imagetest_category_id' => $imageTestCatId,
+                                    'findings' => $imageTest['findings'],
+                                ];
+                                $this->imageTestRepository->updateOrCreate($imageTestCriteria, $imageTestObj);
+                            }
+                        }
+
+                        // Perform necessary operations with the validated othertests data
+                        if (!empty($otherTests) && !empty($otherTestFindings)) {
+                            $otherTests = [
+                                'appointment_id' => $appointment_id,
+                                'tests' => $otherTests,
+                                'findings' => $otherTestFindings,
+                            ];
+                            $this->otherTestRepository->updateOrCreate($criteria, $otherTests);
+                        }
+                    }
+
+                    // Diagnosis data
+                    $diagnosisData = $request->input('diagnosisData');
+                    if (isset($diagnosisData)) {
+                        $icd10Codes = $diagnosisData['icd10Codes'];
+                        $diagnosis_comments = $diagnosisData['comments'];
+
+                        if (!empty($icd10Codes)) {
+                            // Insert each icd10Code into the database
+                            foreach ($icd10Codes as $icdString) {
+                                $parts = explode(' ', $icdString);
+                                $categoryCode = $parts[0];
+                                $abbrev = implode(' ', array_slice($parts, 1));
+                                // dd($categoryCode, $abbrev);
+                                $icd10Code = $this->icd10CodeRepository->findIcd10CodeByCodeAbbrev($categoryCode, $abbrev);
+                                $icd10CodeId = $icd10Code->id;
+
+                                $diagnosisCriteria = [
+                                    'appointment_id' => $appointment_id,
+                                    'icd_code_id' => $icd10CodeId
+                                ];
+
+                                $diagnosisData = [
+                                    'appointment_id' => $appointment_id,
+                                    'icd_code_id' => $icd10CodeId,
+                                    'comments' => $diagnosis_comments,
+                                    'diagnosis_date' => Carbon::now(),
+                                ];
+                                $this->diagnosisRepository->updateOrCreate($diagnosisCriteria, $diagnosisData);
+                            }
+                        }
+                    }
+
+                    // Treatment data
+                    $treatmentData = $request->input('treatmentData');
+                    if (isset($treatmentData)) {
+                        $drugs = $treatmentData['drugs'];
+                        $treatmentPlan = $treatmentData['treatmentPlan'];
+
+                        if (!empty($drugs)) {
+
+                            foreach ($drugs as $drug) {
+
+                                $drugName = $drug['name'];
+                                $dosage = $drug['dosage'];
+                                $duration = $drug['duration'];
+                                $quantity = $drug['quantity'];
+                                $routeOfAdmin = $drug['route_of_admin'];
+                                $instructions = $drug['instructions'];
+                                $drug = $this->drugRepository->findDrugByName($drugName);
+                                $drug_id = $drug->id;
+
+                                $drugObj = [
+                                    'appointment_id' => $appointment_id,
+                                    'drug_id' => $drug_id,
+                                    'dosage' => $dosage,
+                                    'admin_route_id' => $this->adminRouteRepository->findRouteByName($routeOfAdmin)->id,
+                                    'duration' => $duration,
+                                    'quantity' => $quantity,
+                                    'instructions' => $instructions,
+                                ];
+
+                                // Perform necessary operations with each drug
+                                $this->prescriptionRepository->updateOrCreate(['appointment_id' => $appointment_id,  'drug_id' => $drug_id], $drugObj);
+                            }
+                        }
+
+                        if (!empty($treatmentPlan)) {
+                            $treatmentManagmentData = [
+                                'appointment_id' => $appointment_id,
+                                'treatment_plan' => $treatmentPlan
+                            ];
+                            $this->treatmentPlanRepository->updateOrCreate($criteria, $treatmentManagmentData);
+                        }
+                    }
+
+                    // if not draft, complete the appointment
+                    if (!$isDraft) {
+                        $this->medicalAppointmentRepository->update($appointment_id, ['is_draft' => false]);
+                        $patient_id = $appointment->patient_id;
+                        $this->medicalAppointmentRepository->completeAppointment($patient_id, $appointment_id);
+                        $datetime = Carbon::parse($appointment->appointment_date);
+                        $appointment->appointment_date = $datetime->toDateString();
+                        $appointment->appointment_time = date('H:i', strtotime($datetime->toTimeString()));
+
+                        $this->notificationService->sendAppointmentCompletedMessage($appointment, true);
+                        $this->notificationService->sendAppointmentCompletedMessage($appointment, false);
+                    }
+
+                    $message = $isDraft ? 'Data saved as draft' : 'Appointment has been completed successfully';
+                    return response()->json(['message' => $message], 200);
+                } else {
+                    return Helper::sendFailedHttpResponse('You have already been completed this appointment.');
+                }
             }
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);

@@ -18,9 +18,14 @@ class Icd10CodeRepository
         return $this->icd10Code->create($icd10CodeData);
     }
 
-    public function find($id = null)
+    public function find($id)
     {
         return $this->icd10Code->find($id);
+    }
+
+    public function findIcd10CodeByCodeAbbrev($code, $abbrev)
+    {
+        return $this->icd10Code->where('category_code', $code)->where('abbreviated_description', $abbrev)->first();
     }
 
     public function get($id = null)

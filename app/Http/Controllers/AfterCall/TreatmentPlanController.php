@@ -70,7 +70,7 @@ class TreatmentPlanController extends Controller
                     'treatment_plan' => $request->treatment_plan
                 ];
 
-                $result = $this->treatmentPlanRepository->createOrUpdate($criteria, $validatedData);
+                $result = $this->treatmentPlanRepository->updateOrCreate($criteria, $validatedData);
                 return response()->json(['message' => 'Treatment plan inserted successfully', 'data' => $result], 200);
             }
         } catch (\Exception $e) {

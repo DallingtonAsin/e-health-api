@@ -8,7 +8,7 @@ use App\Models\MedicalDoctor;
 use App\Models\Patient;
 use Carbon\Carbon;
 
-class DoctorRatingTableSeeder extends Seeder
+class DoctorRatingSeeder extends Seeder
 {
     /**
      * Run the database seeds.

@@ -18,7 +18,7 @@ class CompanyInfoRepository
         return $this->companyInfo->create($companyInfoData);
     }
 
-    public function find($id = null)
+    public function find($id )
     {
         return $this->companyInfo->find($id);
     }
