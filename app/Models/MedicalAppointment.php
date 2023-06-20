@@ -4,11 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Patient;
-use App\Models\MedicalDoctor;
-use App\Models\AppointmentType;
-use App\Models\MeetingToken;
-use App\Models\MedicalHistory;
 
 class MedicalAppointment extends Model
 {
@@ -18,7 +13,7 @@ class MedicalAppointment extends Model
 
     protected $fillable = [
         'patient_id', 'doctor_id', 'appointment_number', 'appointment_type_id', 'appointment_date', 'reason', 'notes',
-        'status', 'confirmed_at', 'is_doctor_notified', 'alert_status'
+        'status', 'confirmed_at', 'is_doctor_notified', 'alert_status', 'is_draft'
     ];
 
     public function patient()
@@ -55,6 +50,6 @@ class MedicalAppointment extends Model
 
     public function medicalHistory()
     {
-        return $this->hasOne(MedicalHistory::class, 'appointment_id');
+        return $this->hasOne(PatientMedicalHistory::class, 'appointment_id');
     }
 }

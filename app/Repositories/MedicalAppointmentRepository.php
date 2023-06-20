@@ -29,12 +29,9 @@ class MedicalAppointmentRepository
         return $this->medicalAppointment->findOrFail($id);
     }
 
-    public function get($id = null, $status = null)
+    public function get($id = null, $patient_id = null, $status = null, $doctor_id = null, $is_doctor_notified = null)
     {
-        if ($id) {
-            return $this->medicalAppointment->find($id);
-        }
-        return $this->medicalAppointment->all();
+        return $this->getMedicalAppointments($id, $patient_id, $status, $doctor_id, $is_doctor_notified);
     }
 
     public function update($id, $medicalAppointmentData)
