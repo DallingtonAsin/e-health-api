@@ -25,7 +25,9 @@ class LabTestCategoryRepository
 
     public function findLabTestCategoryByName($name)
     {
-        return $this->labTestCategory->where('name', $name)->first();
+        $labTestCat = $this->labTestCategory->where('name', 'like', '%'.$name.'%')->first();
+        return $labTestCat;
+        // dd($labTestCat);
     }
 
     public function get()

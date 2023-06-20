@@ -18,9 +18,9 @@ class MedicalHistoryRepository
         return $this->medicalHistory->create($medicalHistoryData);
     }
 
-    public function createOrUpdate($criteria, $data)
+    public function updateOrCreate($criteria, $data)
     {
-        return $this->medicalHistory->createOrUpdate($criteria, $data);
+        return $this->medicalHistory->updateOrCreate($criteria, $data);
     }
 
     public function find($id )

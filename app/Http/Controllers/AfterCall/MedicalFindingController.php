@@ -70,7 +70,7 @@ class MedicalFindingController extends Controller
                     'finding' => $request->finding
                 ];
 
-                $result = $this->medicalFindingRepository->createOrUpdate($criteria, $validatedData);
+                $result = $this->medicalFindingRepository->updateOrCreate($criteria, $validatedData);
                 return response()->json(['message' => 'Medical findings inserted successfully', 'data' => $result], 200);
             }
         } catch (\Exception $e) {

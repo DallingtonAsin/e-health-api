@@ -9,7 +9,7 @@ class OtherTest extends Model
 {
     use HasFactory;
 
-    protected $table = 'image_tests';
+    protected $table = 'other_tests';
 
     protected $fillable = ['appointment_id', 'tests', 'findings'];
 

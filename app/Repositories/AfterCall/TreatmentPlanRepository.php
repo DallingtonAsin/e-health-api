@@ -18,9 +18,9 @@ class TreatmentPlanRepository
         return $this->treatmentPlan->create($treatmentPlanData);
     }
 
-    public function createOrUpdate($criteria, $data)
+    public function updateOrCreate($criteria, $data)
     {
-        return $this->treatmentPlan->createOrUpdate($criteria, $data);
+        return $this->treatmentPlan->updateOrCreate($criteria, $data);
     }
 
     public function find($id )

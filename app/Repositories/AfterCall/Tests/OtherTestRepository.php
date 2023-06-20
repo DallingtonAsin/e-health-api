@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories\AfterCall;
+namespace App\Repositories\AfterCall\Tests;
 
 use App\Models\OtherTest;
 
@@ -18,9 +18,9 @@ class OtherTestRepository
         return $this->otherTest->create($otherTestData);
     }
 
-    public function createOrUpdate($criteria, $data)
+    public function updateOrCreate($criteria, $data)
     {
-        return $this->otherTest->createOrUpdate($criteria, $data);
+        return $this->otherTest->updateOrCreate($criteria, $data);
     }
 
     public function find($id)

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories\AfterCall;
+namespace App\Repositories\AfterCall\Tests;
 
 use App\Models\LabTest;
 
@@ -18,9 +18,9 @@ class LabTestRepository
         return $this->labTest->create($labTestData);
     }
 
-    public function createOrUpdate($criteria, $data)
+    public function updateOrCreate($criteria, $data)
     {
-        return $this->labTest->createOrUpdate($criteria, $data);
+        return $this->labTest->updateOrCreate($criteria, $data);
     }
 
     public function find($id)

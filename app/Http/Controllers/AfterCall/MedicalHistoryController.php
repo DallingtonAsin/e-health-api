@@ -70,7 +70,7 @@ class MedicalHistoryController extends Controller
                     'drug_allergies' => $request->drug_allergies
                 ];
 
-                $result = $this->medicalHistoryRepository->createOrUpdate($criteria, $validatedData);
+                $result = $this->medicalHistoryRepository->updateOrCreate($criteria, $validatedData);
                 return response()->json(['message' => 'Patient medical history inserted successfully', 'data' => $result], 200);
             }
         } catch (\Exception $e) {

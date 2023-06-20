@@ -18,9 +18,9 @@ class DiagnosisRepository
         return $this->diagnosis->create($diagnosisData);
     }
 
-    public function createOrUpdate($criteria, $data)
+    public function updateOrCreate($criteria, $data)
     {
-        return $this->diagnosis->createOrUpdate($criteria, $data);
+        return $this->diagnosis->updateOrCreate($criteria, $data);
     }
 
     public function find($id )

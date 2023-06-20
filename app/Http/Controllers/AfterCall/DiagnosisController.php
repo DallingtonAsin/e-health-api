@@ -73,7 +73,7 @@ class DiagnosisController extends Controller
                     'diagnosis_date' => Carbon::createFromFormat('Y-m-d', $request->diagnosis_date),
                 ];
 
-                $result = $this->diagnosisRepository->createOrUpdate($criteria, $validatedData);
+                $result = $this->diagnosisRepository->updateOrCreate($criteria, $validatedData);
                 return response()->json(['message' => 'Diagnosis inserted successfully', 'data' => $result], 200);
             }
         } catch (\Exception $e) {

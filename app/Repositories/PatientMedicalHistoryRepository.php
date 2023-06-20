@@ -13,9 +13,14 @@ class PatientMedicalHistoryRepository
         $this->patientMedicalHistory = $patientMedicalHistory;
     }
 
-    public function create($patientMedicalHistoryData)
+    public function create($data)
     {
-        return $this->patientMedicalHistory->create($patientMedicalHistoryData);
+        return $this->patientMedicalHistory->create($data);
+    }
+
+    public function updateOrCreate($criteria, $data)
+    {
+        return $this->patientMedicalHistory->updateOrCreate($criteria, $data);
     }
 
     public function find($id)

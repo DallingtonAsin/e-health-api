@@ -18,9 +18,9 @@ class PrescriptionRepository
         return $this->prescription->create($prescriptionData);
     }
 
-    public function createOrUpdate($criteria, $data)
+    public function updateOrCreate($criteria, $data)
     {
-        return $this->prescription->createOrUpdate($criteria, $data);
+        return $this->prescription->updateOrCreate($criteria, $data);
     }
 
     public function find($id )

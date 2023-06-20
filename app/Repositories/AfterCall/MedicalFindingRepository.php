@@ -18,9 +18,9 @@ class MedicalFindingRepository
         return $this->medicalFinding->create($medicalFindingData);
     }
 
-    public function createOrUpdate($criteria, $data)
+    public function updateOrCreate($criteria, $data)
     {
-        return $this->medicalFinding->createOrUpdate($criteria, $data);
+        return $this->medicalFinding->updateOrCreate($criteria, $data);
     }
 
     public function find($id )
