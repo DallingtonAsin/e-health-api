@@ -21,4 +21,14 @@ class Prescription extends Model
     {
         return $this->belongsTo(MedicalAppointment::class, 'appointment_id');
     }
+
+    public function drug()
+    {
+        return $this->belongsTo(Drug::class, 'drug_id');
+    }
+
+    public function adminRoute()
+    {
+        return $this->belongsTo(MedicalAdministrationRoute::class, 'admin_route_id');
+    }
 }

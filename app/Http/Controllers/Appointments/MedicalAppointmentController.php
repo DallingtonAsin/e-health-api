@@ -24,6 +24,7 @@ use App\Repositories\AfterCall\Tests\LabTestRepository;
 use App\Repositories\AfterCall\Tests\ImageTestRepository;
 use App\Repositories\AfterCall\Tests\OtherTestRepository;
 use App\Repositories\AfterCall\DiagnosisRepository;
+use App\Repositories\AfterCall\DiagnosisCommentsRepository;
 use App\Repositories\AfterCall\PrescriptionRepository;
 use App\Repositories\AfterCall\TreatmentPlanRepository;
 
@@ -38,7 +39,7 @@ class MedicalAppointmentController extends Controller
     protected $patientMedicalHistoryRepository, $medicalFindingRepository;
     protected $labTestCategoryRepository, $imageTestCategoryRepository, $icd10CodeRepository;
 
-    protected $medicalHistoryRepository, $labTestRepository, $imageTestRepository, $otherTestRepository, $diagnosisRepository;
+    protected $medicalHistoryRepository, $labTestRepository, $imageTestRepository, $otherTestRepository, $diagnosisRepository, $diagnosisCommentsRepository;
     protected $drugRepository, $adminRouteRepository, $prescriptionRepository, $treatmentPlanRepository;
     protected $meetingTokenRepository, $notificationService, $pushNotificationService;
 
@@ -64,6 +65,7 @@ class MedicalAppointmentController extends Controller
         PatientMedicalHistoryRepository $patientMedicalHistoryRepository,
         MedicalFindingRepository $medicalFindingRepository,
         DiagnosisRepository $diagnosisRepository,
+        DiagnosisCommentsRepository $diagnosisCommentsRepository,
         PrescriptionRepository $prescriptionRepository,
         TreatmentPlanRepository $treatmentPlanRepository
     ) {
@@ -87,6 +89,7 @@ class MedicalAppointmentController extends Controller
         $this->imageTestRepository = $imageTestRepository;
         $this->otherTestRepository = $otherTestRepository;
         $this->diagnosisRepository = $diagnosisRepository;
+        $this->diagnosisCommentsRepository = $diagnosisCommentsRepository;
         $this->prescriptionRepository = $prescriptionRepository;
         $this->treatmentPlanRepository = $treatmentPlanRepository;
     }
@@ -173,8 +176,7 @@ class MedicalAppointmentController extends Controller
             'appointment_time' => 'required',
             'reason' => 'sometimes|nullable',
             'past_medical_history' => 'sometimes|nullable',
-            'current_treatment' => 'sometimes|nullable',
-
+            'current_treatment' => 'sometimes|nullable'
         ]);
 
         try {
@@ -241,7 +243,7 @@ class MedicalAppointmentController extends Controller
 
                         $this->patientMedicalHistoryRepository->updateOrCreate($criteria, $medical_history_data);
 
-                        $appointment = $this->medicalAppointmentRepository->get($data->id);
+                        $appointment = $this->medicalAppointmentRepository->find($data->id);
                         $is_online = $appointment->isOnline();
                         $patient = $appointment->patient;
 
@@ -379,7 +381,7 @@ class MedicalAppointmentController extends Controller
     {
 
         $validator = Validator::make($request->all(), [
-            'appointment_id' => 'required|exists:medical_appointments,id',
+            'appointmentId' => 'required|exists:medical_appointments,id',
             'isDraft' => 'required|boolean',
             'historyData.presenting_complaint' => 'required',
             'historyData.past_medical_history' => 'required',
@@ -415,11 +417,11 @@ class MedicalAppointmentController extends Controller
 
             'diagnosisData' => 'nullable|array',
             'diagnosisData.icd10Codes.*' => 'required|string',
-            'diagnosisData.icd10Codes' => 'sometimes|required|array',
+            'diagnosisData.icd10Codes' => 'sometimes|nullable|array',
             'diagnosisData.comments' => 'required|string',
 
             'treatmentData' => 'nullable|array',
-            'treatmentData.drugs' => 'sometimes|required|array',
+            'treatmentData.drugs' => 'sometimes|nullable|array',
             'treatmentData.drugs.*.name' => 'required|string',
             'treatmentData.drugs.*.dosage' => 'required|string',
             'treatmentData.drugs.*.duration' => 'required|integer',
@@ -441,7 +443,7 @@ class MedicalAppointmentController extends Controller
 
                 if ($appointment->is_draft) {
 
-                    $appointment_id = $request->appointment_id;
+                    $appointment_id = $request->appointmentId;
                     $isDraft = $request->isDraft;
                     $criteria = [
                         'appointment_id' => $appointment_id
@@ -498,7 +500,7 @@ class MedicalAppointmentController extends Controller
                                 $imageTestCatId = $imageTestCat->id;
                                 $imageTestCriteria = [
                                     'appointment_id' => $appointment_id,
-                                    'imagetest_category_id' => $labTestCategoryId
+                                    'imagetest_category_id' => $imageTestCatId
                                 ];
                                 $imageTestObj = [
                                     'appointment_id' => $appointment_id,
@@ -544,11 +546,18 @@ class MedicalAppointmentController extends Controller
                                 $diagnosisData = [
                                     'appointment_id' => $appointment_id,
                                     'icd_code_id' => $icd10CodeId,
-                                    'comments' => $diagnosis_comments,
                                     'diagnosis_date' => Carbon::now(),
                                 ];
                                 $this->diagnosisRepository->updateOrCreate($diagnosisCriteria, $diagnosisData);
                             }
+                        }
+
+                        if (!empty($diagnosis_comments)) {
+                            $diagnosisCommentData = [
+                                'appointment_id' => $appointment_id,
+                                'comments' => $diagnosis_comments
+                            ];
+                            $this->diagnosisCommentsRepository->updateOrCreate($criteria, $diagnosisCommentData);
                         }
                     }
 
@@ -717,6 +726,16 @@ class MedicalAppointmentController extends Controller
             } else {
                 return response()->json(['message' => 'Invalid request'], 400);
             }
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
+    public function getAppointmentConsultationData($appointment_id)
+    {
+        try {
+            $data = $this->medicalAppointmentRepository->getPostConsulationData($appointment_id);
+            return response()->json($data, 200);
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }

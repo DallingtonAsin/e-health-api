@@ -48,8 +48,48 @@ class MedicalAppointment extends Model
         return $this->hasOne(MeetingToken::class, 'appointment_id');
     }
 
-    public function medicalHistory()
+    public function patientMedicalHistory()
     {
         return $this->hasOne(PatientMedicalHistory::class, 'appointment_id');
+    }
+
+    public function medicalHistory()
+    {
+        return $this->hasOne(MedicalHistory::class, 'appointment_id');
+    }
+
+    public function labTests()
+    {
+        return $this->hasMany(LabTest::class, 'appointment_id');
+    }
+
+    public function imageTests()
+    {
+        return $this->hasMany(imageTest::class, 'appointment_id');
+    }
+
+    public function otherTests()
+    {
+        return $this->hasOne(otherTest::class, 'appointment_id');
+    }
+
+    public function diagnosis()
+    {
+        return $this->hasMany(Diagnosis::class, 'appointment_id');
+    }
+
+    public function diagnosisComments()
+    {
+        return $this->hasOne(DiagnosisComment::class, 'appointment_id');
+    }
+
+    public function prescriptions()
+    {
+        return $this->hasMany(Prescription::class, 'appointment_id');
+    }
+
+    public function treatmentPlan()
+    {
+        return $this->hasOne(TreatmentPlan::class, 'appointment_id');
     }
 }

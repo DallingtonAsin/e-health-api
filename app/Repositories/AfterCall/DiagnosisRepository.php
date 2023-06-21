@@ -30,7 +30,7 @@ class DiagnosisRepository
 
     public function get()
     {
-        $diagnoses = $this->diagnosis->select(['id', 'appointment_id', 'icd_code_id', 'comments', 'diagnosis_date'])->orderBy('id', 'asc');
+        $diagnoses = $this->diagnosis->select(['id', 'appointment_id', 'icd_code_id', 'diagnosis_date'])->orderBy('id', 'asc');
         return $diagnoses->get();
     }
 
