@@ -184,7 +184,7 @@ class MedicalAppointmentRepository
 
     public function getPostConsulationData($appointment_id)
     {
-        $appointment = $this->medicalAppointment->select(['id', 'appointment_number'])->where('id', $appointment_id)->with(['medicalHistory' => function ($query) {
+        $appointment = $this->medicalAppointment->select(['id', 'appointment_number', 'is_draft'])->where('id', $appointment_id)->with(['medicalHistory' => function ($query) {
             $query->select(['appointment_id', 'presenting_complaint', 'past_medical_history', 'drug_allergies', 'findings']);
         }])->with(['labTests' => function ($query) {
             $query->select(['appointment_id', 'labtest_category_id', 'findings']);
