@@ -92,4 +92,9 @@ class MedicalAppointment extends Model
     {
         return $this->hasOne(TreatmentPlan::class, 'appointment_id');
     }
+
+    public function labTestDocuments()
+    {
+        return $this->hasMany(LabTestDocument::class, 'appointment_id');
+    }
 }

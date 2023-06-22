@@ -131,7 +131,7 @@ Route::group(['prefix' => 'appointments'], function () {
     });
 
     Route::middleware(['auth:doctor'])->group(function () {
-        Route::put('{appointment_id}/complete', [MedicalAppointmentController::class, 'completeAppointment']);
+        Route::post('{appointment_id}/complete', [MedicalAppointmentController::class, 'completeAppointment']);
         Route::put('confirm', [MedicalAppointmentController::class, 'confirmAppointment']);
         Route::put('cancel', [MedicalAppointmentController::class, 'cancelAppointment']);
         Route::get('{appointment_id}/post-consultation-data', [MedicalAppointmentController::class, 'getAppointmentConsultationData']);
