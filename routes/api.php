@@ -11,7 +11,7 @@ use App\Http\Controllers\Appointments\AppointmentTypeController;
 use App\Http\Controllers\Appointments\MedicalAppointmentController;
 use App\Http\Controllers\Medical\DrugController;
 use App\Http\Controllers\Medical\MedicalSpecialtyController;
-use App\Http\Controllers\Medical\MedicalHistoryController;
+use App\Http\Controllers\Medical\PatientMedicalHistoryController;
 use App\Http\Controllers\Medical\MedicalFacilityController;
 use App\Http\Controllers\Emails\MailController;
 use App\Http\Controllers\Languages\LanguageController;
@@ -105,7 +105,7 @@ Route::middleware(['auth:patient,doctor', 'patient.or.doctor'])->group(function 
     Route::resource('drugs', DrugController::class);
     Route::resource('company-information', CompanyInfoController::class);
     Route::get('appointments/meeting/{appointment_id}', [MedicalAppointmentController::class, 'getAppointmentMeetingDetails']);
-    Route::get('medical-history/patient/{patient_id}', [MedicalHistoryController::class, 'getPatientMedicalHistory']);
+    Route::get('medical-history/patient/{patient_id}', [PatientMedicalHistoryController::class, 'getPatientMedicalHistory']);
     Route::get('prescription-drugs', [DrugController::class, 'getPrescriptionDrugs']);
 });
 
