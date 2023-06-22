@@ -21,6 +21,7 @@ use App\Repositories\AdministrationRouteRepository;
 
 use App\Repositories\AfterCall\MedicalHistoryRepository;
 use App\Repositories\AfterCall\Tests\LabTestRepository;
+use App\Repositories\AfterCall\Tests\LabTestDocumentRepository;
 use App\Repositories\AfterCall\Tests\ImageTestRepository;
 use App\Repositories\AfterCall\Tests\OtherTestRepository;
 use App\Repositories\AfterCall\DiagnosisRepository;
@@ -31,6 +32,7 @@ use App\Repositories\AfterCall\TreatmentPlanRepository;
 use App\Services\NotificationService;
 use App\Services\PushNotificationService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class MedicalAppointmentController extends Controller
 {
@@ -40,7 +42,7 @@ class MedicalAppointmentController extends Controller
     protected $labTestCategoryRepository, $imageTestCategoryRepository, $icd10CodeRepository;
 
     protected $medicalHistoryRepository, $labTestRepository, $imageTestRepository, $otherTestRepository, $diagnosisRepository, $diagnosisCommentsRepository;
-    protected $drugRepository, $adminRouteRepository, $prescriptionRepository, $treatmentPlanRepository;
+    protected $drugRepository, $adminRouteRepository, $prescriptionRepository, $treatmentPlanRepository, $labTestDocumentRepository;
     protected $meetingTokenRepository, $notificationService, $pushNotificationService;
 
     public function __construct(
@@ -59,6 +61,7 @@ class MedicalAppointmentController extends Controller
         AdministrationRouteRepository $adminRouteRepository,
 
         LabTestRepository $labTestRepository,
+        LabTestDocumentRepository $labTestDocumentRepository,
         ImageTestRepository $imageTestRepository,
         OtherTestRepository $otherTestRepository,
 
@@ -86,6 +89,7 @@ class MedicalAppointmentController extends Controller
 
         $this->medicalHistoryRepository = $medicalHistoryRepository;
         $this->labTestRepository = $labTestRepository;
+        $this->labTestDocumentRepository = $labTestDocumentRepository;
         $this->imageTestRepository = $imageTestRepository;
         $this->otherTestRepository = $otherTestRepository;
         $this->diagnosisRepository = $diagnosisRepository;
@@ -380,9 +384,12 @@ class MedicalAppointmentController extends Controller
     public function completeAppointment(Request $request, $appointment_id)
     {
 
-        $validator = Validator::make($request->all(), [
+
+        $payload = json_decode($request->payload, true);
+        $validator = Validator::make($payload, [
             'appointmentId' => 'required|exists:medical_appointments,id',
             'isDraft' => 'required|boolean',
+            'historyData' => 'required|array',
             'historyData.presenting_complaint' => 'required',
             'historyData.past_medical_history' => 'required',
             'historyData.drug_allergies' => 'required',
@@ -400,6 +407,7 @@ class MedicalAppointmentController extends Controller
             ],
             'labTestData.labTests.*.name' => 'required|string',
             'labTestData.labTests.*.findings' => 'required|string',
+
             'labTestData.imageTests' => [
                 'nullable',
                 'array',
@@ -429,11 +437,17 @@ class MedicalAppointmentController extends Controller
             'treatmentData.drugs.*.quantity' => 'required|integer',
             'treatmentData.drugs.*.route_of_admin' => 'required|string',
             'treatmentData.treatmentPlan' => 'required|string'
+
+        ]);
+
+        $fileValidator = Validator::make($request->all(), [
+            'labTestDocuments' => 'sometimes|array',
+            'labTestDocuments.*' => 'file|mimes:pdf,jpg,png|max:2048'
         ]);
 
         try {
 
-            if ($validator->fails()) {
+            if ($validator->fails() || $fileValidator->fails()) {
                 $message = $validator->errors()->all();
                 return Helper::sendFailedHttpResponse($message);
             } else {
@@ -443,14 +457,14 @@ class MedicalAppointmentController extends Controller
 
                 if ($appointment->is_draft) {
 
-                    $appointment_id = $request->appointmentId;
-                    $isDraft = $request->isDraft;
+                    $appointment_id = $payload['appointmentId'];
+                    $isDraft = $payload['isDraft'];
                     $criteria = [
                         'appointment_id' => $appointment_id
                     ];
 
                     // Process history data
-                    $historyData = $request->input('historyData');
+                    $historyData = $payload['historyData'];
                     $presenting_complaint = $historyData['presenting_complaint'];
                     $past_medical_history = $historyData['past_medical_history'];
                     $drug_allergies = $historyData['drug_allergies'];
@@ -467,7 +481,7 @@ class MedicalAppointmentController extends Controller
 
 
                     // Process Labtest data
-                    $labTestData = $request->input('labTestData');
+                    $labTestData = $payload['labTestData'];
 
                     if (isset($labTestData)) {
                         $otherTests = $labTestData['otherTests'];
@@ -523,7 +537,7 @@ class MedicalAppointmentController extends Controller
                     }
 
                     // Diagnosis data
-                    $diagnosisData = $request->input('diagnosisData');
+                    $diagnosisData = $payload['diagnosisData'];
                     if (isset($diagnosisData)) {
                         $icd10Codes = $diagnosisData['icd10Codes'];
                         $diagnosis_comments = $diagnosisData['comments'];
@@ -562,7 +576,7 @@ class MedicalAppointmentController extends Controller
                     }
 
                     // Treatment data
-                    $treatmentData = $request->input('treatmentData');
+                    $treatmentData = $payload['treatmentData'];
                     if (isset($treatmentData)) {
                         $drugs = $treatmentData['drugs'];
                         $treatmentPlan = $treatmentData['treatmentPlan'];
@@ -601,6 +615,32 @@ class MedicalAppointmentController extends Controller
                                 'treatment_plan' => $treatmentPlan
                             ];
                             $this->treatmentPlanRepository->updateOrCreate($criteria, $treatmentManagmentData);
+                        }
+                    }
+
+                    // upload labtest documents 
+                    if ($request->hasFile('labTestDocuments')) {
+                        foreach ($request->file('labTestDocuments') as $index => $file) {
+                            $file_extension = $file->getClientOriginalExtension();
+                            $file_name = $appointment->appointment_number . '_' . $index . '.' . $file_extension;
+
+                            $doesFileExist = $this->labTestDocumentRepository->doesFileExist($appointment_id, $file_name);
+                            if ($doesFileExist) {
+                                if (Storage::disk('public')->exists($file_name)) {
+                                    Storage::disk('public')->delete($file_name);
+                                    $this->labTestDocumentRepository->deleteFile($appointment_id, $file_name);
+                                }
+                            }
+                            $file_path = $file->storeAs('documents/labtests', $file_name, 'public');
+                            $is_image = in_array($file_extension, ['jpg', 'jpeg', 'png', 'gif']);
+
+                            $fileData = [
+                                'appointment_id' => $appointment_id,
+                                'file_path' => $file_path,
+                                'type' => $file_extension,
+                                'is_image' => $is_image
+                            ];
+                            $this->labTestDocumentRepository->create($fileData);
                         }
                     }
 

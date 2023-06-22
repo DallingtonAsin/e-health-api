@@ -53,7 +53,7 @@ class PatientSeeder extends Seeder
             "first_name" => $this->faker->firstName(),
             "last_name" => $this->faker->lastName(),
             "country_code" => '+256',
-            "phone_number" => "774014727",
+            "phone_number" => "774014728",
             "email" => $this->faker->email,
             "address" => $this->faker->streetAddress,
             "gender" => $this->faker->randomElement(["Male", "Female"]),

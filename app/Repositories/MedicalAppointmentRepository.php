@@ -200,6 +200,8 @@ class MedicalAppointmentRepository
             $query->select(['appointment_id', 'drug_id', 'dosage', 'admin_route_id', 'duration', 'quantity', 'instructions']);
         }])->with(['treatmentPlan' => function ($query) {
             $query->select(['appointment_id', 'treatment_plan']);
+        }])->with(['labTestDocuments' => function ($query) {
+            $query->select(['appointment_id', 'file_path', 'type', 'is_image as isImage']);
         }])->first();
 
         $labTests = $appointment->labTests;
@@ -247,6 +249,16 @@ class MedicalAppointmentRepository
                 unset($prescription->admin_route_id);
                 unset($prescription->drug);
                 unset($prescription->adminRoute);
+            }
+        }
+
+        $labTestDocuments = $appointment->labTestDocuments;
+        if (!empty($labTestDocuments)) {
+            foreach ($labTestDocuments as $labTestDocument) {
+                $labTestDocument->uri = $labTestDocument->filePath();
+                $labTestDocument->isOnline = true;
+                unset($labTestDocument->appointment_id);
+                unset($labTestDocument->file_path);
             }
         }
 
