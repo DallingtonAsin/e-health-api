@@ -111,6 +111,7 @@ Route::middleware(['auth:patient,doctor', 'patient.or.doctor'])->group(function 
 Route::group(['prefix' => 'doctor', 'middleware' => ['auth:doctor']], function () {
     Route::resource('schedule', DoctorScheduleController::class);
     Route::get('availability/{doctor_id}', [DoctorScheduleController::class, 'checkDoctorAvailability']);
+    Route::get('availability/windows/{doctor_id}', [DoctorScheduleController::class, 'getDoctorAvailabilityWindows']);
     Route::get('{doctor_id}/pending', [MedicalAppointmentController::class, 'getDoctorPendingAppointments']);
     Route::get('{doctor_id}/confirmed', [MedicalAppointmentController::class, 'getDoctorConfirmedAppointments']);
     Route::get('{doctor_id}/completed', [MedicalAppointmentController::class, 'getDoctorCompletedAppointments']);
