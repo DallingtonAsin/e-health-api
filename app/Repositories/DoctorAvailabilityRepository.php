@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\DoctorAvailability;
+use Carbon\Carbon;
 
 class DoctorAvailabilityRepository
 {
@@ -68,5 +69,23 @@ class DoctorAvailabilityRepository
     {
         return $this->availability->where('id', '!=', $id)->where('doctor_id', $doctor_id)->where('date', $date)
             ->where('start_time', $start_time)->where('end_time', $end_time)->exists();
+    }
+
+    public function checkDoctorAvailability($doctorId)
+    {
+        $availability = $this->getDoctorAvailability($doctorId);
+        if ($availability->isEmpty()) {
+            throw new \Exception('Doctor has not set an availability schedule.');
+        }
+        return $availability;
+    }
+
+    public function getDoctorAvailability($doctorId)
+    {
+        $today = Carbon::today();
+        $availability = $this->availability->select(['id', 'doctor_id', 'date', 'start_time', 'end_time'])->where('doctor_id', $doctorId)
+            ->whereDate('date', '>=', $today)
+            ->orderBy('date', 'asc')->get();
+        return $availability;
     }
 }

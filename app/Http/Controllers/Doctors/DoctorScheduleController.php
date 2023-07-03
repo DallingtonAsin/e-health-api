@@ -110,6 +110,21 @@ class DoctorScheduleController extends Controller
         }
     }
 
+    public function checkDoctorAvailability($doctor_id)
+    {
+        try {
+
+            $availability = $this->doctorAvailabilityRepository->getDoctorAvailability($doctor_id);
+            if ($availability->isEmpty()) {
+                return Helper::sendFailedHttpResponse('Doctor cannot be booked as yet.');
+            } else {
+                return response($availability, 200);
+            }
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
     /**
      * Show the form for editing the specified resource.
      *
