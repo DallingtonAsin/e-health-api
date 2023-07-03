@@ -199,8 +199,9 @@ class MedicalAppointmentController extends Controller
                 $past_medical_history = $request->input('past_medical_history');
                 $current_treatment = $request->input('current_treatment');
 
+                $converted_24hr_time = Carbon::createFromFormat('h:i A', $time)->format('H:i');
                 $appointment_type = $this->appointmentTypeRepository->getAppointmentTypeByName($appointment_type_name);
-                $appointment_date =  Carbon::createFromFormat('Y-m-d H:i', $date . ' ' . $time);
+                $appointment_date =  Carbon::createFromFormat('Y-m-d H:i', $date . ' ' . $converted_24hr_time);
                 $appointment_type_id = $appointment_type->id;
                 $exists = $this->medicalAppointmentRepository->checkIfAppointmentExists($patient_id, $doctor_id, $appointment_type_id, $appointment_date);
 

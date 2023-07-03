@@ -96,7 +96,7 @@ class MedicalDoctorRepository
 
                 $time = $startTime;
                 while ($time <= $endTime) {
-                    $timeSlots[$date][] = date('H:i', $time);
+                    $timeSlots[$date][] = date('h:i A', $time);
                     $time += 60 * 30;
                 }
             }
