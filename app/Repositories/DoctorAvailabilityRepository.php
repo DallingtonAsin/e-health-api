@@ -36,7 +36,7 @@ class DoctorAvailabilityRepository
                 ->select(['id', 'doctor_id', 'date', 'start_time', 'end_time'])->orderBy('date', 'desc')->orderBy('start_time', 'desc')->get();
         }
 
-        return $this->availability->select(['id', 'doctor_id', 'date', 'start_time', 'end_time'])->orderBy('date', 'desc')->get();
+        return $this->availability->select(['id', 'doctor_id', 'date', 'start_time', 'end_time', 'is_deleted'])->where('is_deleted', false)->orderBy('date', 'desc')->get();
     }
 
     public function update($id, $availabilityData)
@@ -83,8 +83,10 @@ class DoctorAvailabilityRepository
     public function getDoctorAvailability($doctorId)
     {
         $today = Carbon::today();
-        $availability = $this->availability->select(['id', 'doctor_id', 'date', 'start_time', 'end_time'])->where('doctor_id', $doctorId)
+        $availability = $this->availability->select(['id', 'doctor_id', 'date', 'start_time', 'end_time', 'is_deleted'])
+            ->where('doctor_id', $doctorId)
             ->whereDate('date', '>=', $today)
+            ->where('is_deleted', false)
             ->orderBy('date', 'asc')->get();
         return $availability;
     }
@@ -93,6 +95,31 @@ class DoctorAvailabilityRepository
     {
         $conflictingCount = $this->availability->where('doctor_id', $doctorId)
             ->where('date', $date)
+            ->where('is_deleted', false)
+            ->where(function ($query) use ($startTime, $endTime) {
+                $query->where(function ($subQuery) use ($startTime, $endTime) {
+                    $subQuery->where('start_time', '>=', $startTime)
+                        ->where('start_time', '<', $endTime);
+                })->orWhere(function ($subQuery) use ($startTime, $endTime) {
+                    $subQuery->where('end_time', '>', $startTime)
+                        ->where('end_time', '<=', $endTime);
+                })->orWhere(function ($subQuery) use ($startTime, $endTime) {
+                    $subQuery->where('start_time', '<=', $startTime)
+                        ->where('end_time', '>=', $endTime);
+                });
+            })
+            ->count();
+
+        return $conflictingCount > 0;
+    }
+
+    public function checkForTimeOverlapOnUpdate($id, $doctorId, $date, $startTime, $endTime)
+    {
+        $conflictingCount = $this->availability
+            ->where('id', "!=", $id)
+            ->where('doctor_id', $doctorId)
+            ->where('date', $date)
+            ->where('is_deleted', false)
             ->where(function ($query) use ($startTime, $endTime) {
                 $query->where(function ($subQuery) use ($startTime, $endTime) {
                     $subQuery->where('start_time', '>=', $startTime)
@@ -116,6 +143,7 @@ class DoctorAvailabilityRepository
 
         $availability = $this->availability->where('doctor_id', $doctorId)
             ->where('date', '>=', $today)
+            ->where('is_deleted', false)
             ->orderBy('date')
             ->orderByRaw("TIME_FORMAT(start_time, '%H:%i')")
             ->get();
