@@ -25,7 +25,13 @@ class DoctorScheduleController extends Controller
      */
     public function index()
     {
-        //
+        try {
+            $doctor_id = auth('doctor')->user()->id;
+            $doctor_schedule = $this->doctorAvailabilityRepository->get(null, $doctor_id);
+            return response()->json($doctor_schedule, 200);
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
     }
 
 
@@ -67,8 +73,20 @@ class DoctorScheduleController extends Controller
                 $start_time = $request->input('start_time');
                 $end_time = $request->input('end_time');
 
+                $diffMinutes = (strtotime($end_time) - strtotime($start_time)) / 60;
+                if ($diffMinutes < 30) {
+                    return Helper::sendFailedHttpResponse("Time difference between start time and end time should be atleast 30 minutes");
+                }
+
                 $start_time = date('H:i', strtotime($start_time));
                 $end_time = date('H:i', strtotime($end_time));
+
+                foreach ($dates as $date) {
+                    $overlapExists = $this->doctorAvailabilityRepository->checkForTimeOverlap($doctor_id, $date, $start_time, $end_time);
+                    if ($overlapExists) {
+                        return Helper::sendFailedHttpResponse("Time conflict detected on " . $date . " for specified time range " . $start_time . "-" . $end_time . "");
+                    }
+                }
 
                 $appointmentDates = collect($dates)->map(function ($date) use ($doctor_id, $start_time, $end_time) {
                     return [
@@ -80,14 +98,12 @@ class DoctorScheduleController extends Controller
                 });
 
                 $appointmentDates->each(function ($data) {
-                    $criteria = [
-                        'doctor_id' => $data['doctor_id'],
-                        'date' => $data['date']
-                    ];
-                    $data = $this->doctorAvailabilityRepository->updateOrCreateSchedule($criteria, $data);
+                    $criteria = $data;
+                    $data['is_deleted'] = false;
+                    $this->doctorAvailabilityRepository->updateOrCreateSchedule($criteria, $data);
                 });
 
-                return response()->json(['message' => 'Your schedule has been added successfully'], 200);
+                return response()->json(['message' => 'Your availability has been updated successfully'], 200);
             }
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -105,6 +121,31 @@ class DoctorScheduleController extends Controller
         try {
             $doctor_schedule = $this->doctorAvailabilityRepository->get(null, $doctor_id);
             return response($doctor_schedule, 200);
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
+    public function checkDoctorAvailability($doctor_id)
+    {
+        try {
+            $availability = $this->doctorAvailabilityRepository->getDoctorAvailability($doctor_id);
+            if ($availability->isEmpty()) {
+                return Helper::sendFailedHttpResponse('Doctor cannot be booked as yet.');
+            } else {
+                return response($availability, 200);
+            }
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
+
+    public function getDoctorAvailabilityWindows($doctor_id)
+    {
+        try {
+            $availabilityWindows = $this->doctorAvailabilityRepository->getDoctorAvailabilityWindows($doctor_id);
+            return response($availabilityWindows, 200);
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
@@ -132,7 +173,8 @@ class DoctorScheduleController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'doctor_id' => 'required|exists:medical_doctors,id',
-            'date' => 'required|date',
+            'dates' => ['required', 'array'],
+            'dates.*' => ['date_format:Y-m-d'],
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time'
         ]);
@@ -145,32 +187,39 @@ class DoctorScheduleController extends Controller
             } else {
 
                 $doctor_id = $request->input('doctor_id');
-                $date = $request->input('date');
+                $dates = $request->input('dates');
                 $start_time = $request->input('start_time');
                 $end_time = $request->input('end_time');
 
-                $date = date('Y-m-d', strtotime($date));
+                $diffMinutes = (strtotime($end_time) - strtotime($start_time)) / 60;
+                if ($diffMinutes < 30) {
+                    return Helper::sendFailedHttpResponse("Time difference between start time and end time should be atleast 30 minutes");
+                }
+
                 $start_time = date('H:i', strtotime($start_time));
                 $end_time = date('H:i', strtotime($end_time));
 
-                $exists = $this->doctorAvailabilityRepository->checkIfDoctorScheduleExistsOnUpdate($id, $doctor_id, $date, $start_time, $end_time);
+                foreach ($dates as $date) {
+                    $overlapExists = $this->doctorAvailabilityRepository->checkForTimeOverlapOnUpdate($id, $doctor_id, $date, $start_time, $end_time);
+                    if ($overlapExists) {
+                        return Helper::sendFailedHttpResponse("Time conflict detected on " . $date . " for specified time range " . $start_time . "-" . $end_time . "");
+                    }
+                }
 
-                if ($exists) {
-                    return response(['error' => 'You have already added this to your calendar'], 400);
-                } else {
-
-                    $data = [
+                $appointmentDates = collect($dates)->map(function ($date) use ($doctor_id, $start_time, $end_time) {
+                    return [
                         'doctor_id' => $doctor_id,
                         'date' => $date,
                         'start_time' => $start_time,
                         'end_time' => $end_time
                     ];
+                });
 
-                    $data = $this->doctorAvailabilityRepository->update($id, $data);
-                    $data->makeHidden(['id', 'created_at', 'updated_at']);
+                $appointmentDates->each(function ($data) use ($id) {
+                    $this->doctorAvailabilityRepository->update($id, $data);
+                });
 
-                    return response()->json(['message' => 'Your schedule has been updated successfully'], 200);
-                }
+                return response()->json(['message' => 'Your availability has been updated successfully'], 200);
             }
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -185,6 +234,23 @@ class DoctorScheduleController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $validator = Validator::make(["id" => $id], [
+            'id' => 'required|exists:doctor_availability,id'
+        ]);
+
+        try {
+
+            if ($validator->fails()) {
+                $message = $validator->errors()->all();
+                return Helper::sendFailedHttpResponse($message);
+            } else {
+                $data = ['is_deleted' => true];
+                $res = $this->doctorAvailabilityRepository->update($id, $data);
+                $res->makeHidden(['id', 'created_at', 'updated_at']);
+                return response()->json(['message' => 'Your schedule has been updated successfully'], 200);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }

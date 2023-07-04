@@ -39,11 +39,7 @@ class MedicalDoctorRepository
     public function get($id = null, $specialty = null, $patient_id = null, $is_online = null)
     {
 
-        $today = Carbon::today();
-        $doctors = $this->medicalDoctor->where('is_verified', 1)->withCount('ratings')->with(['availability' => function ($query) use ($today) {
-            $query->where('date', '>=', $today)->orderBy('date', 'asc');
-        }]);
-
+        $doctors = $this->medicalDoctor->where('is_verified', 1)->withCount('ratings');
         if ($id) {
             $doctors = $doctors->where('id', '=', $id);
         }
@@ -82,29 +78,6 @@ class MedicalDoctorRepository
                 $doctor['facility'] = $medicalFacility->name;
                 $doctor['specialty'] = $medicalSpecialty->name;
             }
-
-            $doctor->availability->makeHidden(['id', 'created_at', 'updated_at']);
-
-            $timeSlots = [];
-            $dates = [];
-
-            foreach ($doctor->availability as $slot) {
-                $date = $slot->date;
-                array_push($dates, $date);
-                $startTime = strtotime($slot->start_time);
-                $endTime = strtotime($slot->end_time);
-
-                $time = $startTime;
-                while ($time <= $endTime) {
-                    $timeSlots[$date][] = date('H:i', $time);
-                    $time += 60 * 30;
-                }
-            }
-
-            unset($doctor->availability);
-
-            $doctor['schedule_dates'] = $dates;
-            $doctor['schedule'] = $timeSlots;
         }
 
         $sortedDoctors = collect($doctors)

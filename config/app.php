@@ -15,12 +15,10 @@ return [
 
     'name' => env('APP_NAME', 'E-HEALTH'),
     'currency' => env('APP_CURRENCY', 'UGX'),
+    'company_name' => env('COMPANY_NAME', 'Vastel'),
 
-
-    'AfricasTalking_Sandbox_Username' => env('AFRICASTALKING_SANDBOX_USERNAME'),
-    'AfricasTalking_Sandbox_ApiKey' => env('AFRICASTALKING_SANDBOX_APIKEY'),
-    'AfricasTalking_Live_Username' => env('AFRICASTALKING_LIVE_USERNAME'),
-    'AfricasTalking_Live_ApiKey' => env('AFRICASTALKING_LIVE_APIKEY'),
+    'AfricasTalking_ApiKey' => env('AFRICASTALKING_API_KEY'),
+    'AfricasTalking_Username' => env('AFRICASTALKING_USERNAME'),
 
     /*
     |--------------------------------------------------------------------------
@@ -33,12 +31,12 @@ return [
     |
     */
 
-    'env' => env('APP_ENV', 'production'),
+    'env' => env('APP_ENV', 'local'),
 
-    'AGORA_APP_ID' => env('AGORA_APP_ID', '68da267731be44fda2cc7106d5c4db12'),
-    'AGORA_CHANNEL_NAME' => env('AGORA_CHANNEL_NAME', 'Telemedicine'),
-    'AGORA_APP_CERTIFICATE' => env('AGORA_APP_CERTIFICATE', 'b16dfa2745704076b220e4d30709a1c9'),
-    'AGORA_TEMP_TOKEN' => env('AGORA_TEMP_TOKEN', '007eJxTYJCSa5h4I0CYUzNw2s9pronvb3UEPVn17z/n3SlTbthaMs9SYDCzSEk0MjM3NzZMSjUxSQNykpPNDQ3MUkyTTVKSDI2OvfuT3BDIyHC/tIGVkQECQXxBBt/U1JLMvPSg/Pzc4JKi1MRcBgYAZ84mlw=='),
+    'AGORA_APP_ID' => env('AGORA_APP_ID'),
+    'AGORA_CHANNEL_NAME' => env('AGORA_CHANNEL_NAME'),
+    'AGORA_APP_CERTIFICATE' => env('AGORA_APP_CERTIFICATE'),
+    'AGORA_TEMP_TOKEN' => env('AGORA_TEMP_TOKEN'),
 
     /*
     |--------------------------------------------------------------------------
