@@ -57,7 +57,7 @@ class SharedHelper
         }
     }
 
-    public static function generateUniqueNumber($table, $column = null, $length, $prefix)
+    public static function generateUniqueNumber($table, $length, $prefix, $column = null)
     {
       try {
   

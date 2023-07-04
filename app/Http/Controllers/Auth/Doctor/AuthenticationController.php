@@ -142,7 +142,7 @@ class AuthenticationController extends Controller
             $doctor_id = $doctor->id;
             $otp = $this->smsService->generateNumericOTP(6);
             $phone_number = $doctor->country_code . '' . $doctor->phone_number;
-            // $this->smsService->sendOTP($phone_number, $otp);
+            $this->smsService->sendOTP($phone_number, $otp);
             $this->doctorRepository->update($doctor_id, ["otp" => $otp]);
             $doctor = $this->doctorRepository->generateAccessToken($doctor_id);
 

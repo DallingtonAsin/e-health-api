@@ -66,7 +66,7 @@ class MedicalAppointmentRepository
 
     public function generateAppointmentNumber()
     {
-        return Helper::generateUniqueNumber('medical_appointments', 'appointment_number', 10, 'APT');
+        return Helper::generateUniqueNumber('medical_appointments', 10, 'APT', 'appointment_number');
     }
 
     public function getMedicalAppointments($id = null, $patient_id = null, $status = null, $doctor_id = null, $is_doctor_notified = null)
@@ -109,10 +109,16 @@ class MedicalAppointmentRepository
             ->map(function ($appointment) {
                 $is_online = $appointment->isOnline();
                 $appointment->is_online = $appointment->isOnline();
-                $is_expired = $this->isAppointmentExpired($appointment->id);
-                $appointment->is_expired = $is_expired;
-                $appointment->status = $is_expired ? 'Expired' : $appointment->status;
 
+                $closedStatuses = ["completed", "cancelled"];
+                if (!in_array($appointment->status, $closedStatuses)) {
+                    $is_expired = $this->isAppointmentExpired($appointment->id);
+                    $appointment->status = $is_expired ? 'Expired' : $appointment->status;
+                    $appointment->is_expired = $is_expired;
+                } else {
+                    $appointment->is_expired = false;
+                }
+                
                 if ($is_online) {
                     if (!empty($appointment->meetingAccess->appointment_id)) {
                         unset($appointment->meetingAccess->appointment_id);
@@ -229,7 +235,7 @@ class MedicalAppointmentRepository
         $diagnosisIcdCodes = [];
         if (!empty($diagnoses)) {
             foreach ($diagnoses as $diagnosis) {
-                $diagnosis_name = trim($diagnosis->Icd10Code->category_code). ' '.trim($diagnosis->Icd10Code->abbreviated_description);
+                $diagnosis_name = trim($diagnosis->Icd10Code->category_code) . ' ' . trim($diagnosis->Icd10Code->abbreviated_description);
                 unset($diagnosis->appointment_id);
                 unset($diagnosis->icd_code_id);
                 unset($diagnosis->Icd10Code);
