@@ -27,16 +27,24 @@ class DoctorAvailabilityRepository
     public function get($id = null, $doctor_id)
     {
 
+        $schedule = $this->availability;
         if ($id) {
-            return $this->availability->find($id);
+            $schedule =  $schedule->where('id', $id);
         }
 
         if ($doctor_id) {
-            return $this->availability->where('doctor_id', $doctor_id)
-                ->select(['id', 'doctor_id', 'date', 'start_time', 'end_time'])->orderBy('date', 'desc')->orderBy('start_time', 'desc')->get();
+            $schedule = $this->availability->where('doctor_id', $doctor_id);
         }
 
-        return $this->availability->select(['id', 'doctor_id', 'date', 'start_time', 'end_time', 'is_deleted'])->where('is_deleted', false)->orderBy('date', 'desc')->get();
+        $schedule = $schedule->select(['id', 'doctor_id', 'date', 'start_time', 'end_time', 'is_deleted'])->where('is_deleted', false)->orderBy('date', 'desc')->orderBy('start_time', 'desc')->get();
+        if (!empty($schedule)) {
+            $schedule = $schedule->map(function ($avail) {
+                $avail->start_time = Carbon::createFromFormat('H:i:s', $avail->start_time)->format('H:i');
+                $avail->end_time = Carbon::createFromFormat('H:i:s', $avail->end_time)->format('H:i');
+                return $avail;
+            });
+        }
+        return $schedule;
     }
 
     public function update($id, $availabilityData)

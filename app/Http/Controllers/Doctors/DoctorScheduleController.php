@@ -25,7 +25,13 @@ class DoctorScheduleController extends Controller
      */
     public function index()
     {
-        //
+        try {
+            $doctor_id = auth('doctor')->user()->id;
+            $doctor_schedule = $this->doctorAvailabilityRepository->get(null, $doctor_id);
+            return response()->json($doctor_schedule, 200);
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
     }
 
 
