@@ -33,6 +33,7 @@ use App\Services\NotificationService;
 use App\Services\PushNotificationService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Arr;
 
 class MedicalAppointmentController extends Controller
 {
@@ -385,17 +386,40 @@ class MedicalAppointmentController extends Controller
     public function completeAppointment(Request $request, $appointment_id)
     {
 
-
         $payload = json_decode($request->payload, true);
-        $validator = Validator::make($payload, [
-            'appointmentId' => 'required|exists:medical_appointments,id',
-            'isDraft' => 'required|boolean',
-            'historyData' => 'required|array',
-            'historyData.presenting_complaint' => 'required',
-            'historyData.past_medical_history' => 'required',
-            'historyData.drug_allergies' => 'required',
-            'historyData.findings' => 'required',
+        if (!Arr::has($payload, 'isDraft')) {
+            return Helper::sendFailedHttpResponse('Please select if you want to save as draft or not');
+        }
+        $isDraft = $payload['isDraft'];
+        if (!in_array($isDraft, [true, false], true)) {
+            return Helper::sendFailedHttpResponse('isDraft must be either true or false');
+        }
 
+        $mandatoryRules = [
+            'appointmentId' => 'required|exists:medical_appointments,id',
+            'isDraft' => 'required|boolean'
+        ];
+
+
+        if ($isDraft) {
+            $historyDataRules = [
+                'historyData' => 'sometimes|nullable|array',
+                'historyData.presenting_complaint' => 'sometimes|nullable|string',
+                'historyData.past_medical_history' => 'sometimes|nullable|string',
+                'historyData.drug_allergies' => 'sometimes|nullable|string',
+                'historyData.findings' => 'sometimes|nullable|string',
+            ];
+        } else {
+            $historyDataRules = [
+                'historyData' => 'required|array',
+                'historyData.presenting_complaint' => 'required',
+                'historyData.past_medical_history' => 'required',
+                'historyData.drug_allergies' => 'required',
+                'historyData.findings' => 'required',
+            ];
+        }
+
+        $medicalTestRules = [
             'labTestData' => 'sometimes|required|array',
             'labTestData.labTests' => [
                 'nullable',
@@ -426,9 +450,20 @@ class MedicalAppointmentController extends Controller
 
             'diagnosisData' => 'nullable|array',
             'diagnosisData.icd10Codes.*' => 'required|string',
-            'diagnosisData.icd10Codes' => 'sometimes|nullable|array',
-            'diagnosisData.comments' => 'required|string',
+            'diagnosisData.icd10Codes' => 'sometimes|nullable|array'
+        ];
 
+        if ($isDraft) {
+            $diagnosisCommentsRules = [
+                'diagnosisData.comments' => 'sometimes|nullable|string',
+            ];
+        } else {
+            $diagnosisCommentsRules = [
+                'diagnosisData.comments' => 'required|string',
+            ];
+        }
+
+        $treatmentDataRules = [
             'treatmentData' => 'nullable|array',
             'treatmentData.drugs' => 'sometimes|nullable|array',
             'treatmentData.drugs.*.name' => 'required|string',
@@ -437,9 +472,11 @@ class MedicalAppointmentController extends Controller
             'treatmentData.drugs.*.instructions' => 'required|string',
             'treatmentData.drugs.*.quantity' => 'required|integer',
             'treatmentData.drugs.*.route_of_admin' => 'required|string',
-            'treatmentData.treatmentPlan' => 'required|string'
+            'treatmentData.treatmentPlan' => 'sometimes|nullable|string'
+        ];
 
-        ]);
+        $rules = array_merge($mandatoryRules, $historyDataRules, $medicalTestRules, $diagnosisCommentsRules, $treatmentDataRules);
+        $validator = Validator::make($payload, $rules);
 
         $fileValidator = Validator::make($request->all(), [
             'labTestDocuments' => 'sometimes|array',
@@ -459,7 +496,6 @@ class MedicalAppointmentController extends Controller
                 if ($appointment->is_draft) {
 
                     $appointment_id = $payload['appointmentId'];
-                    $isDraft = $payload['isDraft'];
                     $criteria = [
                         'appointment_id' => $appointment_id
                     ];
