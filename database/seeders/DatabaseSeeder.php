@@ -27,7 +27,7 @@ class DatabaseSeeder extends Seeder
             DrugSeeder::class,
             DoctorRatingSeeder::class,
             IcdCodeCategorySeeder::class,
-            Icd10CodeSeeder::class,
+            // Icd10CodeSeeder::class,
             ImageTestCategorySeeder::class,
             LabTestCategorySeeder::class,
             MedicalAdministrationRouteSeeder::class,

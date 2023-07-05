@@ -4,18 +4,23 @@ namespace App\Http\Controllers\AfterCall;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Helpers\SharedHelper as Helper;
-use Illuminate\Support\Facades\Validator;
 use App\Repositories\AfterCall\MedicalHistoryRepository;
+use App\Repositories\MedicalHistory\HeldCallRepository;
+use App\Repositories\MedicalAppointmentRepository;
 
 class MedicalHistoryController extends Controller
 {
 
-    protected $medicalHistoryRepository;
+    protected $medicalHistoryRepository, $heldCallRepository, $medicalAppointmentRepository;
 
-    public function __construct(MedicalHistoryRepository $medicalHistoryRepository)
-    {
+    public function __construct(
+        MedicalHistoryRepository $medicalHistoryRepository,
+        HeldCallRepository $heldCallRepository,
+        MedicalAppointmentRepository $medicalAppointmentRepository
+    ) {
         $this->medicalHistoryRepository = $medicalHistoryRepository;
+        $this->heldCallRepository = $heldCallRepository;
+        $this->medicalAppointmentRepository = $medicalAppointmentRepository;
     }
     /**
      * Display a listing of the resource.
@@ -49,33 +54,6 @@ class MedicalHistoryController extends Controller
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'appointment_id' => 'required|exists:medical_appointments,id',
-            'medical_history' => 'required',
-            'drug_allergies' => 'required'
-        ]);
-
-        try {
-            if ($validator->fails()) {
-                $message = $validator->errors()->all();
-                return Helper::sendFailedHttpResponse($message);
-            } else {
-
-                $criteria = [
-                    'appointment_id' => $request->appointment_id
-                ];
-                $validatedData = [
-                    'appointment_id' => $request->appointment_id,
-                    'medical_history' => $request->medical_history,
-                    'drug_allergies' => $request->drug_allergies
-                ];
-
-                $result = $this->medicalHistoryRepository->updateOrCreate($criteria, $validatedData);
-                return response()->json(['message' => 'Patient medical history inserted successfully', 'data' => $result], 200);
-            }
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
     }
 
     /**
@@ -121,5 +99,26 @@ class MedicalHistoryController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function getPatientHeldAppointments()
+    {
+        try {
+            $patient_id = auth('patient')->user()->id;
+            return $this->medicalAppointmentRepository->getHeldAppointments(null, $patient_id);
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
+    public function getDoctorHeldAppointments()
+    {
+        try {
+            $doctor_id = auth('doctor')->user()->id;
+            // dd($doctor_id);
+            return $this->medicalAppointmentRepository->getHeldAppointments(null, null, $doctor_id);
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
     }
 }
