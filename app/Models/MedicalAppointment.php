@@ -97,4 +97,9 @@ class MedicalAppointment extends Model
     {
         return $this->hasMany(LabTestDocument::class, 'appointment_id');
     }
+
+    public function heldCall()
+    {
+        return $this->hasOne(HeldCall::class, 'appointment_id');
+    }
 }

@@ -83,6 +83,12 @@ class MedicalAppointmentRepository
             $query->select(['id', 'patient_id', 'appointment_id', 'past_medical_history', 'current_treatment', 'illness', 'diagnosis_date', 'treatment']);
         }]);
 
+        if ($status && $status == 'completed') {
+            $appointments  = $appointments->with(['heldCall' => function ($query) {
+                $query->select(['id', 'appointment_id', 'start_time', 'end_time', 'duration']);
+            }]);
+        }
+
         if ($id) {
             $appointments->where('id', $id);
         }
@@ -118,7 +124,7 @@ class MedicalAppointmentRepository
                 } else {
                     $appointment->is_expired = false;
                 }
-                
+
                 if ($is_online) {
                     if (!empty($appointment->meetingAccess->appointment_id)) {
                         unset($appointment->meetingAccess->appointment_id);
@@ -269,5 +275,10 @@ class MedicalAppointmentRepository
         }
 
         return $appointment;
+    }
+
+    public function getHeldAppointments($id = null, $patient_id = null, $doctor_id = null)
+    {
+        return $this->getMedicalAppointments($id, $patient_id, 'completed', $doctor_id, null);
     }
 }
