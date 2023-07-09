@@ -125,7 +125,7 @@ class MedicalHistoryController extends Controller
     {
         try {
             $patient_id = auth('patient')->user()->id;
-            return $this->medicalAppointmentRepository->getHeldLabTests(null, $patient_id);
+            return $this->medicalAppointmentRepository->getHeldTests(null, $patient_id);
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }
@@ -135,7 +135,47 @@ class MedicalHistoryController extends Controller
     {
         try {
             $doctor_id = auth('doctor')->user()->id;
-            return $this->medicalAppointmentRepository->getHeldLabTests(null, null, $doctor_id);
+            return $this->medicalAppointmentRepository->getHeldTests(null, null, $doctor_id);
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
+    public function getPatientDiagnosis()
+    {
+        try {
+            $patient_id = auth('patient')->user()->id;
+            return $this->medicalAppointmentRepository->getConductedDiagnosis(null, $patient_id);
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
+    public function getDoctorDiagnois()
+    {
+        try {
+            $doctor_id = auth('doctor')->user()->id;
+            return $this->medicalAppointmentRepository->getConductedDiagnosis(null, null, $doctor_id);
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
+    public function getPatientTreatments()
+    {
+        try {
+            $patient_id = auth('patient')->user()->id;
+            return $this->medicalAppointmentRepository->getConductedTreatments(null, $patient_id);
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
+    public function getDoctorTreatments()
+    {
+        try {
+            $doctor_id = auth('doctor')->user()->id;
+            return $this->medicalAppointmentRepository->getConductedTreatments(null, null, $doctor_id);
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }

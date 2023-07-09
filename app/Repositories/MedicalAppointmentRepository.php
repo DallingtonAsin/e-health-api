@@ -267,13 +267,51 @@ class MedicalAppointmentRepository
         return $appointments;
     }
 
-    public function getHeldLabTests($id = null, $patient_id = null, $doctor_id = null)
+    public function getHeldTests($id = null, $patient_id = null, $doctor_id = null)
     {
         $appointments = $this->queryAppointments(['id', 'patient_id', 'doctor_id', 'appointment_number', 'appointment_type_id', 'appointment_date', 'reason', 'notes', 'status', 'completed_at']);
         $appointments  = $appointments->where('status', 'completed')->with(['labTests' => function ($query) {
             $query->select(['id', 'appointment_id', 'labtest_category_id', 'findings'])->with(['labTestCategory' => function ($query) {
                 $query->select(['id', 'code', 'name', 'category']);
             }]);
+        }])->with(['imageTests' => function ($query) {
+            $query->select(['id', 'appointment_id', 'imagetest_category_id', 'findings'])->with(['imageTestCategory' => function ($query) {
+                $query->select(['id', 'code', 'name', 'category']);
+            }]);
+        }])->with(['otherTests']);
+        $appointments = $this->filterAppointments($appointments, $id, $patient_id, $doctor_id);
+        $appointments = $this->getFormattedAppointmentsData($appointments);
+        return $appointments;
+    }
+
+    public function getConductedDiagnosis($id = null, $patient_id = null, $doctor_id = null)
+    {
+        $appointments = $this->queryAppointments(['id', 'patient_id', 'doctor_id', 'appointment_number', 'appointment_type_id', 'appointment_date', 'reason', 'notes', 'status', 'completed_at']);
+        $appointments  = $appointments->where('status', 'completed')->with(['diagnosis' => function ($query) {
+            $query->select(['id', 'appointment_id', 'icd_code_id', 'diagnosis_date'])->with(['Icd10Code' => function ($query) {
+                $query->select(['id', 'category_code', 'diagnosis_code', 'abbreviated_description', 'full_description']);
+            }]);
+        }])->with(['diagnosisComments' => function ($query) {
+            $query->select(['id', 'appointment_id', 'comments']);
+        }]);
+        $appointments = $this->filterAppointments($appointments, $id, $patient_id, $doctor_id);
+        $appointments = $this->getFormattedAppointmentsData($appointments);
+        return $appointments;
+    }
+
+
+    public function getConductedTreatments($id = null, $patient_id = null, $doctor_id = null)
+    {
+        $appointments = $this->queryAppointments(['id', 'patient_id', 'doctor_id', 'appointment_number', 'appointment_type_id', 'appointment_date', 'reason', 'notes', 'status', 'completed_at']);
+        $appointments  = $appointments->where('status', 'completed')->with(['prescriptions' => function ($query) {
+            $query->select(['id', 'appointment_id', 'drug_id', 'dosage', 'admin_route_id', 'duration', 'quantity', 'instructions'])
+            ->with(['drug' => function ($query) {
+                $query->select(['id', 'name']);
+            }])->with(['adminRoute' => function ($query) {
+                $query->select(['id', 'name']);
+            }]);
+        }])->with(['treatmentPlan' => function ($query) {
+            $query->select(['id', 'appointment_id', 'treatment_plan']);
         }]);
         $appointments = $this->filterAppointments($appointments, $id, $patient_id, $doctor_id);
         $appointments = $this->getFormattedAppointmentsData($appointments);

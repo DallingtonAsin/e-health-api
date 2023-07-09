@@ -109,6 +109,10 @@ Route::middleware(['auth:patient,doctor', 'patient.or.doctor'])->group(function 
     Route::get('medical-history/calls/doctor', [MedicalHistoryController::class, 'getDoctorHeldAppointments']);
     Route::get('medical-history/labtests/patient', [MedicalHistoryController::class, 'getPatientLabTests']);
     Route::get('medical-history/labtests/doctor', [MedicalHistoryController::class, 'getDoctorLabTests']);
+    Route::get('medical-history/diagnosis/patient', [MedicalHistoryController::class, 'getPatientDiagnosis']);
+    Route::get('medical-history/diagnosis/doctor', [MedicalHistoryController::class, 'getDoctorDiagnois']);
+    Route::get('medical-history/treatment/patient', [MedicalHistoryController::class, 'getPatientTreatments']);
+    Route::get('medical-history/treatment/doctor', [MedicalHistoryController::class, 'getDoctorTreatments']);
     Route::get('medical-history/patient/{patient_id}', [PatientMedicalHistoryController::class, 'getPatientMedicalHistory']);
     Route::get('prescription-drugs', [DrugController::class, 'getPrescriptionDrugs']);
 });
