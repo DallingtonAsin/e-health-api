@@ -115,8 +115,27 @@ class MedicalHistoryController extends Controller
     {
         try {
             $doctor_id = auth('doctor')->user()->id;
-            // dd($doctor_id);
             return $this->medicalAppointmentRepository->getHeldAppointments(null, null, $doctor_id);
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
+    public function getPatientLabTests()
+    {
+        try {
+            $patient_id = auth('patient')->user()->id;
+            return $this->medicalAppointmentRepository->getHeldLabTests(null, $patient_id);
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
+    public function getDoctorLabTests()
+    {
+        try {
+            $doctor_id = auth('doctor')->user()->id;
+            return $this->medicalAppointmentRepository->getHeldLabTests(null, null, $doctor_id);
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 500);
         }

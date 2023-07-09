@@ -69,7 +69,7 @@ class MedicalAppointmentRepository
         return Helper::generateUniqueNumber('medical_appointments', 10, 'APT', 'appointment_number');
     }
 
-    public function getMedicalAppointments($id = null, $patient_id = null, $status = null, $doctor_id = null, $is_doctor_notified = null)
+    private function queryAppointments($projection = [])
     {
         $appointments = $this->medicalAppointment->with(['patient' => function ($query) {
             $query->select(['id', 'first_name', 'last_name', 'country_code', 'phone_number', 'email', 'address', 'dob', 'image']);
@@ -82,13 +82,30 @@ class MedicalAppointmentRepository
         }])->with(['patientMedicalHistory' => function ($query) {
             $query->select(['id', 'patient_id', 'appointment_id', 'past_medical_history', 'current_treatment', 'illness', 'diagnosis_date', 'treatment']);
         }]);
+        if (!empty($projection)) {
+            $appointments = $appointments->select($projection);
+        }
+        return $appointments;
+    }
 
-        if ($status && $status == 'completed') {
-            $appointments  = $appointments->with(['heldCall' => function ($query) {
-                $query->select(['id', 'appointment_id', 'start_time', 'end_time', 'duration']);
-            }]);
+    public function getMedicalAppointments($id = null, $patient_id = null, $status = null, $doctor_id = null, $is_doctor_notified = null)
+    {
+        $appointments = $this->queryAppointments();
+        $appointments = $this->filterAppointments($appointments, $id, $patient_id, $doctor_id);
+
+        if ($status) {
+            $appointments->where('status', $status);
+        }
+        if (!is_null($is_doctor_notified)) {
+            $appointments->where('is_doctor_notified', $is_doctor_notified);
         }
 
+        $appointments = $this->getFormattedAppointmentsData($appointments);
+        return $appointments;
+    }
+
+    private function filterAppointments($appointments, $id = null, $patient_id = null, $doctor_id = null)
+    {
         if ($id) {
             $appointments->where('id', $id);
         }
@@ -100,52 +117,6 @@ class MedicalAppointmentRepository
         if ($doctor_id) {
             $appointments->where('doctor_id', $doctor_id);
         }
-
-        if ($status) {
-            $appointments->where('status', $status);
-        }
-
-        if (!is_null($is_doctor_notified)) {
-            $appointments->where('is_doctor_notified', $is_doctor_notified);
-        }
-
-        $appointments->orderBy('appointment_date', 'desc');
-
-        $appointments = $appointments->get()
-            ->map(function ($appointment) {
-                $is_online = $appointment->isOnline();
-                $appointment->is_online = $appointment->isOnline();
-
-                $closedStatuses = ["completed", "cancelled"];
-                if (!in_array($appointment->status, $closedStatuses)) {
-                    $is_expired = $this->isAppointmentExpired($appointment->id);
-                    $appointment->status = $is_expired ? 'Expired' : $appointment->status;
-                    $appointment->is_expired = $is_expired;
-                } else {
-                    $appointment->is_expired = false;
-                }
-
-                if ($is_online) {
-                    if (!empty($appointment->meetingAccess->appointment_id)) {
-                        unset($appointment->meetingAccess->appointment_id);
-                    }
-                }
-
-                $appointment->is_video = $appointment->isVideo();
-                $appointment->appointment_time =  Carbon::parse($appointment->appointment_date)->format('H:i');
-                $appointment->appointment_date = Carbon::parse($appointment->appointment_date)->toDateString();
-                $appointment->status = ucfirst($appointment->status);
-                $appointment->patient->age = Helper::calculateAge($appointment->patient->dob) . ' years';
-                $appointment->patient->thumbnail = $appointment->patient->thumbnail();
-                $appointment->doctor->thumbnail = $appointment->doctor->thumbnail();
-                $appointment->doctor->specialty = MedicalSpecialty::where('id', $appointment->doctor->specialty_id)->value('name');
-                $appointment->doctor->primary_facility = MedicalFacility::where('id', $appointment->doctor->primary_facility_id)->value('name');
-                $appointment->doctor->service_fee = number_format(floatval($appointment->doctor->service_fee));
-                return $appointment;
-            });
-
-        $appointments->makeHidden(['created_at', 'updated_at']);
-
         return $appointments;
     }
 
@@ -236,7 +207,6 @@ class MedicalAppointmentRepository
             }
         }
 
-
         $diagnoses = $appointment->diagnosis;
         $diagnosisIcdCodes = [];
         if (!empty($diagnoses)) {
@@ -279,6 +249,83 @@ class MedicalAppointmentRepository
 
     public function getHeldAppointments($id = null, $patient_id = null, $doctor_id = null)
     {
-        return $this->getMedicalAppointments($id, $patient_id, 'completed', $doctor_id, null);
+        $appointments = $this->queryAppointments();
+        $appointments  = $appointments->where('status', 'completed')->with(['heldCall' => function ($query) {
+            $query->select(['id', 'appointment_id', 'start_time', 'end_time', 'duration']);
+        }]);
+        $appointments = $this->filterAppointments($appointments, $id, $patient_id, $doctor_id);
+        $appointments = $this->getFormattedAppointmentsData($appointments);
+        if (!empty($appointments)) {
+            $appointments = $appointments->map(function ($appointment) {
+                unset($appointment->patient);
+                unset($appointment->doctor);
+                unset($appointment->meetingAccess);
+                unset($appointment->patientMedicalHistory);
+                return $appointment;
+            });
+        }
+        return $appointments;
+    }
+
+    public function getHeldLabTests($id = null, $patient_id = null, $doctor_id = null)
+    {
+        $appointments = $this->queryAppointments(['id', 'patient_id', 'doctor_id', 'appointment_number', 'appointment_type_id', 'appointment_date', 'reason', 'notes', 'status', 'completed_at']);
+        $appointments  = $appointments->where('status', 'completed')->with(['labTests' => function ($query) {
+            $query->select(['id', 'appointment_id', 'labtest_category_id', 'findings'])->with(['labTestCategory' => function ($query) {
+                $query->select(['id', 'code', 'name', 'category']);
+            }]);
+        }]);
+        $appointments = $this->filterAppointments($appointments, $id, $patient_id, $doctor_id);
+        $appointments = $this->getFormattedAppointmentsData($appointments);
+        if (!empty($appointments)) {
+            $appointments = $appointments->map(function ($appointment) {
+                unset($appointment->patient);
+                unset($appointment->doctor);
+                unset($appointment->meetingAccess);
+                unset($appointment->patientMedicalHistory);
+                return $appointment;
+            });
+        }
+        return $appointments;
+    }
+
+    private function getFormattedAppointmentsData($appointments)
+    {
+        $appointments->orderBy('appointment_date', 'desc');
+        $appointments = $appointments->get()
+            ->map(function ($appointment) {
+                $is_online = $appointment->isOnline();
+                $appointment->is_online = $appointment->isOnline();
+
+                $closedStatuses = ["completed", "cancelled"];
+                if (!in_array($appointment->status, $closedStatuses)) {
+                    $is_expired = $this->isAppointmentExpired($appointment->id);
+                    $appointment->status = $is_expired ? 'Expired' : $appointment->status;
+                    $appointment->is_expired = $is_expired;
+                } else {
+                    $appointment->is_expired = false;
+                }
+
+                if ($is_online) {
+                    if (!empty($appointment->meetingAccess->appointment_id)) {
+                        unset($appointment->meetingAccess->appointment_id);
+                    }
+                }
+
+                $appointment->is_video = $appointment->isVideo();
+                $appointment->appointment_time =  Carbon::parse($appointment->appointment_date)->format('h:i A');
+                $appointment->appointment_date = Carbon::parse($appointment->appointment_date)->toDateString();
+                $appointment->status = ucfirst($appointment->status);
+                $appointment->patient->age = Helper::calculateAge($appointment->patient->dob) . ' years';
+                $appointment->patient->thumbnail = $appointment->patient->thumbnail();
+                $appointment->doctor->thumbnail = $appointment->doctor->thumbnail();
+                $appointment->doctor->specialty = MedicalSpecialty::where('id', $appointment->doctor->specialty_id)->value('name');
+                $appointment->doctor->primary_facility = MedicalFacility::where('id', $appointment->doctor->primary_facility_id)->value('name');
+                $appointment->doctor->service_fee = number_format(floatval($appointment->doctor->service_fee));
+                return $appointment;
+            });
+
+        $appointments->makeHidden(['created_at', 'updated_at']);
+        return $appointments;
     }
 }

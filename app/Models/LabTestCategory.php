@@ -22,4 +22,9 @@ class LabTestCategory extends Model
     ];
 
     public $timestamps = true;
+
+    public function labTests()
+    {
+        return $this->hasMany(LabTest::class, 'labtest_category_id');
+    }
 }

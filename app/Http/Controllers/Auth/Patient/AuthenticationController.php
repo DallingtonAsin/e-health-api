@@ -27,7 +27,6 @@ class AuthenticationController extends Controller
     // send verification code
     public function sendVerificationCode(Request $request)
     {
-
         $dataObj = [
             'country_code' => 'required',
             'phone_number' => 'required',
@@ -70,7 +69,6 @@ class AuthenticationController extends Controller
                 } else {
 
                     $user_type_id = $this->userTypeRepository->getPatientTypeId();
-
                     $validatedData = [
                         'user_type_id' => $user_type_id,
                         'country_code' => $country_code,
