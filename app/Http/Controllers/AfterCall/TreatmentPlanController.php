@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\AfterCall;
+namespace App\Http\Controllers\PostCall;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Helpers\SharedHelper as Helper;
 use Illuminate\Support\Facades\Validator;
-use App\Repositories\AfterCall\TreatmentPlanRepository;
+use App\Repositories\PostCall\TreatmentPlanRepository;
 
 class TreatmentPlanController extends Controller
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories\AfterCall\Tests;
+namespace App\Repositories\PostCall\Tests;
 
 use App\Models\LabTest;
 

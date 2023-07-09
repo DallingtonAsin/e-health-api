@@ -11,7 +11,7 @@ use App\Repositories\AppointmentTypeRepository;
 use App\Repositories\MeetingTokenRepository;
 use App\Repositories\MedicalDoctorRepository;
 use App\Repositories\PatientMedicalHistoryRepository;
-use App\Repositories\AfterCall\MedicalFindingRepository;
+use App\Repositories\PostCall\MedicalFindingRepository;
 
 use App\Repositories\LabTestCategoryRepository;
 use App\Repositories\ImageTestCategoryRepository;
@@ -19,15 +19,15 @@ use App\Repositories\Icd10CodeRepository;
 use App\Repositories\DrugRepository;
 use App\Repositories\AdministrationRouteRepository;
 
-use App\Repositories\AfterCall\MedicalHistoryRepository;
-use App\Repositories\AfterCall\Tests\LabTestRepository;
-use App\Repositories\AfterCall\Tests\LabTestDocumentRepository;
-use App\Repositories\AfterCall\Tests\ImageTestRepository;
-use App\Repositories\AfterCall\Tests\OtherTestRepository;
-use App\Repositories\AfterCall\DiagnosisRepository;
-use App\Repositories\AfterCall\DiagnosisCommentsRepository;
-use App\Repositories\AfterCall\PrescriptionRepository;
-use App\Repositories\AfterCall\TreatmentPlanRepository;
+use App\Repositories\PostCall\MedicalHistoryRepository;
+use App\Repositories\PostCall\Tests\LabTestRepository;
+use App\Repositories\PostCall\Tests\LabTestDocumentRepository;
+use App\Repositories\PostCall\Tests\ImageTestRepository;
+use App\Repositories\PostCall\Tests\OtherTestRepository;
+use App\Repositories\PostCall\DiagnosisRepository;
+use App\Repositories\PostCall\DiagnosisCommentsRepository;
+use App\Repositories\PostCall\PrescriptionRepository;
+use App\Repositories\PostCall\TreatmentPlanRepository;
 
 use App\Services\NotificationService;
 use App\Services\PushNotificationService;

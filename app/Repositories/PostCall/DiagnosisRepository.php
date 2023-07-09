@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories\AfterCall;
+namespace App\Repositories\PostCall;
 
 use App\Models\Diagnosis;
 

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\AfterCall;
+namespace App\Http\Controllers\PostCall;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Repositories\AfterCall\MedicalHistoryRepository;
+use App\Repositories\PostCall\MedicalHistoryRepository;
 use App\Repositories\MedicalHistory\HeldCallRepository;
 use App\Repositories\MedicalAppointmentRepository;
 
