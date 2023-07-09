@@ -277,15 +277,6 @@ class MedicalAppointmentRepository
         }]);
         $appointments = $this->filterAppointments($appointments, $id, $patient_id, $doctor_id);
         $appointments = $this->getFormattedAppointmentsData($appointments);
-        if (!empty($appointments)) {
-            $appointments = $appointments->map(function ($appointment) {
-                unset($appointment->patient);
-                unset($appointment->doctor);
-                unset($appointment->meetingAccess);
-                unset($appointment->patientMedicalHistory);
-                return $appointment;
-            });
-        }
         return $appointments;
     }
 
@@ -315,13 +306,20 @@ class MedicalAppointmentRepository
                 $appointment->is_video = $appointment->isVideo();
                 $appointment->appointment_time =  Carbon::parse($appointment->appointment_date)->format('h:i A');
                 $appointment->appointment_date = Carbon::parse($appointment->appointment_date)->toDateString();
-                $appointment->status = ucfirst($appointment->status);
+                $appointment_status = $appointment->status;
+                $appointment->status = ucfirst($appointment_status);
                 $appointment->patient->age = Helper::calculateAge($appointment->patient->dob) . ' years';
                 $appointment->patient->thumbnail = $appointment->patient->thumbnail();
                 $appointment->doctor->thumbnail = $appointment->doctor->thumbnail();
                 $appointment->doctor->specialty = MedicalSpecialty::where('id', $appointment->doctor->specialty_id)->value('name');
                 $appointment->doctor->primary_facility = MedicalFacility::where('id', $appointment->doctor->primary_facility_id)->value('name');
                 $appointment->doctor->service_fee = number_format(floatval($appointment->doctor->service_fee));
+                if ($appointment_status == "completed") {
+                    unset($appointment->patient);
+                    unset($appointment->doctor);
+                    unset($appointment->meetingAccess);
+                    unset($appointment->patientMedicalHistory);
+                }
                 return $appointment;
             });
 
