@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Appointments;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Repositories\AppointmentTypeRepository;
+use App\Repositories\Appointments\AppointmentTypeRepository;
 
 
 class AppointmentTypeController extends Controller

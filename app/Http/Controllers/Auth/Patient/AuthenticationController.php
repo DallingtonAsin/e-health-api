@@ -7,8 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\SharedHelper as Helper;
 use App\Services\Transaction\Sms\SmsService;
-use App\Repositories\UserTypeRepository;
-use App\Repositories\PatientRepository;
+use App\Repositories\User\UserTypeRepository;
+use App\Repositories\Patient\PatientRepository;
 use Illuminate\Support\Facades\Hash;
 
 class AuthenticationController extends Controller

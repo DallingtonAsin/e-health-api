@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Repositories\Doctor;
 
 use App\Models\DoctorIdentificationDocument;
 use Illuminate\Support\Facades\Storage;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Repositories\Notifications;
 
 use App\Models\Patient;
 use App\Models\MedicalDoctor;

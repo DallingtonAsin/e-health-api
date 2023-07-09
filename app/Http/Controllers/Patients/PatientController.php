@@ -7,8 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\SharedHelper as Helper;
 use Illuminate\Support\Facades\Storage;
-use App\Repositories\PatientRepository;
-use App\Repositories\MedicalDoctorRepository;
+use App\Repositories\Patient\PatientRepository;
+use App\Repositories\Doctor\MedicalDoctorRepository;
 use Illuminate\Support\Facades\Hash;
 
 class PatientController extends Controller

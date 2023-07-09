@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Repositories\Doctor;
 
 use App\Models\MedicalDoctor;
-use Carbon\Carbon;
+use App\Repositories\MedicalFacilityRepository;
+use App\Repositories\Doctor\MedicalSpecialtyRepository;
+use App\Repositories\Patient\PatientRepository;
 
 class MedicalDoctorRepository
 {

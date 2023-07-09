@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Repositories\PostCall\MedicalHistoryRepository;
 use App\Repositories\MedicalHistory\HeldCallRepository;
-use App\Repositories\MedicalAppointmentRepository;
+use App\Repositories\Appointments\MedicalAppointmentRepository;
 
 class MedicalHistoryController extends Controller
 {

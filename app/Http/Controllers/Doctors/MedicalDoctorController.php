@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Doctors;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Repositories\MedicalDoctorRepository;
-use App\Repositories\MedicalSpecialtyRepository;
-use App\Repositories\DoctorIdentificationRepository;
+use App\Repositories\Doctor\MedicalDoctorRepository;
+use App\Repositories\Doctor\MedicalSpecialtyRepository;
+use App\Repositories\Doctor\DoctorIdentificationRepository;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\SharedHelper as Helper;
 use App\Repositories\MedicalFacilityRepository;

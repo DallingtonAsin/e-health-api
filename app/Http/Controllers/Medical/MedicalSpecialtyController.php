@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Medical;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Repositories\MedicalSpecialtyRepository;
+use App\Repositories\Doctor\MedicalSpecialtyRepository;
 
 class MedicalSpecialtyController extends Controller
 {

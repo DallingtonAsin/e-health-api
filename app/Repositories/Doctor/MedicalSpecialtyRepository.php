@@ -1,5 +1,5 @@
 <?php 
-namespace App\Repositories;
+namespace App\Repositories\Doctor;
 
 use App\Models\MedicalSpecialty;
 

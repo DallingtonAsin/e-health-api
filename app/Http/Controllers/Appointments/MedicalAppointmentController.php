@@ -6,17 +6,17 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Helpers\SharedHelper as Helper;
 use Illuminate\Support\Facades\Validator;
-use App\Repositories\MedicalAppointmentRepository;
-use App\Repositories\AppointmentTypeRepository;
-use App\Repositories\MeetingTokenRepository;
-use App\Repositories\MedicalDoctorRepository;
-use App\Repositories\PatientMedicalHistoryRepository;
+use App\Repositories\Appointments\MedicalAppointmentRepository;
+use App\Repositories\Appointments\AppointmentTypeRepository;
+use App\Repositories\Appointments\MeetingTokenRepository;
+use App\Repositories\Doctor\MedicalDoctorRepository;
+use App\Repositories\MedicalHistory\PatientMedicalHistoryRepository;
 use App\Repositories\PostCall\MedicalFindingRepository;
 
-use App\Repositories\LabTestCategoryRepository;
-use App\Repositories\ImageTestCategoryRepository;
-use App\Repositories\Icd10CodeRepository;
-use App\Repositories\DrugRepository;
+use App\Repositories\Lab\LabTestCategoryRepository;
+use App\Repositories\Lab\ImageTestCategoryRepository;
+use App\Repositories\Lab\Icd10CodeRepository;
+use App\Repositories\Drug\DrugRepository;
 use App\Repositories\AdministrationRouteRepository;
 
 use App\Repositories\PostCall\MedicalHistoryRepository;

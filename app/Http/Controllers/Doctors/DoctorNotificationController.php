@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Helpers\SharedHelper as Helper;
 use Illuminate\Support\Facades\Validator;
-use App\Repositories\NotificationRepository;
+use App\Repositories\Notifications\NotificationRepository;
 use App\Services\PushNotificationService;
 
 class DoctorNotificationController extends Controller

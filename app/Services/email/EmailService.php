@@ -2,10 +2,10 @@
 
 namespace App\Services\email;
 
-use App\Repositories\MedicalAppointmentRepository;
+use App\Repositories\Appointments\MedicalAppointmentRepository;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\PendingAppointmentEmail;
-use App\Repositories\MedicalDoctorRepository;
+use App\Repositories\Doctor\MedicalDoctorRepository;
 use App\Services\PushNotificationService;
 use Illuminate\Support\Facades\Log;
 

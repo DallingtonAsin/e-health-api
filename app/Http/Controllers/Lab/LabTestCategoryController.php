@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Lab;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Repositories\LabTestCategoryRepository;
+use App\Repositories\Lab\LabTestCategoryRepository;
 
 class LabTestCategoryController extends Controller
 {

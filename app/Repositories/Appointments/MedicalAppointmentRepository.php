@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Repositories\Appointments;
 
 use App\Models\MedicalAppointment;
 use App\Models\AppointmentType;

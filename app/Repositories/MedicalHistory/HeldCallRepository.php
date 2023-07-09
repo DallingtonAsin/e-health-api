@@ -3,7 +3,7 @@
 namespace App\Repositories\MedicalHistory;
 
 use App\Models\HeldCall;
-use App\Repositories\MedicalAppointmentRepository;
+use App\Repositories\Appointments\MedicalAppointmentRepository;
 
 class HeldCallRepository
 {
