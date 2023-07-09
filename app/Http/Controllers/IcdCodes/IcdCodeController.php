@@ -4,7 +4,7 @@ namespace App\Http\Controllers\IcdCodes;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Repositories\Icd10CodeRepository;
+use App\Repositories\Lab\Icd10CodeRepository;
 
 class IcdCodeController extends Controller
 {

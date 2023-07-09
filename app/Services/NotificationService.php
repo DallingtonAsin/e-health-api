@@ -7,8 +7,8 @@ use App\Notifications\AppointmentBookedNotification;
 use App\Notifications\AppointmentConfirmedNotification;
 use App\Notifications\AppointmentCancelledNotification;
 use App\Notifications\AppointmentCompletedNotification;
-use App\Repositories\PatientRepository;
-use App\Repositories\MedicalDoctorRepository;
+use App\Repositories\Patient\PatientRepository;
+use App\Repositories\Doctor\MedicalDoctorRepository;
 use Carbon\Carbon;
 
 class NotificationService

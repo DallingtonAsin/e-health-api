@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Patients;
 
 use App\Http\Controllers\Controller;
-use App\Repositories\NotificationRepository;
+use App\Repositories\Notifications\NotificationRepository;
 
 class PatientNotificationController extends Controller
 {

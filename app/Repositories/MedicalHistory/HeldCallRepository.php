@@ -3,7 +3,7 @@
 namespace App\Repositories\MedicalHistory;
 
 use App\Models\HeldCall;
-use App\Repositories\MedicalAppointmentRepository;
+use App\Repositories\Appointments\MedicalAppointmentRepository;
 
 class HeldCallRepository
 {
@@ -17,17 +17,7 @@ class HeldCallRepository
 
     public function get($id = null, $patient_id = null, $doctor_id = null)
     {
-
         return $this->medicalAppointmentRepository->getMedicalAppointments($id, $patient_id, 'completed', $doctor_id, null);
-
-        // $heldCall = $this->heldCall;
-        // if($heldCall){
-        //     $heldCall = $heldCall->where('id', $id);
-        // }
-        // $heldCall = $heldCall->with(['appointment' => function ($query) {
-        //     $query->select(['id', 'patient_id', 'doctor_id', 'appointment_number', 'appointment_date', 'reason', 'notes', 'status', 'completed_at']);
-        // }])->select(['id', 'appointment_id', 'start_time', 'end_time', 'duration'])->get();
-        // return $heldCall;
     }
 
     public function find($id)

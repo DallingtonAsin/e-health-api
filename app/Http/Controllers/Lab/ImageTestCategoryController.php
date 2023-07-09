@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Lab;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Repositories\ImageTestCategoryRepository;
+use App\Repositories\Lab\ImageTestCategoryRepository;
 
 class ImageTestCategoryController extends Controller
 {

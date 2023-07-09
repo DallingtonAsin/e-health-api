@@ -65,12 +65,12 @@ class MedicalAppointment extends Model
 
     public function imageTests()
     {
-        return $this->hasMany(imageTest::class, 'appointment_id');
+        return $this->hasMany(ImageTest::class, 'appointment_id');
     }
 
     public function otherTests()
     {
-        return $this->hasOne(otherTest::class, 'appointment_id');
+        return $this->hasOne(OtherTest::class, 'appointment_id');
     }
 
     public function diagnosis()

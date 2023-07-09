@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\SharedHelper as Helper;
-use App\Repositories\UserTypeRepository;
-use App\Repositories\MedicalDoctorRepository;
+use App\Repositories\User\UserTypeRepository;
+use App\Repositories\Doctor\MedicalDoctorRepository;
 use App\Services\Transaction\Sms\SmsService;
 use Illuminate\Support\Facades\Hash;
 

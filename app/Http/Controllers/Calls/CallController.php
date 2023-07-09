@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\SharedHelper as Helper;
-use App\Repositories\CallRepository;
+use App\Repositories\Appointments\CallRepository;
 
 class CallController extends Controller
 {

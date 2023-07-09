@@ -1,0 +1,79 @@
+<?php
+
+namespace App\Repositories\Drug;
+
+use App\Models\Drug;
+
+class DrugRepository
+{
+    protected $drug;
+
+    public function __construct(Drug $drug)
+    {
+        $this->drug = $drug;
+    }
+
+    public function create($drugData)
+    {
+        return $this->drug->create($drugData);
+    }
+
+    public function find($id)
+    {
+        return $this->drug->find($id);
+    }
+
+    public function findDrugByName($name)
+    {
+        return $this->drug->where('name', $name)->first();
+    }
+
+    public function get($id = null)
+    {
+
+        $drugs = $this->drug->with(['category' => function ($query) {
+            $query->select(['id', 'name']);
+        }]);
+
+
+        if ($id) {
+            $drugs->where('id', $id);
+        }
+
+        $drugs->orderBy('id', 'asc');
+        $drugs = $drugs->get();
+
+        $drugs->map(function ($drug) {
+            $drug->formatted_price = 'UGX. ' . number_format($drug->price);
+            $drug->in_stock = $drug->isInStock();
+            $drug->status = ucfirst(strtolower($drug->status));
+        });
+
+        return $drugs;
+    }
+
+    public function getPrescriptionDrugs()
+    {
+        return $this->drug->select(['id as key', 'name as value'])->get();
+    }
+
+    public function update($id, $drugData)
+    {
+        $drug = $this->drug->find($id);
+        $drug->update($drugData);
+        return $drug;
+    }
+
+    public function delete($id)
+    {
+        $drug = $this->drug->find($id);
+        $drug->delete();
+        return $drug;
+    }
+
+    public function exists($id)
+    {
+        $drug = $this->drug->where('id', $id)->exists();
+        return $drug;
+    }
+}
