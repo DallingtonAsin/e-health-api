@@ -52,4 +52,9 @@ class PatientCreditTransactionRepository
         $transaction = $this->transaction->where('id', $id)->exists();
         return $transaction;
     }
+
+    public function getTotalCredit($patient_id)
+    {
+        return $this->transaction->where('patient_id', $patient_id)->sum('amount');
+    }
 }

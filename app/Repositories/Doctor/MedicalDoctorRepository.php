@@ -6,21 +6,28 @@ use App\Models\MedicalDoctor;
 use App\Repositories\MedicalFacilityRepository;
 use App\Repositories\Doctor\MedicalSpecialtyRepository;
 use App\Repositories\Patient\PatientRepository;
+use App\Repositories\Transactions\Credit\DoctorCreditTransactionRepository;
+use App\Repositories\Transactions\Debit\DoctorDebitTransactionRepository;
 
 class MedicalDoctorRepository
 {
     protected $medicalDoctor, $medicalFacilityRepository, $medicalSpecialtyRepository, $patientRepository;
+    protected $creditTransactionRepository, $debitTransactionRepository;
 
     public function __construct(
         MedicalDoctor $medicalDoctor,
         MedicalFacilityRepository $medicalFacilityRepository,
         MedicalSpecialtyRepository $medicalSpecialtyRepository,
-        PatientRepository $patientRepository
+        PatientRepository $patientRepository,
+        DoctorCreditTransactionRepository $creditTransactionRepository,
+        DoctorDebitTransactionRepository $debitTransactionRepository,
     ) {
         $this->medicalDoctor = $medicalDoctor;
         $this->medicalFacilityRepository = $medicalFacilityRepository;
         $this->medicalSpecialtyRepository = $medicalSpecialtyRepository;
         $this->patientRepository = $patientRepository;
+        $this->creditTransactionRepository = $creditTransactionRepository;
+        $this->debitTransactionRepository = $debitTransactionRepository;
     }
 
     public function create($medicalDoctorData)
@@ -134,6 +141,14 @@ class MedicalDoctorRepository
         return $this->medicalDoctor->where("email", $email)->first();
     }
 
+    public function getWalletBalance($doctor_id)
+    {
+        $credits = $this->creditTransactionRepository->getTotalCredit($doctor_id);
+        $debits = $this->debitTransactionRepository->getTotalDebit($doctor_id);
+        $balance = $credits - $debits;
+        return $balance;
+    }
+
     public function generateAccessToken($id)
     {
 
@@ -158,6 +173,7 @@ class MedicalDoctorRepository
         unset($doctor->ratings);
         $doctor->image = $doctor->thumbnail();
         $doctor->access_token = $access_token;
+        $doctor->balance = $this->getWalletBalance($id);
         return $doctor;
     }
 }

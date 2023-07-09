@@ -3,14 +3,22 @@
 namespace App\Repositories\Patient;
 
 use App\Models\Patient;
+use App\Repositories\Transactions\Credit\PatientCreditTransactionRepository;
+use App\Repositories\Transactions\Debit\PatientDebitTransactionRepository;
 
 class PatientRepository
 {
-    protected $patient;
+    protected $patient, $creditTransactionRepository, $debitTransactionRepository;
 
-    public function __construct(Patient $patient)
-    {
+    public function __construct(
+        Patient $patient,
+        PatientCreditTransactionRepository $creditTransactionRepository,
+        PatientDebitTransactionRepository $debitTransactionRepository
+
+    ) {
         $this->patient = $patient;
+        $this->creditTransactionRepository = $creditTransactionRepository;
+        $this->debitTransactionRepository = $debitTransactionRepository;
     }
 
     public function create($patientData)
@@ -26,7 +34,8 @@ class PatientRepository
         return $this->patient->all();
     }
 
-    public function find($id){
+    public function find($id)
+    {
         return $this->patient->find($id);
     }
 
@@ -74,8 +83,17 @@ class PatientRepository
         return $this->patient->where("email", $email)->first();
     }
 
-    public function checkIfEmailIsTaken($email){
+    public function checkIfEmailIsTaken($email)
+    {
         return $this->patient->where('email', $email)->exists();
+    }
+
+    public function getWalletBalance($patient_id)
+    {
+        $credits = $this->creditTransactionRepository->getTotalCredit($patient_id);
+        $debits = $this->debitTransactionRepository->getTotalDebit($patient_id);
+        $balance = $credits - $debits;
+        return $balance;
     }
 
     public function generateAccessToken($id)
@@ -87,6 +105,7 @@ class PatientRepository
         $patient->is_patient = $patient->isPatient();
         $patient->image = $patient->thumbnail();
         $patient->access_token = $access_token;
+        $patient->balance = $this->getWalletBalance($id);
         return $patient;
     }
 }

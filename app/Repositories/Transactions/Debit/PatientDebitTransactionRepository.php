@@ -52,4 +52,9 @@ class PatientDebitTransactionRepository
         $transaction = $this->transaction->where('id', $id)->exists();
         return $transaction;
     }
+
+    public function getTotalDebit($patient_id)
+    {
+        return $this->transaction->where('patient_id', $patient_id)->sum('amount');
+    }
 }
