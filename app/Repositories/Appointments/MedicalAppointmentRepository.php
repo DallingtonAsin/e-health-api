@@ -353,10 +353,10 @@ class MedicalAppointmentRepository
                 $appointment->doctor->primary_facility = MedicalFacility::where('id', $appointment->doctor->primary_facility_id)->value('name');
                 $appointment->doctor->service_fee = number_format(floatval($appointment->doctor->service_fee));
                 if ($appointment_status == "completed") {
-                    unset($appointment->patient);
-                    unset($appointment->doctor);
                     unset($appointment->meetingAccess);
-                    unset($appointment->patientMedicalHistory);
+                    // unset($appointment->patient);
+                    // unset($appointment->doctor);
+                    // unset($appointment->patientMedicalHistory);
                 }
                 return $appointment;
             });
