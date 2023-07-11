@@ -11,7 +11,7 @@ use App\Http\Controllers\Appointments\AppointmentTypeController;
 use App\Http\Controllers\Appointments\MedicalAppointmentController;
 use App\Http\Controllers\Medical\DrugController;
 use App\Http\Controllers\Medical\MedicalSpecialtyController;
-use App\Http\Controllers\AfterCall\MedicalHistoryController;
+use App\Http\Controllers\PostCall\MedicalHistoryController;
 use App\Http\Controllers\Medical\PatientMedicalHistoryController;
 use App\Http\Controllers\Medical\MedicalFacilityController;
 use App\Http\Controllers\Emails\MailController;
