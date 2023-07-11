@@ -28,7 +28,7 @@ use App\Repositories\PostCall\DiagnosisRepository;
 use App\Repositories\PostCall\DiagnosisCommentsRepository;
 use App\Repositories\PostCall\PrescriptionRepository;
 use App\Repositories\PostCall\TreatmentPlanRepository;
-
+use App\Helpers\AgoraHelper;
 use App\Services\NotificationService;
 use App\Services\PushNotificationService;
 use Carbon\Carbon;
@@ -39,7 +39,7 @@ class MedicalAppointmentController extends Controller
 {
 
     protected $appointmentTypeRepository, $medicalAppointmentRepository, $doctorRepository;
-    protected $patientMedicalHistoryRepository, $medicalFindingRepository;
+    protected $patientMedicalHistoryRepository, $medicalFindingRepository, $agoraHelper;
     protected $labTestCategoryRepository, $imageTestCategoryRepository, $icd10CodeRepository;
 
     protected $medicalHistoryRepository, $labTestRepository, $imageTestRepository, $otherTestRepository, $diagnosisRepository, $diagnosisCommentsRepository;
@@ -71,7 +71,8 @@ class MedicalAppointmentController extends Controller
         DiagnosisRepository $diagnosisRepository,
         DiagnosisCommentsRepository $diagnosisCommentsRepository,
         PrescriptionRepository $prescriptionRepository,
-        TreatmentPlanRepository $treatmentPlanRepository
+        TreatmentPlanRepository $treatmentPlanRepository,
+        AgoraHelper $agoraHelper
     ) {
         $this->appointmentTypeRepository = $appointmentTypeRepository;
         $this->medicalAppointmentRepository = $medicalAppointmentRepository;
@@ -97,6 +98,7 @@ class MedicalAppointmentController extends Controller
         $this->diagnosisCommentsRepository = $diagnosisCommentsRepository;
         $this->prescriptionRepository = $prescriptionRepository;
         $this->treatmentPlanRepository = $treatmentPlanRepository;
+        $this->agoraHelper = $agoraHelper;
     }
 
     /**
@@ -255,11 +257,12 @@ class MedicalAppointmentController extends Controller
 
                         if ($is_online) {
                             $is_video = $appointment->isVideo();
-                            $meeting_token = $this->meetingTokenRepository->generateMeetingToken($patient, $appointment_number, $is_video);
-                            $meeting_details = [
+                           // $meeting_token = $this->meetingTokenRepository->generateMeetingToken($patient, $appointment_number, $is_video);
+                           $meeting_token = $this->agoraHelper->GetToken($patient->id, $appointment_number);
+                           $meeting_details = [
                                 'appointment_id' => $data->id,
                                 'app_id' => config('app.AGORA_APP_ID'),
-                                'channel' => config('app.AGORA_CHANNEL_NAME'),
+                                'channel' => $appointment_number, // config('app.AGORA_CHANNEL_NAME'),
                                 'token' => $meeting_token
                             ];
                             $this->meetingTokenRepository->create($meeting_details);

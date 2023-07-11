@@ -34,8 +34,8 @@ return [
     'env' => env('APP_ENV', 'local'),
 
     'AGORA_APP_ID' => env('AGORA_APP_ID'),
-    'AGORA_CHANNEL_NAME' => env('AGORA_CHANNEL_NAME'),
     'AGORA_APP_CERTIFICATE' => env('AGORA_APP_CERTIFICATE'),
+    'AGORA_CHANNEL_NAME' => env('AGORA_CHANNEL_NAME'),
     'AGORA_TEMP_TOKEN' => env('AGORA_TEMP_TOKEN'),
 
     /*

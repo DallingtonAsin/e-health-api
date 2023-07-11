@@ -61,7 +61,7 @@ class MeetingTokenRepository
 
         $appID = config('app.AGORA_APP_ID');
         $appCertificate = config('app.AGORA_APP_CERTIFICATE');
-        $token = config('app.AGORA_TEMP_TOKEN');
+        // $token = config('app.AGORA_TEMP_TOKEN');
 
         $channelName = $appointment_number;
         $user = $patient->first_name . " " . $patient->last_name;
@@ -70,9 +70,8 @@ class MeetingTokenRepository
         $currentTimestamp = now()->getTimestamp();
         $privilegeExpiredTs = $currentTimestamp + $expireTimeInSeconds;
 
-        if (is_null($token)) {
-            $token = RtcTokenBuilder::buildTokenWithUserAccount($appID, $appCertificate, $channelName, $user, $role, $privilegeExpiredTs);
-        }
+        $token = RtcTokenBuilder::buildTokenWithUserAccount($appID, $appCertificate, $channelName, $user, $role, $privilegeExpiredTs);
+
 
         return $token;
     }
